@@ -36,11 +36,11 @@ namespace engine::audio
         };
 
     private:
-        engine::resource::ResourceManager *resource_manager_;        ///< @brief 指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
-        std::string current_music_;                                  ///< @brief 当前正在播放的音乐路径，用于避免重复播放同一音乐。
-        MIX_Mixer *mixer_ = nullptr;                                 ///< @brief 非拥有指针，借用 ResourceManager 提供的 mixer
-        std::array<MIX_Track *, 8> sound_tracks_{nullptr};           ///< @brief 音效轨道数组，用于播放多个音效。
-        std::unique_ptr<MIX_Track, SDLMixTrackDeleter> music_track_; ///< @brief 背景音乐轨道，用于播放单条音乐。
+        engine::resource::ResourceManager *resource_manager_;        ///<  指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
+        std::string current_music_;                                  ///<  当前正在播放的音乐路径，用于避免重复播放同一音乐。
+        MIX_Mixer *mixer_ = nullptr;                                 ///<  非拥有指针，借用 ResourceManager 提供的 mixer
+        std::array<MIX_Track *, 8> sound_tracks_{nullptr};           ///<  音效轨道数组，用于播放多个音效。
+        std::unique_ptr<MIX_Track, SDLMixTrackDeleter> music_track_; ///<  背景音乐轨道，用于播放单条音乐。
 
     public:
         /**

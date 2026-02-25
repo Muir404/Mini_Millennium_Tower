@@ -165,7 +165,7 @@ namespace engine::audio
             return false;
         }
 
-        // 配置循环次数（SDL3_mixer 标准属性：MIX_PROP_PLAY_LOOPS_NUMBER）
+        // 7. 配置循环次数（SDL3_mixer 标准属性：MIX_PROP_PLAY_LOOPS_NUMBER）
         SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, loops);
         spdlog::trace("[AudioPlayer] 背景音乐 {} 循环次数设置为: {}", music_path, loops);
 

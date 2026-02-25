@@ -180,8 +180,8 @@ namespace engine::input
 
             auto it = input_to_actions_.find(scancode);
             if (it != input_to_actions_.end())
-            { // 如果按键有对应的action
-                const std::vector<std::string> &associated_actions = it->second;
+            {
+                const std::vector<std::string> &associated_actions = it->second; // 如果按键有对应的action
                 for (const auto &action_name : associated_actions)
                 {
                     updateActionState(action_name, is_down, is_repeat); // 更新action状态
