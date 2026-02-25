@@ -46,8 +46,6 @@ namespace engine::core // 命名空间与路径一致
         {
             time_->update();
             float delta_time = time_->getDeltaTime();
-            input_manager_->update(); // 每帧显更新输入管理器
-
             handleEvents();
             update(delta_time);
             render();
@@ -148,12 +146,8 @@ namespace engine::core // 命名空间与路径一致
 
     void GameApp::handleEvents()
     {
-        if (input_manager_->shouldQuit())
-        {
-            spdlog::trace("[GameApp] GameApp收到来自InputManager的退出请求");
-            is_running_ = false;
-            return;
-        }
+        // 处理并分发事件
+        input_manager_->update(); // 每帧显更新输入管理器
         scene_manager_->handleInput();
     }
 
@@ -367,7 +361,7 @@ namespace engine::core // 命名空间与路径一致
     {
         try
         {
-            input_manager_ = std::make_unique<engine::input::InputManager>(sdl_renderer_, config_.get());
+            input_manager_ = std::make_unique<engine::input::InputManager>(sdl_renderer_, config_.get(), dispatcher_.get());
         }
         catch (const std::exception &e)
         {

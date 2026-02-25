@@ -40,24 +40,28 @@ namespace game::scene
 
         Scene::clean();
     }
-    void GameScene::onReplace()
+    bool GameScene::onReplace()
     {
         spdlog::info("[GameScene] 替换场景");
         requestReplaceScene(std::make_unique<game::scene::GameScene>(context_));
+        return true;
     }
-    void GameScene::onPush()
+    bool GameScene::onPush()
     {
         spdlog::info("[GameScene] 压栈场景");
         requestPushScene(std::make_unique<game::scene::GameScene>(context_));
+        return true;
     }
-    void GameScene::onPop()
+    bool GameScene::onPop()
     {
         spdlog::info("[GameScene] 出栈场景{}", scene_num_);
         requestPopScene();
+        return true;
     }
-    void GameScene::onQuit()
+    bool GameScene::onQuit()
     {
         spdlog::info("[GameScene] 退出游戏");
         quit();
+        return true;
     }
 }

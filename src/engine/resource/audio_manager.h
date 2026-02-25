@@ -15,10 +15,10 @@ namespace engine::resource
 {
 
     /**
-     * @brief 管理 SDL_mixer 3.0 音频资源
+     * @brief 音频资源管理器
      *
-     * 提供音频资源的加载、缓存、轨道管理和分组控制功能
-     * 构造失败时会抛出异常，仅供 ResourceManager 内部使用
+     * 负责加载、缓存和管理游戏中的音频资源（音效和音乐）。
+     * 支持短音效（如按钮点击）和长音乐（如背景音乐）。
      */
     class AudioManager final
     {
@@ -27,8 +27,9 @@ namespace engine::resource
 
     private:
         /**
-         * @brief MIX_Audio 自定义删除器
-         * SDL_mixer 3.0 中音效/音乐统一为 MIX_Audio，无需区分 Chunk/Music
+         * @brief SDL 音频资源删除器
+         *
+         * 用于自动释放 SDL 音频资源（音效和音乐）。
          */
         struct SDLMixAudioDeleter
         {
@@ -41,37 +42,14 @@ namespace engine::resource
             }
         };
 
-        // struct SDLMixMixerDeleter
-        // {
-        //     void operator()(MIX_Mixer *mixer) const
-        //     {
-        //         if (mixer)
-        //         {
-        //             MIX_DestroyMixer(mixer);
-        //         }
-        //     }
-        // };
-
     private:
         // 资源缓存
-        std::unordered_map<std::string, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> sounds_; // 短音效缓存 (路径 -> 音频资源)
-        std::unordered_map<std::string, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> music_;  // 长音乐缓存 (路径 -> 音频资源)
-        // std::unique_ptr<MIX_Mixer, SDLMixMixerDeleter> mixer_;
+        std::unordered_map<std::string, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> sounds_; ///< 短音效缓存 (路径 -> 音频资源)
+        std::unordered_map<std::string, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> music_;  ///< 长音乐缓存 (路径 -> 音频资源)
         MIX_Mixer *mixer_;
 
-        // ========================== 公有接口（Public Interface）==========================
     public:
-        /**
-         * @brief 构造函数
-         * 初始化 SDL_mixer 并打开音频设备，预分配轨道池
-         * @throws std::runtime_error SDL_mixer 初始化或音频设备打开失败时抛出
-         */
         AudioManager();
-
-        /**
-         * @brief 析构函数
-         * 清理所有音频资源，关闭 SDL_mixer 并释放设备
-         */
         ~AudioManager();
 
         // 禁用拷贝和移动语义（单例语义）
@@ -80,7 +58,6 @@ namespace engine::resource
         AudioManager(AudioManager &&) = delete;
         AudioManager &operator=(AudioManager &&) = delete;
 
-        // ========================== 私有接口（Private Interface）==========================
     private:
         // getter and setter
         MIX_Mixer *getMixer()
@@ -88,59 +65,82 @@ namespace engine::resource
             return mixer_;
         }
 
-        // -------------------------- 资源加载/卸载 --------------------------
         /**
-         * @brief 加载音效资源（短音频，预解码到内存）
+         * @brief 加载短音效
+         *
+         * 加载指定路径的音效文件到缓存中。
+         *
          * @param file_path 音效文件路径
-         * @return 加载成功返回 MIX_Audio 指针，失败返回 nullptr
+         * @return MIX_Audio* 加载的音效资源指针
          */
         MIX_Audio *loadSound(std::string_view file_path);
 
         /**
-         * @brief 获取音效资源（缓存优先）
+         * @brief 获取短音效
+         *
+         * 从缓存中获取指定路径的音效资源。如果资源不存在，尝试加载它。
+         *
          * @param file_path 音效文件路径
-         * @return 成功返回 MIX_Audio 指针，失败抛出异常
+         * @return MIX_Audio* 音效资源指针
          */
         MIX_Audio *getSound(std::string_view file_path);
 
         /**
-         * @brief 卸载指定音效资源
+         * @brief 卸载短音效
+         *
+         * 从缓存中移除指定路径的音效资源。
+         *
          * @param file_path 音效文件路径
          */
         void unloadSound(std::string_view file_path);
 
         /**
-         * @brief 清空所有音效资源
+         * @brief 清除所有短音效
+         *
+         * 从缓存中移除所有已加载的短音效资源。
          */
         void clearSounds();
 
         /**
-         * @brief 加载音乐资源（长音频，流式解码）
+         * @brief 加载长音乐
+         *
+         * 加载指定路径的音乐文件到缓存中。
+         *
          * @param file_path 音乐文件路径
-         * @return 加载成功返回 MIX_Audio 指针，失败返回 nullptr
+         * @return MIX_Audio* 加载的音乐资源指针
          */
         MIX_Audio *loadMusic(std::string_view file_path);
 
         /**
-         * @brief 获取音乐资源（缓存优先）
+         * @brief 获取长音乐
+         *
+         * 从缓存中获取指定路径的音乐资源。如果资源不存在，尝试加载它。
+         *
          * @param file_path 音乐文件路径
-         * @return 成功返回 MIX_Audio 指针，失败抛出异常
+         * @return MIX_Audio* 音乐资源指针
          */
         MIX_Audio *getMusic(std::string_view file_path);
 
         /**
-         * @brief 卸载指定音乐资源
+         * @brief 卸载长音乐
+         *
+         * 从缓存中移除指定路径的音乐资源。
+         *
          * @param file_path 音乐文件路径
          */
         void unloadMusic(std::string_view file_path);
 
         /**
-         * @brief 清空所有音乐资源
+         * @brief 清除所有长音乐
+         *
+         * 从缓存中移除所有已加载的长音乐资源。
          */
         void clearMusic();
 
         /**
-         * @brief 清空所有音频资源
+         * @brief 清除所有音频资源
+         *
+         * 从缓存中移除所有已加载的短音效和长音乐资源。
          */
         void clearAudio();
     };

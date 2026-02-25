@@ -5,8 +5,6 @@
 
 namespace engine::resource
 {
-
-    // ========================== 构造/析构函数 ==========================
     AudioManager::AudioManager()
     {
         // 初始化 SDL_mixer 子系统
@@ -46,7 +44,6 @@ namespace engine::resource
         spdlog::trace("[AudioManager] 析构完成");
     }
 
-    // ========================== 音效管理（Sound） ==========================
     MIX_Audio *AudioManager::loadSound(std::string_view file_path)
     {
         // 检查缓存，避免重复加载
@@ -110,7 +107,6 @@ namespace engine::resource
         }
     }
 
-    // ========================== 音乐管理（Music） ==========================
     MIX_Audio *AudioManager::loadMusic(std::string_view file_path)
     {
         // 检查缓存，避免重复加载
@@ -174,7 +170,6 @@ namespace engine::resource
         }
     }
 
-    // ========================== 资源清理（顶层） ==========================
     void AudioManager::clearAudio()
     {
         clearSounds(); // 清理音效

@@ -14,9 +14,9 @@ namespace game::scene
 
     private:
         int scene_num_{0};
-        void onReplace();
-        void onPush();
-        void onPop();
-        void onQuit();
+        bool onReplace();
+        bool onPush();
+        bool onPop();
+        bool onQuit();
     };
 }

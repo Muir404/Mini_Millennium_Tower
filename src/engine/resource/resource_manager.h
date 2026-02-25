@@ -22,7 +22,6 @@ namespace engine::resource
 
     /**
      * @brief 作为访问各种资源管理器的中央控制点（外观模式 Facade）。
-     * 在构造时初始化其管理的子系统。构造失败会抛出异常。
      */
     class ResourceManager final
     {
@@ -76,7 +75,7 @@ namespace engine::resource
         void clearFonts();                                              ///< @brief 清空所有字体资源
 
         // Mixer
-        MIX_Mixer *getMixer();
+        MIX_Mixer *getMixer(); ///< @brief 获取 Mixer 实例指针
     };
 
 } // namespace engine::resource

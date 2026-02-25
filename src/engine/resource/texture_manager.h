@@ -1,35 +1,17 @@
 #pragma once
-
-// ==============================
-// 标准库头文件
-// ==============================
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
-
-// ==============================
-// 其它文件引入
-// ==============================
-
-// ==============================
-// 第三方库头文件
-// ==============================
 #include <SDL3/SDL_render.h>
 #include <glm/glm.hpp>
 
-// ==============================
-// 命名空间与实现
-// ==============================
 namespace engine::resource
 {
+
     /**
-     * @class TextureManager
-     * @brief 纹理资源管理器类
-     *
-     * 负责SDL纹理的加载、缓存、卸载和尺寸查询，使用智能指针+自定义删除器管理纹理生命周期，
-     * 避免内存泄漏。仅允许ResourceManager作为友元类访问，确保资源管理的唯一性。
+     * @brief 纹理管理器类，负责加载、缓存和管理SDL纹理资源
      */
     class TextureManager
     {
@@ -38,10 +20,8 @@ namespace engine::resource
 
     private:
         /**
-         * @struct SDLTextureDeleter
-         * @brief SDL_Texture智能指针删除器
-         *
-         * 确保销毁时调用SDL_DestroyTexture释放纹理资源
+         * @brief 自定义删除器，用于SDL_Texture智能指针，确保在智能指针析构时自动调用SDL_DestroyTexture
+         * @param texture SDL_Texture指针，指向要删除的纹理资源
          */
         struct SDLTextureDeleter
         {
@@ -55,18 +35,11 @@ namespace engine::resource
         };
 
         // 私有成员变量
-        // 纹理缓存映射表：文件路径 → 带自定义删除器的SDL_Texture智能指针
-        std::unordered_map<std::string, std::unique_ptr<SDL_Texture, SDLTextureDeleter>> textures_;
-        // SDL渲染器指针（非拥有权，由外部ResourceManager传入并保证生命周期）
-        SDL_Renderer *renderer_ = nullptr;
+        std::unordered_map<std::string, std::unique_ptr<SDL_Texture, SDLTextureDeleter>> textures_; ///< 纹理缓存映射表：文件路径 → 带自定义删除器的SDL_Texture智能指针
+
+        SDL_Renderer *renderer_ = nullptr; ///< SDL渲染器指针（非拥有权，由外部ResourceManager传入并保证生命周期）
 
     public:
-        /**
-         * @brief 构造函数：初始化纹理管理器
-         *
-         * @param renderer SDL渲染器指针（必须非空）
-         * @throw std::runtime_error 渲染器指针为空时抛出异常
-         */
         explicit TextureManager(SDL_Renderer *renderer);
 
         // 禁用拷贝/移动语义
@@ -78,38 +51,34 @@ namespace engine::resource
 
     private:
         /**
-         * @brief 加载纹理资源（不存在则加载，已存在则返回缓存）
-         *
-         * @param file_path 纹理文件路径（支持BMP/PNG/JPG等）
-         * @return 成功返回SDL_Texture指针，失败返回nullptr
+         * @brief 加载SDL纹理资源，支持缓存复用
+         * @param file_path 纹理文件路径（支持相对路径）
+         * @return SDL_Texture* 加载的SDL纹理指针（已缓存）
          */
         SDL_Texture *loadTexture(std::string_view file_path);
 
         /**
-         * @brief 获取已加载的纹理（不存在则尝试自动加载）
-         *
-         * @param file_path 纹理文件路径
-         * @return 成功返回SDL_Texture指针，失败返回nullptr
+         * @brief 获取已加载的SDL纹理指针（若不存在则加载）
+         * @param file_path 纹理文件路径（支持相对路径）
+         * @return SDL_Texture* 已加载的SDL纹理指针（已缓存）
          */
         SDL_Texture *getTexture(std::string_view file_path);
 
         /**
-         * @brief 卸载指定路径的纹理资源
-         *
-         * @param file_path 纹理文件路径
+         * @brief 卸载指定路径的SDL纹理资源（若存在）
+         * @param file_path 纹理文件路径（支持相对路径）
          */
         void unloadTexture(std::string_view file_path);
 
         /**
-         * @brief 获取纹理资源的尺寸（宽/高）
-         *
-         * @param file_path 纹理文件路径
-         * @return 包含宽高的glm::vec2（x=宽，y=高），失败返回(0,0)
+         * @brief 获取指定路径纹理的尺寸（若不存在则加载）
+         * @param file_path 纹理文件路径（支持相对路径）
+         * @return glm::vec2 纹理尺寸（宽度、高度）
          */
         glm::vec2 getTextureSize(std::string_view file_path);
 
         /**
-         * @brief 清空所有已加载的纹理资源
+         * @brief 清除所有已加载的SDL纹理资源（谨慎使用，可能导致内存泄漏）
          */
         void clearTextures();
     };
