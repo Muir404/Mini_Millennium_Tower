@@ -5,7 +5,6 @@
 #include "../core/game_state.h"
 #include "../render/camera.h"
 #include "../ui/ui_manager.h"
-#include "../physics/physics_engine.h"
 #include <algorithm> // for std::remove_if
 #include <spdlog/spdlog.h>
 
@@ -62,8 +61,7 @@ namespace engine::scene
         // 只有游戏进行中，才需要更新物理引擎和相机
         if (context_.getGameState().isPlaying())
         {
-            context_.getPhysicsEngine().update(delta_time); // 先更新物理引擎
-            context_.getCamera().update(delta_time);        // 更新相机
+            context_.getCamera().update(delta_time); // 更新相机
         }
 
         // 更新所有游戏对象，先略过需要移除的对象

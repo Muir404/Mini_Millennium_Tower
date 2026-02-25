@@ -70,12 +70,8 @@ set(SOURCES
     # engine-input
     src/engine/input/input_manager.cpp
 
-    # engine-ovject
+    # engine-object
     src/engine/object/game_object.cpp
-
-    # engine-physics
-    src/engine/physics/physics_engine.cpp
-    src/engine/physics/collision.cpp
     
     # engine-audio
     src/engine/audio/audio_player.cpp
@@ -85,8 +81,6 @@ set(SOURCES
     src/engine/component/transform_component.cpp
     src/engine/component/parallax_component.cpp
     src/engine/component/tilelayer_component.cpp
-    src/engine/component/physics_component.cpp
-    src/engine/component/collider_component.cpp
     src/engine/component/animation_component.cpp
     src/engine/component/health_component.cpp
     src/engine/component/audio_component.cpp
@@ -94,7 +88,7 @@ set(SOURCES
     # engine-scene
     src/engine/scene/scene.cpp
     src/engine/scene/scene_manager.cpp
-    src/engine/scene/level_loader.cpp
+    #src/engine/scene/level_loader.cpp
 
     # engine-ui-state
     src/engine/ui/state/ui_hover_state.cpp

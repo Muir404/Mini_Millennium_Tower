@@ -17,11 +17,6 @@ namespace engine::resource
     class ResourceManager;
 }
 
-namespace engine::physics
-{
-    class PhysicsEngine;
-}
-
 namespace engine::audio
 {
     class AudioPlayer;
@@ -45,25 +40,15 @@ namespace engine::core
         engine::render::Camera &camera_;                      // 相机
         engine::render::TextRenderer &texture_renderer_;      // 字体引擎
         engine::resource::ResourceManager &resource_manager_; // 资源管理器
-        engine::physics::PhysicsEngine &physics_engine_;      // 物理引擎
         engine::audio::AudioPlayer &audio_player_;            // 音频播放器
         engine::core::GameState &game_state_;                 // 游戏状态
 
     public:
-        /**
-         * @brief 构造函数。
-         * @param input_manager 对 InputManager 实例的引用。
-         * @param renderer 对 Renderer 实例的引用。
-         * @param camera 对 Camera 实例的引用。
-         * @param resource_manager 对 ResourceManager 实例的引用。
-         * @param physics_engine 对 PhysicsEngine 实例的引用。
-         */
         Context(engine::input::InputManager &input_manager,
                 engine::render::Renderer &renderer,
                 engine::render::Camera &camera,
                 engine::render::TextRenderer &texture_renderer,
                 engine::resource::ResourceManager &resource_manager,
-                engine::physics::PhysicsEngine &physics_engine_,
                 engine::audio::AudioPlayer &audio_player_,
                 engine::core::GameState &game_state_);
 
@@ -93,10 +78,6 @@ namespace engine::core
         engine::resource::ResourceManager &getResourceManager() const
         {
             return resource_manager_; // 获取资源管理器
-        }
-        engine::physics::PhysicsEngine &getPhysicsEngine() const
-        {
-            return physics_engine_; // 获取物理引擎
         }
         engine::audio::AudioPlayer &getAudioPlayer() const
         {

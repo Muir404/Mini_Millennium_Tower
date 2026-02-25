@@ -5,7 +5,6 @@
 #include "../render/camera.h"
 #include "../render/text_renderer.h"
 #include "../resource/resource_manager.h"
-#include "../physics/physics_engine.h"
 #include "../audio/audio_player.h"
 #include <spdlog/spdlog.h>
 
@@ -17,7 +16,6 @@ namespace engine::core
                      engine::render::Camera &camera,
                      engine::render::TextRenderer &texture_renderer,
                      engine::resource::ResourceManager &resource_manager,
-                     engine::physics::PhysicsEngine &physics_engine,
                      engine::audio::AudioPlayer &audio_player,
                      engine::core::GameState &game_state)
         : input_manager_(input_manager),
@@ -25,7 +23,6 @@ namespace engine::core
           camera_(camera),
           texture_renderer_(texture_renderer),
           resource_manager_(resource_manager),
-          physics_engine_(physics_engine),
           audio_player_(audio_player),
           game_state_(game_state)
     {
