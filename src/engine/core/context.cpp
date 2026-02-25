@@ -7,18 +7,22 @@
 #include "../resource/resource_manager.h"
 #include "../audio/audio_player.h"
 #include <spdlog/spdlog.h>
+#include "entt/entt.hpp"
 
 namespace engine::core
 {
 
-    Context::Context(engine::input::InputManager &input_manager,
-                     engine::render::Renderer &renderer,
-                     engine::render::Camera &camera,
-                     engine::render::TextRenderer &texture_renderer,
-                     engine::resource::ResourceManager &resource_manager,
-                     engine::audio::AudioPlayer &audio_player,
-                     engine::core::GameState &game_state)
-        : input_manager_(input_manager),
+    Context::Context(
+        entt::dispatcher &dispatcher,
+        engine::input::InputManager &input_manager,
+        engine::render::Renderer &renderer,
+        engine::render::Camera &camera,
+        engine::render::TextRenderer &texture_renderer,
+        engine::resource::ResourceManager &resource_manager,
+        engine::audio::AudioPlayer &audio_player,
+        engine::core::GameState &game_state)
+        : dispatcher_(dispatcher),
+          input_manager_(input_manager),
           renderer_(renderer),
           camera_(camera),
           texture_renderer_(texture_renderer),
@@ -26,7 +30,7 @@ namespace engine::core
           audio_player_(audio_player),
           game_state_(game_state)
     {
-        spdlog::trace("上下文已创建并初始化。");
+        spdlog::trace("[Context] 上下文已创建并初始化。");
     }
 
 } // namespace engine::core

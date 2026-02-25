@@ -10,14 +10,13 @@
 
 namespace engine::scene
 {
-    Scene::Scene(std::string_view name, engine::core::Context &context, engine::scene::SceneManager &scene_manager)
+    Scene::Scene(std::string_view name, engine::core::Context &context)
         : scene_name_(name),
           context_(context),
-          scene_manager_(scene_manager),
           ui_manager_(std::make_unique<engine::ui::UIManager>()),
           is_initialized_(false)
     {
-        spdlog::trace("场景 '{}' 构造完成。", scene_name_);
+        spdlog::trace("[Scene] 场景 '{}' 构造完成。", scene_name_);
     }
 
     Scene::~Scene() = default;
@@ -25,7 +24,7 @@ namespace engine::scene
     void Scene::init()
     {
         is_initialized_ = true; // 子类应该最后调用父类的 init 方法
-        spdlog::trace("场景 '{}' 初始化完成。", scene_name_);
+        spdlog::trace("[Scene] 场景 '{}' 初始化完成。", scene_name_);
     }
 
     void Scene::update(float delta_time)
@@ -42,7 +41,7 @@ namespace engine::scene
             if (!obj)
             {
                 need_remove = true;
-                spdlog::warn("场景 '{}' 中存在空的游戏对象指针，将在本帧清理。", scene_name_);
+                spdlog::warn("[Scene] 场景 '{}' 中存在空的游戏对象指针，将在本帧清理。", scene_name_);
                 continue;
             }
             if (obj->isNeedRemove())
@@ -73,7 +72,7 @@ namespace engine::scene
             }
             else if (!obj)
             {
-                spdlog::warn("尝试更新一个空的游戏对象指针。");
+                spdlog::warn("[Scene] 尝试更新一个空的游戏对象指针。");
             }
         }
 
@@ -141,7 +140,7 @@ namespace engine::scene
         game_objects_.clear();
 
         is_initialized_ = false; // 清理完成后，设置场景为未初始化
-        spdlog::trace("场景 '{}' 清理完成。", scene_name_);
+        spdlog::trace("[Scene] 场景 '{}' 清理完成。", scene_name_);
     }
 
     void Scene::addGameObject(std::unique_ptr<engine::object::GameObject> &&game_object)
@@ -152,7 +151,7 @@ namespace engine::scene
         }
         else
         {
-            spdlog::warn("尝试向场景 '{}' 添加空游戏对象。", scene_name_);
+            spdlog::warn("[Scene] 尝试向场景 '{}' 添加空游戏对象。", scene_name_);
         }
     }
 
@@ -164,7 +163,7 @@ namespace engine::scene
         }
         else
         {
-            spdlog::warn("尝试向场景 '{}' 添加空游戏对象。", scene_name_);
+            spdlog::warn("[Scene] 尝试向场景 '{}' 添加空游戏对象。", scene_name_);
         }
     }
 
@@ -172,7 +171,7 @@ namespace engine::scene
     {
         if (!game_object_ptr)
         {
-            spdlog::warn("尝试从场景 '{}' 中移除一个空的游戏对象指针。", scene_name_);
+            spdlog::warn("[Scene] 尝试从场景 '{}' 中移除一个空的游戏对象指针。", scene_name_);
             return;
         }
 
@@ -189,11 +188,11 @@ namespace engine::scene
         {
             (*it)->clean();                               // 因为传入的是指针，因此只可能有一个元素被移除，不需要遍历it到末尾
             game_objects_.erase(it, game_objects_.end()); // 删除从it到末尾的元素（最后一个元素）
-            spdlog::trace("从场景 '{}' 中移除游戏对象。", scene_name_);
+            spdlog::trace("[Scene] 从场景 '{}' 中移除游戏对象。", scene_name_);
         }
         else
         {
-            spdlog::warn("游戏对象指针未找到在场景 '{}' 中。", scene_name_);
+            spdlog::warn("[Scene] 游戏对象指针未找到在场景 '{}' 中。", scene_name_);
         }
     }
 
@@ -213,6 +212,26 @@ namespace engine::scene
             }
         }
         return nullptr;
+    }
+
+    void Scene::requestPopScene()
+    {
+        context_.getDispatcher().trigger(engine::utils::PopSceneEvent());
+    }
+
+    void Scene::requestPushScene(std::unique_ptr<Scene> &&scene)
+    {
+        context_.getDispatcher().trigger(engine::utils::PushSceneEvent(std::move(scene)));
+    }
+
+    void Scene::requestReplaceScene(std::unique_ptr<Scene> &&scene)
+    {
+        context_.getDispatcher().trigger(engine::utils::ReplaceSceneEvent(std::move(scene)));
+    }
+
+    void Scene::quit()
+    {
+        context_.getDispatcher().trigger(engine::utils::QuitEvent());
     }
 
     void Scene::processPendingAdditions()
