@@ -21,10 +21,10 @@ namespace engine::audio
         // 校验资源管理器有效性
         if (!resource_manager_)
         {
-            throw std::runtime_error("AudioPlayer: ResourceManager 指针为空，初始化失败");
+            throw std::runtime_error("[AudioPlayer] ResourceManager 指针为空，初始化失败");
         }
 
-        mixer_ = resource_manager_->getMixer();
+        mixer_ = resource_manager_->getMixer(); // 获取资源管理器提供的 mixer
 
         // 初始化 sound_tracks_ 数组
         for (auto &track_ptr : sound_tracks_)
@@ -32,12 +32,12 @@ namespace engine::audio
             track_ptr = MIX_CreateTrack(mixer_);
             if (!track_ptr)
             {
-                spdlog::error("AudioPlayer: 创建音效轨道失败");
+                spdlog::error("[AudioPlayer] 创建音效轨道失败");
             }
         }
         auto raw_music_track = MIX_CreateTrack(mixer_);
         music_track_.reset(raw_music_track);
-        spdlog::trace("AudioPlayer: 初始化成功");
+        spdlog::trace("[AudioPlayer] 初始化成功");
     }
 
     /**
@@ -80,7 +80,7 @@ namespace engine::audio
         MIX_Audio *sound = resource_manager_->getSound(sound_path);
         if (!sound)
         {
-            spdlog::error("AudioPlayer: 音效资源加载失败，路径: {}", sound_path);
+            spdlog::error("[AudioPlayer] 音效资源加载失败，路径: {}", sound_path);
             return false;
         }
 
@@ -95,26 +95,23 @@ namespace engine::audio
                     // 绑定音效到轨道
                     if (!MIX_SetTrackAudio(track_ptr, sound)) // 如果失败
                     {
-                        spdlog::error("AudioPlayer: 音效轨道绑定资源失败: {}, 错误: {}", sound_path, SDL_GetError());
+                        spdlog::error("[AudioPlayer] 音效轨道绑定资源失败: {}, 错误: {}", sound_path, SDL_GetError());
                         continue; // 尝试下一个轨道
                     }
 
                     // 播放
                     if (!MIX_PlayTrack(track_ptr, 0)) // 如果失败
                     {
-                        spdlog::error("AudioPlayer: 播放音效 {} 失败: {}", sound_path, SDL_GetError());
+                        spdlog::error("[AudioPlayer] 播放音效 {} 失败: {}", sound_path, SDL_GetError());
                         continue; // 尝试下一个轨道
                     }
-                    spdlog::trace("AudioPlayer: 播放音效 {} 成功", sound_path);
-                    // while (MIX_TrackPlaying(track_ptr))
-                    // {
-                    // }
+                    spdlog::trace("[AudioPlayer] 播放音效 {} 成功", sound_path);
                     return true;
                 }
             }
         }
 
-        spdlog::error("AudioPlayer: 无可用音效轨道，音效: {}", sound_path);
+        spdlog::error("[AudioPlayer] 无可用音效轨道，音效: {}", sound_path);
         return false;
     }
 
@@ -131,7 +128,7 @@ namespace engine::audio
         // 1. 判重：当前已在播放该音乐，直接返回成功
         if (music_path == current_music_)
         {
-            spdlog::trace("AudioPlayer: 背景音乐 {} 已在播放，无需重复播放", music_path);
+            spdlog::trace("[AudioPlayer] 背景音乐 {} 已在播放，无需重复播放", music_path);
             return true;
         }
 
@@ -142,12 +139,12 @@ namespace engine::audio
         }
 
         // 3. 通过 ResourceManager 加载/获取音乐资源
-        // 向 rsmanager 要 音频资源
+        // 向 ResourceManager 要 音频资源
         MIX_Audio *music = resource_manager_->getMusic(std::string(music_path));
 
         if (!music)
         {
-            spdlog::error("AudioPlayer: 背景音乐资源加载失败，路径: {}", music_path);
+            spdlog::error("[AudioPlayer] 背景音乐资源加载失败，路径: {}", music_path);
             return false;
         }
         // 4. 更新当前播放标记
@@ -156,7 +153,7 @@ namespace engine::audio
         // 5. 绑定音乐资源到背景音乐轨道
         if (!MIX_SetTrackAudio(music_track_.get(), music))
         {
-            spdlog::error("AudioPlayer: 背景音乐轨道绑定资源失败: {}, 错误: {}", music_path, SDL_GetError());
+            spdlog::error("[AudioPlayer] 背景音乐轨道绑定资源失败: {}, 错误: {}", music_path, SDL_GetError());
             return false;
         }
 
@@ -164,25 +161,22 @@ namespace engine::audio
         SDL_PropertiesID props = SDL_CreateProperties();
         if (!props)
         {
-            spdlog::error("AudioPlayer: 创建背景音乐播放属性失败: {}", SDL_GetError());
+            spdlog::error("[AudioPlayer] 创建背景音乐播放属性失败: {}", SDL_GetError());
             return false;
         }
 
         // 配置循环次数（SDL3_mixer 标准属性：MIX_PROP_PLAY_LOOPS_NUMBER）
         SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, loops);
-        spdlog::trace("AudioPlayer: 背景音乐 {} 循环次数设置为: {}", music_path, loops);
+        spdlog::trace("[AudioPlayer] 背景音乐 {} 循环次数设置为: {}", music_path, loops);
 
         // 8. 启动播放
         if (!MIX_PlayTrack(music_track_.get(), props))
         {
-            spdlog::error("AudioPlayer: 播放背景音乐 {} 失败: {}", music_path, SDL_GetError());
+            spdlog::error("[AudioPlayer] 播放背景音乐 {} 失败: {}", music_path, SDL_GetError());
         }
         else
         {
-            spdlog::info("AudioPlayer: 播放背景音乐 {} 成功（循环：{})", music_path, loops);
-            // while (MIX_TrackPlaying(music_track_.get()))
-            // {
-            // }
+            spdlog::info("[AudioPlayer] 播放背景音乐 {} 成功（循环：{})", music_path, loops);
         }
 
         // 9. 销毁属性对象（避免内存泄漏）
@@ -205,7 +199,7 @@ namespace engine::audio
         auto time = fade_out_ms > 0 ? MIX_TrackMSToFrames(music_track_.get(), fade_out_ms) : MIX_TrackMSToFrames(music_track_.get(), 0);
         // 淡出时长
         MIX_StopTrack(music_track_.get(), time);
-        spdlog::trace("AudioPlayer: 停止背景音乐（淡出时长：{}ms）", fade_out_ms);
+        spdlog::trace("[AudioPlayer] 停止背景音乐（淡出时长：{}ms）", fade_out_ms);
     }
 
     /**
@@ -215,7 +209,7 @@ namespace engine::audio
     {
 
         MIX_PauseTrack(music_track_.get());
-        spdlog::trace("AudioPlayer: 暂停背景音乐播放");
+        spdlog::trace("[AudioPlayer] 暂停背景音乐播放");
     }
 
     /**
@@ -225,7 +219,7 @@ namespace engine::audio
     {
 
         MIX_ResumeTrack(music_track_.get());
-        spdlog::trace("AudioPlayer: 恢复背景音乐播放");
+        spdlog::trace("[AudioPlayer] 恢复背景音乐播放");
     }
 
     // ====================== 音量控制相关 ======================
@@ -241,7 +235,7 @@ namespace engine::audio
         {
             MIX_SetTrackGain(track_ptr, volume);
         }
-        spdlog::info("AudioPlayer: 全局音效音量设置为: {}", sound_volume);
+        spdlog::info("[AudioPlayer] 全局音效音量设置为: {}", sound_volume);
     }
 
     /**
@@ -252,7 +246,7 @@ namespace engine::audio
     {
         auto music_volume = glm::clamp(volume, 0.0f, 1.0f);
         MIX_SetTrackGain(music_track_.get(), music_volume);
-        spdlog::info("AudioPlayer: 背景音乐音量设置为: {}", music_volume);
+        spdlog::info("[AudioPlayer] 背景音乐音量设置为: {}", music_volume);
     }
 
     /**

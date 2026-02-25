@@ -1,8 +1,8 @@
 #include "config.h"
-#include <fstream>
-#include <filesystem>
-#include <nlohmann/json.hpp>
-#include "spdlog/spdlog.h"
+#include <fstream>           // 用于文件读写
+#include <filesystem>        // 用于文件路径操作
+#include <nlohmann/json.hpp> // 用于 JSON 解析
+#include "spdlog/spdlog.h"   // 用于日志记录
 
 namespace engine::core
 {

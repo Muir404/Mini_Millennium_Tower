@@ -8,5 +8,12 @@ namespace game::scene
     public:
         GameScene(engine::core::Context &context, engine::scene::SceneManager &scene_manager);
         ~GameScene();
+
+        void init() override;
+        void clean() override;
+
+    private:
+        void onAttack();
+        void onJump();
     };
 }

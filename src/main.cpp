@@ -3,6 +3,8 @@
 #include "game/scene/game_scene.h"
 #include <spdlog/spdlog.h>
 #include <SDL3/SDL_main.h>
+
+// 注册初始场景
 void setupInitialScene(engine::scene::SceneManager &scene_manager)
 {
     // GameApp在调用run方法之前，先创建并设置初始场景
@@ -10,6 +12,7 @@ void setupInitialScene(engine::scene::SceneManager &scene_manager)
     scene_manager.requestPushScene(std::move(game_scene));
 }
 
+// 主函数
 int main(int /*argc*/, char * /*argv*/[])
 {
     spdlog::set_level(spdlog::level::info);
