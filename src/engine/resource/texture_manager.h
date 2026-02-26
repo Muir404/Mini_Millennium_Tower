@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <SDL3/SDL_render.h>
 #include <glm/glm.hpp>
+#include <entt/entt.hpp>
 
 namespace engine::resource
 {
@@ -35,7 +36,7 @@ namespace engine::resource
         };
 
         // 私有成员变量
-        std::unordered_map<std::string, std::unique_ptr<SDL_Texture, SDLTextureDeleter>> textures_; ///< 纹理缓存映射表：文件路径 → 带自定义删除器的SDL_Texture智能指针
+        std::unordered_map<entt::id_type, std::unique_ptr<SDL_Texture, SDLTextureDeleter>> textures_; ///< 纹理缓存映射表：文件路径 → 带自定义删除器的SDL_Texture智能指针
 
         SDL_Renderer *renderer_ = nullptr; ///< SDL渲染器指针（非拥有权，由外部ResourceManager传入并保证生命周期）
 
@@ -50,36 +51,13 @@ namespace engine::resource
         TextureManager &operator=(TextureManager &&) = delete;
 
     private:
-        /**
-         * @brief 加载SDL纹理资源，支持缓存复用
-         * @param file_path 纹理文件路径（支持相对路径）
-         * @return SDL_Texture* 加载的SDL纹理指针（已缓存）
-         */
-        SDL_Texture *loadTexture(std::string_view file_path);
-
-        /**
-         * @brief 获取已加载的SDL纹理指针（若不存在则加载）
-         * @param file_path 纹理文件路径（支持相对路径）
-         * @return SDL_Texture* 已加载的SDL纹理指针（已缓存）
-         */
-        SDL_Texture *getTexture(std::string_view file_path);
-
-        /**
-         * @brief 卸载指定路径的SDL纹理资源（若存在）
-         * @param file_path 纹理文件路径（支持相对路径）
-         */
-        void unloadTexture(std::string_view file_path);
-
-        /**
-         * @brief 获取指定路径纹理的尺寸（若不存在则加载）
-         * @param file_path 纹理文件路径（支持相对路径）
-         * @return glm::vec2 纹理尺寸（宽度、高度）
-         */
-        glm::vec2 getTextureSize(std::string_view file_path);
-
-        /**
-         * @brief 清除所有已加载的SDL纹理资源（谨慎使用，可能导致内存泄漏）
-         */
-        void clearTextures();
+        SDL_Texture *loadTexture(entt::id_type id, std::string_view file_path);      ///< 加载纹理 实际干活的函数
+        SDL_Texture *loadTexture(entt::hashed_string str_hs);                        ///< 加载纹理 实际调用的函数
+        SDL_Texture *getTexture(entt::id_type id, std::string_view file_path = "");  ///< 获取纹理 实际干活的函数
+        SDL_Texture *getTexture(entt::hashed_string str_hs);                         ///< 获取纹理 实际调用的函数
+        glm::vec2 getTextureSize(entt::id_type id, std::string_view file_path = ""); ///< 获取纹理尺寸 实际干活的函数
+        glm::vec2 getTextureSize(entt::hashed_string str_hs);                        ///< 获取纹理尺寸 实际调用的函数
+        void unloadTexture(entt::id_type id);                                        ///< 卸载纹理 实际干活的函数+实际调用的函数
+        void clearTextures();                                                        ///< 清除所有纹理 实际干活的函数+实际调用的函数
     };
 }

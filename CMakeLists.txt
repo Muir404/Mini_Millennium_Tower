@@ -77,13 +77,13 @@ set(SOURCES
     src/engine/audio/audio_player.cpp
 
     # engine-component
-    src/engine/component/sprite_component.cpp
-    src/engine/component/transform_component.cpp
-    src/engine/component/parallax_component.cpp
-    src/engine/component/tilelayer_component.cpp
-    src/engine/component/animation_component.cpp
-    src/engine/component/health_component.cpp
-    src/engine/component/audio_component.cpp
+    # src/engine/component/sprite_component.cpp
+    # src/engine/component/transform_component.cpp
+    # src/engine/component/parallax_component.cpp
+    # src/engine/component/tilelayer_component.cpp
+    # src/engine/component/animation_component.cpp
+    # src/engine/component/health_component.cpp
+    # src/engine/component/audio_component.cpp
 
     # engine-scene
     src/engine/scene/scene.cpp

@@ -4,6 +4,7 @@
 #include <string_view>
 #include <glm/vec2.hpp>
 #include "../utils/math.h"
+#include <entt/entt.hpp>
 
 struct TTF_TextEngine;
 
@@ -52,7 +53,7 @@ namespace engine::render
          * @param position 左上角屏幕位置。
          * @param color 文本颜色。(默认为白色)
          */
-        void drawUIText(std::string_view text, std::string_view font_id, int font_size,
+        void drawUIText(std::string_view text, entt::id_type font_id, int font_size,
                         const glm::vec2 &position, const engine::utils::FColor &color = {1.0f, 1.0f, 1.0f, 1.0f});
 
         /**
@@ -65,7 +66,7 @@ namespace engine::render
          * @param position 左上角屏幕位置。
          * @param color 文本颜色。
          */
-        void drawText(const Camera &camera, std::string_view text, std::string_view font_id, int font_size,
+        void drawText(const Camera &camera, std::string_view text, entt::id_type font_id, int font_size,
                       const glm::vec2 &position, const engine::utils::FColor &color = {1.0f, 1.0f, 1.0f, 1.0f});
 
         /**
@@ -76,7 +77,7 @@ namespace engine::render
          * @param font_size 字体大小。
          * @return 文本的尺寸。
          */
-        glm::vec2 getTextSize(std::string_view text, std::string_view font_id, int font_size);
+        glm::vec2 getTextSize(std::string_view text, entt::id_type font_id, int font_size, std::string_view font_path = "");
 
         // 禁用拷贝和移动语义
         TextRenderer(const TextRenderer &) = delete;

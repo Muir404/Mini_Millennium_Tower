@@ -1,7 +1,6 @@
 #include "renderer.h"
 #include "../resource/resource_manager.h"
 #include "camera.h"
-#include "sprite.h"
 #include <SDL3/SDL.h>
 #include <stdexcept> // For std::runtime_error
 #include <spdlog/spdlog.h>
@@ -225,12 +224,15 @@ namespace engine::render
         auto src_rect = sprite.getSourceRect();
         if (src_rect.has_value()) // 有源矩形，拿来用
         {
-            if (src_rect.value().w <= 0 || src_rect.value().h <= 0)
+            if (src_rect.value().size.x <= 0 || src_rect.value().size.y <= 0)
             {
-                spdlog::error("源矩形尺寸无效，ID{}", sprite.getTextureId());
+                spdlog::error("源矩形尺寸无效，ID{}，path:{}", sprite.getTextureId(), sprite.getTexturePath());
                 return std::nullopt;
             }
-            return src_rect;
+            return SDL_FRect{src_rect.value().position.x,
+                             src_rect.value().position.y,
+                             src_rect.value().size.x,
+                             src_rect.value().size.y};
         }
         else // 获取整个纹理尺寸
         {

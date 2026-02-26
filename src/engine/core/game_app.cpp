@@ -292,6 +292,10 @@ namespace engine::core // 命名空间与路径一致
             return false;
         }
         spdlog::trace("[GameApp] 资源管理器初始化成功。");
+        if (!resource_manager_->loadResources("assets/data/resource_mapping.json"))
+        {
+            spdlog::error("[GameApp] 加载资源映射文件失败，请检查文件路径是否正确");
+        }
         return true;
     }
 

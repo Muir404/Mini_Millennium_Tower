@@ -1,8 +1,8 @@
 #pragma once
-#include "sprite.h"
-#include "../utils/math.h"
 #include <string>
 #include <optional> // For std::optional
+#include "../utils/math.h"
+#include "sprite.h"
 
 struct SDL_Renderer;
 struct SDL_FRect;
@@ -56,6 +56,8 @@ namespace engine::render
 
         void present();     // 更新屏幕，包装SDL_RenderPresent
         void clearScreen(); // 清屏，包装SDL_RenderClear
+
+        SDL_Renderer *getSDLRenderer() const { return renderer_; } ///< 获取底层的 SDL_Renderer 指针
 
         void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255);       // 包装SDL_SetRenderDrawColor
         void setDrawColorFloat(float r, float g, float b, float a = 1.0f); // 包装SDL_SetRenderDrawColorFloat

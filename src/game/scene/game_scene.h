@@ -13,10 +13,6 @@ namespace game::scene
         void clean() override;
 
     private:
-        int scene_num_{0};
-        bool onReplace();
-        bool onPush();
-        bool onPop();
-        bool onQuit();
+        void testResourceManager();
     };
 }

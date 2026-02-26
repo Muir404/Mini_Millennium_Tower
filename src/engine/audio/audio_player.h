@@ -4,6 +4,7 @@
 #include <memory>                 // 用于管理音效轨道智能指针
 #include <SDL3_mixer/SDL_mixer.h> // 用于音效和音乐播放
 #include <SDL3/SDL_properties.h>  // 用于获取 SDL_Mixer 属性
+#include <entt/entt.hpp>
 
 // 前向声明 ResourceManager
 namespace engine::resource
@@ -37,7 +38,7 @@ namespace engine::audio
 
     private:
         engine::resource::ResourceManager *resource_manager_;        ///<  指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
-        std::string current_music_;                                  ///<  当前正在播放的音乐路径，用于避免重复播放同一音乐。
+        entt::id_type current_music_;                                ///<  当前正在播放的音乐路径，用于避免重复播放同一音乐。
         MIX_Mixer *mixer_ = nullptr;                                 ///<  非拥有指针，借用 ResourceManager 提供的 mixer
         std::array<MIX_Track *, 8> sound_tracks_{nullptr};           ///<  音效轨道数组，用于播放多个音效。
         std::unique_ptr<MIX_Track, SDLMixTrackDeleter> music_track_; ///<  背景音乐轨道，用于播放单条音乐。
@@ -57,63 +58,20 @@ namespace engine::audio
         AudioPlayer &operator=(AudioPlayer &&) = delete;
 
         // --- 播放控制方法 ---
-        /**
-         * @brief 播放音效（chunk）。
-         * 如果尚未缓存，则通过 ResourceManager 加载音效。
-         * @param sound_path 音效文件的路径。
-         * @return 音效正在播放的通道，出错时返回 -1。
-         */
-        bool playSound(std::string_view sound_path);
 
-        /**
-         * @brief 播放背景音乐。如果正在播放，则淡出之前的音乐。
-         * 如果尚未缓存，则通过 ResourceManager 加载音乐。
-         * @param music_path 音乐文件的路径。
-         * @param loops 循环次数（-1 无限循环，0 播放一次，1 播放两次，以此类推）。默认为 -1。
-         * @param fade_in_ms 音乐淡入的时间（毫秒）（0 表示不淡入）。默认为 0。
-         * @return 成功返回 true，出错返回 false。
-         */
-        bool playMusic(std::string_view music_path, int loops = -1, int fade_in_ms = 0);
+        bool playSound(entt::id_type id);           ///< 播放指定ID的音效。
+        bool playSound(entt::hashed_string str_hs); ///< 播放指定哈希字符串的音效。
 
-        /**
-         * @brief 停止当前正在播放的背景音乐。
-         * @param fade_out_ms 淡出时间（毫秒）（0 表示立即停止）。默认为 0。
-         */
-        void stopMusic(int fade_out_ms = 0);
+        bool playMusic(entt::id_type id, int loops = -1, int fade_in_ms = 0);           ///< 播放指定ID的音乐，可选循环次数和淡入时间。
+        bool playMusic(entt::hashed_string str_hs, int loops = -1, int fade_in_ms = 0); ///< 播放指定哈希字符串的音乐，可选循环次数和淡入时间。
 
-        /**
-         * @brief 暂停当前正在播放的背景音乐。
-         */
-        void pauseMusic();
-
-        /**
-         * @brief 恢复已暂停的背景音乐。
-         */
-        void resumeMusic();
-
-        /**
-         * @brief 设置音效通道的音量。
-         * @param volume 音量级别（0.0-1.0）。
-         */
-        void setSoundVolume(float volume);
-
-        /**
-         * @brief 设置音乐通道的音量。
-         * @param volume 音量级别（0.0-1.0）。
-         */
-        void setMusicVolume(float volume);
-
-        /**
-         * @brief 获取当前音乐音量。
-         * @return 音量级别（0.0-1.0）。
-         */
-        float getMusicVolume() const;
-
-        /**
-         * @brief 获取当前音效音量。
-         * @return 音量级别（0.0-1.0）。
-         */
-        float getSoundVolume() const;
+        void stopMusic(int fade_out_ms = 0); ///< 停止当前播放的音乐，可选淡出效果。
+        void pauseMusic();                   ///< 暂停当前播放的音乐。
+        void resumeMusic();                  ///< 恢复当前暂停的音乐播放。
+        void setSoundVolume(float volume);   ///< 设置音效音量。
+        void setMusicVolume(float volume);   ///< 设置背景音乐音量。
+        float getMusicVolume() const;        ///< 获取当前背景音乐音量。
+        float getSoundVolume() const;        ///< 获取当前音效音量。
     };
 
 } // namespace engine::audio

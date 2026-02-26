@@ -5,13 +5,16 @@
 #include "../../core/context.h"
 #include "../../audio/audio_player.h"
 #include <spdlog/spdlog.h>
+#include <entt/core/hashed_string.hpp>
+
+using namespace entt::literals;
 
 namespace engine::ui::state
 {
 
     void UINormalState::enter()
     {
-        owner_->setSprite("normal");
+        owner_->setSprite("normal"_hs);
         spdlog::debug("切换到正常状态");
     }
 
@@ -21,7 +24,7 @@ namespace engine::ui::state
         auto mouse_pos = input_manager.getLogicalMousePosition();
         if (owner_->isPointInside(mouse_pos))
         { // 如果鼠标在UI元素内，则切换到悬停状态
-            owner_->playSound("hover");
+            owner_->playSound("hover"_hs);
             return std::make_unique<engine::ui::state::UIHoverState>(owner_);
         }
         return nullptr;

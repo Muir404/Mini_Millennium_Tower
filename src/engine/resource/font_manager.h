@@ -7,11 +7,12 @@
 #include <unordered_map>      // 用于 std::unordered_map
 #include <utility>            // 用于 std::pair
 #include <SDL3_ttf/SDL_ttf.h> // SDL_ttf 主头文件
+#include <entt/entt.hpp>      // entt 主头文件
 
 namespace engine::resource
 {
 
-    using FontKey = std::pair<std::string, int>; // 字体键（文件路径+字号）
+    using FontKey = std::pair<entt::id_type, int>; // 字体键（文件路径+字号）
 
     /**
      * @brief 字体键哈希函数，用于在 unordered_map 中存储 FontKey
@@ -27,9 +28,10 @@ namespace engine::resource
          */
         std::size_t operator()(const FontKey &key) const
         {
-            std::hash<std::string> string_hasher;
-            std::hash<int> int_hasher;
-            return string_hasher(key.first) ^ int_hasher(key.second);
+            std::size_t h1 = std::hash<entt::id_type>{}(key.first);
+            std::size_t h2 = std::hash<int>{}(key.second);
+            // 混合哈希值，避免相同路径不同字号的字体键哈希冲突 boost::hash_combine
+            return h1 ^ (h2 + 0x9e3779b9 + (h2 << 6) + (h2 >> 2));
         }
     };
 
@@ -69,35 +71,11 @@ namespace engine::resource
         FontManager &operator=(FontManager &&) = delete;
 
     private:
-        /**
-         * @brief 加载字体资源
-         *
-         * @param file_path 字体文件路径
-         * @param point_size 字体字号
-         * @return TTF_Font* 字体指针
-         */
-        TTF_Font *loadFont(std::string_view file_path, int point_size);
-
-        /**
-         * @brief 获取字体资源
-         *
-         * @param file_path 字体文件路径
-         * @param point_size 字体字号
-         * @return TTF_Font* 字体指针
-         */
-        TTF_Font *getFont(std::string_view file_path, int point_size);
-
-        /**
-         * @brief 卸载字体资源
-         *
-         * @param file_path 字体文件路径
-         * @param point_size 字体字号
-         */
-        void unloadFont(std::string_view file_path, int point_size);
-
-        /**
-         * @brief 清空所有字体资源
-         */
-        void clearFonts();
+        TTF_Font *loadFont(entt::id_type id, int point_size, std::string_view file_path);     ///< 加载指定哈希字符串的SDL字体资源（若不存在则加载）
+        TTF_Font *loadFont(entt::hashed_string str_hs, int point_size);                       ///< 加载指定哈希字符串的SDL字体资源（若不存在则加载）
+        TTF_Font *getFont(entt::id_type id, int point_size, std::string_view file_path = ""); ///< 获取指定哈希字符串的SDL字体资源（若不存在则加载）
+        TTF_Font *getFont(entt::hashed_string str_hs, int point_size);                        ///< 获取指定哈希字符串的SDL字体资源（若不存在则加载）
+        void unloadFont(entt::id_type id, int point_size);                                    ///< 卸载指定哈希字符串的SDL字体资源
+        void clearFonts();                                                                    ///< 清空所有已加载的SDL字体资源
     };
 };

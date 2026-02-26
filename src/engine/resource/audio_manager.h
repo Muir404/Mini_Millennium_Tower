@@ -1,15 +1,12 @@
 #pragma once
-
-// 标准库头文件（按字母序排列）
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-
-// 第三方库头文件
 #include <SDL3_mixer/SDL_mixer.h>
+#include <entt/entt.hpp>
 
 namespace engine::resource
 {
@@ -44,8 +41,8 @@ namespace engine::resource
 
     private:
         // 资源缓存
-        std::unordered_map<std::string, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> sounds_; ///< 短音效缓存 (路径 -> 音频资源)
-        std::unordered_map<std::string, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> music_;  ///< 长音乐缓存 (路径 -> 音频资源)
+        std::unordered_map<entt::id_type, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> sounds_; ///< 短音效缓存 (ID -> 音频资源)
+        std::unordered_map<entt::id_type, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> music_;  ///< 长音乐缓存 (ID -> 音频资源)
         MIX_Mixer *mixer_;
 
     public:
@@ -59,90 +56,23 @@ namespace engine::resource
         AudioManager &operator=(AudioManager &&) = delete;
 
     private:
-        // getter and setter
-        MIX_Mixer *getMixer()
-        {
-            return mixer_;
-        }
+        MIX_Mixer *getMixer() { return mixer_; } ///< 获取 SDL 音频 Mixer 指针
 
-        /**
-         * @brief 加载短音效
-         *
-         * 加载指定路径的音效文件到缓存中。
-         *
-         * @param file_path 音效文件路径
-         * @return MIX_Audio* 加载的音效资源指针
-         */
-        MIX_Audio *loadSound(std::string_view file_path);
+        MIX_Audio *loadSound(entt::id_type id, std::string_view file_path);     ///< 加载短音效 实际干活的函数
+        MIX_Audio *loadSound(entt::hashed_string str_hs);                       ///< 加载短音效 实际调用的函数
+        MIX_Audio *getSound(entt::id_type id, std::string_view file_path = ""); ///< 获取短音效 实际干活的函数
+        MIX_Audio *getSound(entt::hashed_string str_hs);                        ///< 获取短音效 实际调用的函数
+        void unloadSound(entt::id_type id);                                     ///< 卸载短音效 实际干活的函数+实际调用的函数
+        void clearSounds();                                                     ///< 清除所有短音效 实际干活的函数+实际调用的函数
 
-        /**
-         * @brief 获取短音效
-         *
-         * 从缓存中获取指定路径的音效资源。如果资源不存在，尝试加载它。
-         *
-         * @param file_path 音效文件路径
-         * @return MIX_Audio* 音效资源指针
-         */
-        MIX_Audio *getSound(std::string_view file_path);
+        MIX_Audio *loadMusic(entt::id_type id, std::string_view file_path);     ///< 加载长音乐 实际干活的函数
+        MIX_Audio *loadMusic(entt::hashed_string str_hs);                       ///< 加载长音乐 实际调用的函数
+        MIX_Audio *getMusic(entt::id_type id, std::string_view file_path = ""); ///< 获取长音乐 实际干活的函数
+        MIX_Audio *getMusic(entt::hashed_string str_hs);                        ///< 获取长音乐 实际调用的函数
+        void unloadMusic(entt::id_type id);                                     ///< 卸载长音乐 实际干活的函数+实际调用的函数
+        void clearMusic();                                                      ///< 清除所有长音乐 实际干活的函数+实际调用的函数
 
-        /**
-         * @brief 卸载短音效
-         *
-         * 从缓存中移除指定路径的音效资源。
-         *
-         * @param file_path 音效文件路径
-         */
-        void unloadSound(std::string_view file_path);
-
-        /**
-         * @brief 清除所有短音效
-         *
-         * 从缓存中移除所有已加载的短音效资源。
-         */
-        void clearSounds();
-
-        /**
-         * @brief 加载长音乐
-         *
-         * 加载指定路径的音乐文件到缓存中。
-         *
-         * @param file_path 音乐文件路径
-         * @return MIX_Audio* 加载的音乐资源指针
-         */
-        MIX_Audio *loadMusic(std::string_view file_path);
-
-        /**
-         * @brief 获取长音乐
-         *
-         * 从缓存中获取指定路径的音乐资源。如果资源不存在，尝试加载它。
-         *
-         * @param file_path 音乐文件路径
-         * @return MIX_Audio* 音乐资源指针
-         */
-        MIX_Audio *getMusic(std::string_view file_path);
-
-        /**
-         * @brief 卸载长音乐
-         *
-         * 从缓存中移除指定路径的音乐资源。
-         *
-         * @param file_path 音乐文件路径
-         */
-        void unloadMusic(std::string_view file_path);
-
-        /**
-         * @brief 清除所有长音乐
-         *
-         * 从缓存中移除所有已加载的长音乐资源。
-         */
-        void clearMusic();
-
-        /**
-         * @brief 清除所有音频资源
-         *
-         * 从缓存中移除所有已加载的短音效和长音乐资源。
-         */
-        void clearAudio();
+        void clearAudio(); ///< 清除所有音频资源 实际干活的函数+实际调用的函数
     };
 
 } // namespace engine::resource
