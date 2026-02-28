@@ -57,19 +57,15 @@ The project follows modern C++ game development practices with clean separation 
 
 ### Build Commands
 ```bash
-mkdir build && cd build
-cmake -G Ninja ..
-ninja
+cmake --preset build-clang-ninja
+cmake --build --preset build-TDPreset
 ```
 
 ## Usage
 
 After building, run the executable to start the tower defense game. Use the Tiled editor to create and modify game levels.
-
-## Contributing
-
-This project uses git for version control. Please follow standard git workflows for contributions.
-
-## License
-
-[Add your license information here]
+```bash
+.build-clang-ninja/TD-Linux # if on Linux
+.build-clang-ninja/TD-Windows.exe # if on Windows
+.build-clang-ninja/TD-MacOS # if on macOS
+```
