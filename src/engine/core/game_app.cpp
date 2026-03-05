@@ -75,6 +75,10 @@ namespace engine::core
         {
             return false;
         }
+        if (!initGameState())
+        {
+            return false;
+        }
         if (!initTime())
         {
             return false;
@@ -100,10 +104,6 @@ namespace engine::core
             return false;
         }
         if (!initInputManager())
-        {
-            return false;
-        }
-        if (!initGameState())
         {
             return false;
         }
@@ -221,7 +221,9 @@ namespace engine::core
             return false;
         }
 
-        window_ = SDL_CreateWindow(config_->window_title_.c_str(), config_->window_width_, config_->window_height_, SDL_WINDOW_RESIZABLE);
+        int window_width = static_cast<int>(config_->window_width_ * config_->window_scale_);
+        int window_height = static_cast<int>(config_->window_height_ * config_->window_scale_);
+        window_ = SDL_CreateWindow(config_->window_title_.c_str(), window_width, window_height, SDL_WINDOW_RESIZABLE);
         if (window_ == nullptr)
         {
             spdlog::error("无法创建窗口! SDL错误: {}", SDL_GetError());
@@ -244,7 +246,9 @@ namespace engine::core
         spdlog::trace("VSync 设置为: {}", config_->vsync_enabled_ ? "Enabled" : "Disabled");
 
         // 设置逻辑分辨率为窗口大小的一半（针对像素游戏）
-        SDL_SetRenderLogicalPresentation(sdl_renderer_, config_->window_width_ / 2, config_->window_height_ / 2, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+        int logical_width = static_cast<int>(config_->window_width_ * config_->window_logical_scale_);
+        int logical_height = static_cast<int>(config_->window_height_ * config_->window_logical_scale_);
+        SDL_SetRenderLogicalPresentation(sdl_renderer_, logical_width, logical_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
         spdlog::trace("SDL 初始化成功。");
         return true;
     }
@@ -317,7 +321,7 @@ namespace engine::core
     {
         try
         {
-            camera_ = std::make_unique<engine::render::Camera>(glm::vec2(config_->window_width_ / 2, config_->window_height_ / 2));
+            camera_ = std::make_unique<engine::render::Camera>(game_state_->getLogicalSize());
         }
         catch (const std::exception &e)
         {

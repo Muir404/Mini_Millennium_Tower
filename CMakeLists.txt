@@ -373,7 +373,10 @@ set(SOURCES
     # engine-scene
     src/engine/scene/scene.cpp
     src/engine/scene/scene_manager.cpp
-    # src/engine/scene/level_loader.cpp
+
+    # engine-loader
+    src/engine/loader/level_loader.cpp
+    src/engine/loader/basic_entity_builder.cpp
 
     # engine-system
     src/engine/system/animation_system.cpp

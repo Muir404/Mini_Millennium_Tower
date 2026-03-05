@@ -70,6 +70,8 @@ namespace engine::core
             window_title_ = window_config.value("title", window_title_);
             window_width_ = window_config.value("width", window_width_);
             window_height_ = window_config.value("height", window_height_);
+            window_scale_ = window_config.value("window_scale", window_scale_);
+            window_logical_scale_ = window_config.value("window_logical_scale", window_logical_scale_);
             window_resizable_ = window_config.value("resizable", window_resizable_);
         }
         if (j.contains("graphics"))
@@ -119,10 +121,35 @@ namespace engine::core
     nlohmann::ordered_json Config::toJson() const
     {
         return nlohmann::ordered_json{
-            {"window", {{"title", window_title_}, {"width", window_width_}, {"height", window_height_}, {"resizable", window_resizable_}}},
-            {"graphics", {{"vsync", vsync_enabled_}}},
-            {"performance", {{"target_fps", target_fps_}}},
-            {"audio", {{"music_volume", music_volume_}, {"sound_volume", sound_volume_}}},
-            {"input_mappings", input_mappings_}};
+            {
+                "window", {
+                    {"title", window_title_}, 
+                    {"width", window_width_}, 
+                    {"height", window_height_}, 
+                    {"window_scale", window_scale_}, 
+                    {"window_logical_scale", window_logical_scale_}, 
+                    {"resizable", window_resizable_}
+                }
+            },
+            {
+                "graphics", {
+                    {"vsync", vsync_enabled_}
+                }
+            },
+            {
+                "performance", {
+                    {"target_fps", target_fps_}
+                }
+            },
+            {
+                "audio", {
+                    {"music_volume", music_volume_}, 
+                    {"sound_volume", sound_volume_}
+                }
+            },
+            {
+                "input_mappings", input_mappings_
+            }
+        };
     }
 }
