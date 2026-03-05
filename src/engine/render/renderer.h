@@ -1,8 +1,8 @@
 #pragma once
-#include <string>
-#include <optional> // For std::optional
+#include "image.h"
+#include "../component/sprite_component.h"
 #include "../utils/math.h"
-#include "sprite.h"
+#include <optional>
 
 struct SDL_Renderer;
 struct SDL_FRect;
@@ -34,22 +34,14 @@ namespace engine::render
         Renderer &operator=(Renderer &&) = delete;
 
         void drawSprite(const Camera &camera,
-                        const Sprite &sprite,
+                        const component::Sprite &sprite,
                         const glm::vec2 &position,
-                        const glm::vec2 &scale = {1.0f, 1.0f},
-                        double angle = 0.0f);
+                        const glm::vec2 &size,
+                        const float rotation = 0.0f);
 
-        void drawParallax(
-            const Camera &camera,
-            const Sprite &sprite,
-            const glm::vec2 &position,
-            const glm::vec2 &scroll_factor,
-            const glm::bvec2 &repeat = {true, true},
-            const glm::vec2 &scale = {1.0f, 1.0f});
-
-        void drawUISprite(const Sprite &sprite,
-                          const glm::vec2 &position,
-                          const std::optional<glm::vec2> &size = std::nullopt);
+        void drawUIImage(const Image &image,
+                         const glm::vec2 &position,
+                         const std::optional<glm::vec2> &size = std::nullopt);
 
         void drawUIFilledRect(const engine::utils::Rect &rect,
                               const engine::utils::FColor &color);
@@ -63,7 +55,7 @@ namespace engine::render
         void setDrawColorFloat(float r, float g, float b, float a = 1.0f); // 包装SDL_SetRenderDrawColorFloat
 
     private:
-        std::optional<SDL_FRect> getSpriteSrcRect(const Sprite &sprite);    // 获取精灵源矩形，用于绘制
+        std::optional<SDL_FRect> getImageSrcRect(const Image &image);       // 获取图片源矩形，用于绘制
         bool isRectInViewport(const Camera &camera, const SDL_FRect &rect); // 判断矩形是否在视口内
     };
 }

@@ -1,22 +1,21 @@
 #include "scene.h"
 #include "scene_manager.h"
-#include "../object/game_object.h"
 #include "../core/context.h"
-#include "../core/game_state.h"
-#include "../render/camera.h"
 #include "../ui/ui_manager.h"
-#include <algorithm> // for std::remove_if
+#include "../utils/events.h"
 #include <spdlog/spdlog.h>
+#include <entt/signal/dispatcher.hpp>
 
 namespace engine::scene
 {
+
     Scene::Scene(std::string_view name, engine::core::Context &context)
         : scene_name_(name),
           context_(context),
           ui_manager_(std::make_unique<engine::ui::UIManager>()),
           is_initialized_(false)
     {
-        spdlog::trace("[Scene] 场景 '{}' 构造完成。", scene_name_);
+        spdlog::trace("场景 '{}' 构造完成。", scene_name_);
     }
 
     Scene::~Scene() = default;
@@ -24,224 +23,65 @@ namespace engine::scene
     void Scene::init()
     {
         is_initialized_ = true; // 子类应该最后调用父类的 init 方法
-        spdlog::trace("[Scene] 场景 '{}' 初始化完成。", scene_name_);
+        spdlog::trace("场景 '{}' 初始化完成。", scene_name_);
     }
 
     void Scene::update(float delta_time)
     {
         if (!is_initialized_)
-        {
             return;
-        }
 
-        // 先移除上一帧已经标记删除的对象，避免物理更新产生的碰撞事件持有悬空指针
-        bool need_remove = false; // 设定一个标志，用于判断是否需要移除对象
-        for (auto &obj : game_objects_)
-        {
-            if (!obj)
-            {
-                need_remove = true;
-                spdlog::warn("[Scene] 场景 '{}' 中存在空的游戏对象指针，将在本帧清理。", scene_name_);
-                continue;
-            }
-            if (obj->isNeedRemove())
-            {
-                need_remove = true;
-                obj->clean();
-            }
-        }
-        if (need_remove)
-        {
-            // NOTE: 需要先 clean 再 erase，确保组件(如 PhysicsComponent)能正确反注册
-            std::erase_if(game_objects_, [](const std::unique_ptr<engine::object::GameObject> &obj)
-                          { return !obj || obj->isNeedRemove(); });
-        }
-
-        // 只有游戏进行中，才需要更新物理引擎和相机
-        if (context_.getGameState().isPlaying())
-        {
-            context_.getCamera().update(delta_time); // 更新相机
-        }
-
-        // 更新所有游戏对象，先略过需要移除的对象
-        for (auto &obj : game_objects_)
-        {
-            if (obj && !obj->isNeedRemove())
-            {
-                obj->update(delta_time, context_);
-            }
-            else if (!obj)
-            {
-                spdlog::warn("[Scene] 尝试更新一个空的游戏对象指针。");
-            }
-        }
-
-        ui_manager_->update(delta_time, context_); // 更新UI管理器
-
-        processPendingAdditions(); // 处理待添加（延时添加）的游戏对象
+        // 更新UI管理器
+        ui_manager_->update(delta_time, context_);
     }
 
     void Scene::render()
     {
         if (!is_initialized_)
-        {
             return;
-        }
-        // 渲染所有游戏对象
-        for (const auto &obj : game_objects_)
-        {
-            if (obj)
-            {
-                obj->render(context_);
-            }
-        }
 
-        // 渲染UI管理器内容
+        // 渲染UI管理器
         ui_manager_->render(context_);
     }
 
     void Scene::handleInput()
     {
         if (!is_initialized_)
-        {
             return;
-        }
 
-        // 先处理UI管理器内容
+        // 处理UI管理器输入
         if (ui_manager_->handleInput(context_))
-        {
-            return;
-        }
-
-        // 遍历所有游戏对象，略过需要移除的对象
-        for (auto &obj : game_objects_)
-        {
-            if (obj && !obj->isNeedRemove())
-            {
-                obj->handleInput(context_);
-            }
-        }
+            return; // 如果输入事件被UI处理则返回，不再处理游戏对象输入
     }
 
     void Scene::clean()
     {
         if (!is_initialized_)
-        {
             return;
-        }
 
-        for (const auto &obj : game_objects_)
-        {
-            if (obj)
-            {
-                obj->clean();
-            }
-        }
-        game_objects_.clear();
-
+        registry_.clear();
         is_initialized_ = false; // 清理完成后，设置场景为未初始化
-        spdlog::trace("[Scene] 场景 '{}' 清理完成。", scene_name_);
-    }
-
-    void Scene::addGameObject(std::unique_ptr<engine::object::GameObject> &&game_object)
-    {
-        if (game_object)
-        {
-            game_objects_.push_back(std::move(game_object));
-        }
-        else
-        {
-            spdlog::warn("[Scene] 尝试向场景 '{}' 添加空游戏对象。", scene_name_);
-        }
-    }
-
-    void Scene::safeAddGameObject(std::unique_ptr<engine::object::GameObject> &&game_object)
-    {
-        if (game_object)
-        {
-            pending_additions_.push_back(std::move(game_object));
-        }
-        else
-        {
-            spdlog::warn("[Scene] 尝试向场景 '{}' 添加空游戏对象。", scene_name_);
-        }
-    }
-
-    void Scene::removeGameObject(engine::object::GameObject *game_object_ptr)
-    {
-        if (!game_object_ptr)
-        {
-            spdlog::warn("[Scene] 尝试从场景 '{}' 中移除一个空的游戏对象指针。", scene_name_);
-            return;
-        }
-
-        // erase-remove 移除法不可用，因为智能指针与裸指针无法比较
-        // 需要使用 std::remove_if 和 lambda 表达式自定义比较的方式
-        auto it = std::remove_if(game_objects_.begin(),
-                                 game_objects_.end(),
-                                 [game_object_ptr](const std::unique_ptr<engine::object::GameObject> &p)
-                                 {
-                                     return p.get() == game_object_ptr; // 比较裸指针是否相等（自定义比较方式）
-                                 });
-
-        if (it != game_objects_.end())
-        {
-            (*it)->clean();                               // 因为传入的是指针，因此只可能有一个元素被移除，不需要遍历it到末尾
-            game_objects_.erase(it, game_objects_.end()); // 删除从it到末尾的元素（最后一个元素）
-            spdlog::trace("[Scene] 从场景 '{}' 中移除游戏对象。", scene_name_);
-        }
-        else
-        {
-            spdlog::warn("[Scene] 游戏对象指针未找到在场景 '{}' 中。", scene_name_);
-        }
-    }
-
-    void Scene::safeRemoveGameObject(engine::object::GameObject *game_object_ptr)
-    {
-        game_object_ptr->setNeedRemove(true);
-    }
-
-    engine::object::GameObject *Scene::findGameObjectByName(std::string_view name) const
-    {
-        // 找到第一个符合条件的游戏对象就返回
-        for (const auto &obj : game_objects_)
-        {
-            if (obj && obj->getName() == name)
-            {
-                return obj.get();
-            }
-        }
-        return nullptr;
+        spdlog::trace("场景 '{}' 清理完成。", scene_name_);
     }
 
     void Scene::requestPopScene()
     {
-        context_.getDispatcher().trigger(engine::utils::PopSceneEvent());
+        context_.getDispatcher().trigger<engine::utils::PopSceneEvent>();
     }
 
-    void Scene::requestPushScene(std::unique_ptr<Scene> &&scene)
+    void Scene::requestPushScene(std::unique_ptr<engine::scene::Scene> &&scene)
     {
-        context_.getDispatcher().trigger(engine::utils::PushSceneEvent(std::move(scene)));
+        context_.getDispatcher().trigger<engine::utils::PushSceneEvent>(engine::utils::PushSceneEvent{std::move(scene)});
     }
 
-    void Scene::requestReplaceScene(std::unique_ptr<Scene> &&scene)
+    void Scene::requestReplaceScene(std::unique_ptr<engine::scene::Scene> &&scene)
     {
-        context_.getDispatcher().trigger(engine::utils::ReplaceSceneEvent(std::move(scene)));
+        context_.getDispatcher().trigger<engine::utils::ReplaceSceneEvent>(engine::utils::ReplaceSceneEvent{std::move(scene)});
     }
 
     void Scene::quit()
     {
-        context_.getDispatcher().trigger(engine::utils::QuitEvent());
-    }
-
-    void Scene::processPendingAdditions()
-    {
-        // 处理待添加的游戏对象
-        for (auto &game_object : pending_additions_)
-        {
-            addGameObject(std::move(game_object));
-        }
-        pending_additions_.clear();
+        context_.getDispatcher().trigger<engine::utils::QuitEvent>();
     }
 
 } // namespace engine::scene

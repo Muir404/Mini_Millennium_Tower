@@ -13,7 +13,7 @@ namespace engine::utils
 namespace engine::render
 {
     // 包含纹理标识符和要绘制的纹理部分以及翻转状态
-    class Sprite final
+    class Image final
     {
     private:
         std::string texture_path_;                       ///< 纹理资源路径
@@ -22,9 +22,9 @@ namespace engine::render
         bool is_flipped_ = false;                        ///< 是否水平翻转
 
     public:
-        Sprite() = default;
+        Image() = default;
 
-        Sprite(std::string_view texture_path,
+        Image(std::string_view texture_path,
                const std::optional<engine::utils::Rect> source_rect = std::nullopt,
                bool is_flipped = false)
             : texture_path_(texture_path.data()),
@@ -34,7 +34,7 @@ namespace engine::render
         {
         }
 
-        Sprite(entt::id_type texture_id,
+        Image(entt::id_type texture_id,
                std::optional<engine::utils::Rect> source_rect = std::nullopt,
                bool is_flipped = false)
             : texture_id_(texture_id),

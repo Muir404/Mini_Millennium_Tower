@@ -614,7 +614,7 @@ namespace engine::scene
                 static_cast<float>(coordinate_y * tile_size_.y),
                 static_cast<float>(tile_size_.x),
                 static_cast<float>(tile_size_.y)};
-            engine::render::Sprite sprite{texture_id, texture_rect};
+            engine::render::Image sprite{texture_id, texture_rect};
             auto tile_type = getTileTypeById(tileset, local_id); // 获取瓦片类型（只有瓦片id，还没找具体瓦片json）
             return engine::component::TileInfo(sprite, tile_type);
         }
@@ -650,7 +650,7 @@ namespace engine::scene
                                               static_cast<float>(tile_json.value("y", 0)),
                                               static_cast<float>(tile_json.value("width", image_width)), // 如果未设置，则使用图片尺寸
                                               static_cast<float>(tile_json.value("height", image_height))};
-                    engine::render::Sprite sprite{texture_id, texture_rect};
+                    engine::render::Image sprite{texture_id, texture_rect};
                     auto tile_type = getTileType(tile_json); // 获取瓦片类型（已经有具体瓦片json了）
                     return engine::component::TileInfo(sprite, tile_type);
                 }

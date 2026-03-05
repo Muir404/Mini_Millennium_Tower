@@ -343,67 +343,57 @@ include_directories(
 # ==============================================================================
 # 项目核心源文件列表
 set(SOURCES
-    # 程序入口
+    # main
     src/main.cpp
 
-    # 引擎核心模块 - 基础运行时
-    src/engine/core/game_app.cpp        # 游戏应用主类
-    src/engine/core/time.cpp            # 时间管理
-    src/engine/core/config.cpp          # 配置管理
-    src/engine/core/context.cpp         # 全局上下文
-    src/engine/core/game_state.cpp      # 游戏状态管理
+    # engine-audio
+    src/engine/audio/audio_player.cpp
 
-    # 引擎核心模块 - 资源管理
-    src/engine/resource/resource_manager.cpp  # 通用资源管理器
-    src/engine/resource/font_manager.cpp      # 字体资源管理
-    src/engine/resource/audio_manager.cpp     # 音频资源管理
-    src/engine/resource/texture_manager.cpp   # 纹理资源管理
+    # engine-core 
+    src/engine/core/game_app.cpp
+    src/engine/core/time.cpp
+    src/engine/core/config.cpp
+    src/engine/core/context.cpp
+    src/engine/core/game_state.cpp
 
-    # 引擎核心模块 - 渲染系统
-    src/engine/render/camera.cpp        # 相机系统
-    src/engine/render/renderer.cpp      # 渲染器核心
-    src/engine/render/animation.cpp     # 动画系统
-    src/engine/render/text_renderer.cpp # 文本渲染
+    # engine-resource
+    src/engine/resource/resource_manager.cpp
+    src/engine/resource/texture_manager.cpp
+    src/engine/resource/audio_manager.cpp
+    src/engine/resource/font_manager.cpp
 
-    # 引擎核心模块 - 输入系统
-    src/engine/input/input_manager.cpp  # 输入管理（键盘/鼠标/手柄）
+    # engine-render
+    src/engine/render/renderer.cpp
+    src/engine/render/camera.cpp
+    src/engine/render/text_renderer.cpp
 
-    # 引擎核心模块 - 游戏对象
-    src/engine/object/game_object.cpp   # 游戏对象基类
+    # engine-input
+    src/engine/input/input_manager.cpp
 
-    # 引擎核心模块 - 音频系统
-    src/engine/audio/audio_player.cpp   # 音频播放控制
+    # engine-scene
+    src/engine/scene/scene.cpp
+    src/engine/scene/scene_manager.cpp
+    # src/engine/scene/level_loader.cpp
 
-    # 引擎核心模块 - 组件系统（暂注释，待实现）
-    # src/engine/component/sprite_component.cpp
-    # src/engine/component/transform_component.cpp
-    # src/engine/component/parallax_component.cpp
-    # src/engine/component/tilelayer_component.cpp
-    # src/engine/component/animation_component.cpp
-    # src/engine/component/health_component.cpp
-    # src/engine/component/audio_component.cpp
+    # engine-system
+    src/engine/system/animation_system.cpp
+    src/engine/system/render_system.cpp
+    src/engine/system/movement_system.cpp
 
-    # 引擎核心模块 - 场景系统
-    src/engine/scene/scene.cpp          # 场景基类
-    src/engine/scene/scene_manager.cpp  # 场景管理器
-    # src/engine/scene/level_loader.cpp  # 关卡加载（暂注释，待实现）
+    # engine-ui
+    src/engine/ui/ui_manager.cpp
+    src/engine/ui/ui_element.cpp
+    src/engine/ui/ui_interactive.cpp
+    src/engine/ui/ui_panel.cpp
+    src/engine/ui/ui_image.cpp
+    src/engine/ui/ui_label.cpp
+    src/engine/ui/ui_button.cpp
+    src/engine/ui/state/ui_normal_state.cpp
+    src/engine/ui/state/ui_pressed_state.cpp
+    src/engine/ui/state/ui_hover_state.cpp
 
-    # 引擎UI模块 - 状态机
-    src/engine/ui/state/ui_hover_state.cpp  # UI悬停状态
-    src/engine/ui/state/ui_pressed_state.cpp # UI按下状态
-    src/engine/ui/state/ui_normal_state.cpp  # UI正常状态
-
-    # 引擎UI模块 - 核心组件
-    src/engine/ui/ui_element.cpp        # UI元素基类
-    src/engine/ui/ui_manager.cpp        # UI管理器
-    src/engine/ui/ui_panel.cpp          # 面板组件
-    src/engine/ui/ui_label.cpp          # 文本标签组件
-    src/engine/ui/ui_image.cpp          # 图片组件
-    src/engine/ui/ui_button.cpp         # 按钮组件
-    src/engine/ui/ui_interactive.cpp    # 可交互UI基类
-
-    # 游戏业务模块 - 场景
-    src/game/scene/game_scene.cpp       # 游戏主场景
+    # game-scene
+    src/game/scene/game_scene.cpp
 )
 
 # Windows系统特殊配置: 添加资源文件 (图标/版本信息等)
@@ -615,21 +605,21 @@ else()
         message(STATUS "  可执行文件输出: ${CMAKE_BINARY_DIR}")
     endif()
 endif()
-message(STATUS "  智能依赖获取: 预编译(prebuilt目录) > 系统库 > 本地源码(external目录) > 在线获取")
-if(BUILD_SHARED_LIBS)
-    message(STATUS "  依赖库默认链接: 动态链接 (Shared)")
-else()
-    message(STATUS "  依赖库默认链接: 静态链接 (Static)")
-endif()
-if(WIN32)
-    message(STATUS "  运行时库处理: 自动检测并复制所有DLL到exe目录")
-    if(MSVC)
-        message(STATUS "  字符编码: UTF-8 (/utf-8) - 避免中文乱码")
-    endif()
-elseif(APPLE)
-    message(STATUS "  运行时库处理: 使用RPATH (@executable_path)")
-elseif(UNIX)
-    message(STATUS "  运行时库处理: 使用RPATH ($ORIGIN)")
-endif()
+# message(STATUS "  智能依赖获取: 预编译(prebuilt目录) > 系统库 > 本地源码(external目录) > 在线获取")
+# if(BUILD_SHARED_LIBS)
+#     message(STATUS "  依赖库默认链接: 动态链接 (Shared)")
+# else()
+#     message(STATUS "  依赖库默认链接: 静态链接 (Static)")
+# endif()
+# if(WIN32)
+#     message(STATUS "  运行时库处理: 自动检测并复制所有DLL到exe目录")
+#     if(MSVC)
+#         message(STATUS "  字符编码: UTF-8 (/utf-8) - 避免中文乱码")
+#     endif()
+# elseif(APPLE)
+#     message(STATUS "  运行时库处理: 使用RPATH (@executable_path)")
+# elseif(UNIX)
+#     message(STATUS "  运行时库处理: 使用RPATH ($ORIGIN)")
+# endif()
 message(STATUS "==============================================")
 message(STATUS "")

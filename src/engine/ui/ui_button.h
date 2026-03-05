@@ -20,19 +20,11 @@ namespace engine::ui
         std::function<void()> callback_; ///< @brief 可自定义的函数（函数包装器）
 
     public:
-        /**
-         * @brief 构造函数
-         * @param normal_sprite_id 正常状态的精灵ID
-         * @param hover_sprite_id 悬停状态的精灵ID
-         * @param pressed_sprite_id 按下状态的精灵ID
-         * @param position 位置
-         * @param size 大小
-         * @param callback 回调函数
-         */
+
         UIButton(engine::core::Context &context,
-                 std::string_view normal_sprite_id,
-                 std::string_view hover_sprite_id,
-                 std::string_view pressed_sprite_id,
+                 std::string_view normal_image_id,
+                 std::string_view hover_image_id,
+                 std::string_view pressed_image_id,
                  glm::vec2 position = {0.0f, 0.0f},
                  glm::vec2 size = {0.0f, 0.0f},
                  std::function<void()> callback = nullptr);

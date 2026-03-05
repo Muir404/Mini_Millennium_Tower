@@ -15,7 +15,7 @@ void setupInitialScene(engine::core::Context &context)
 }
 
 // 主函数
-int main(int /*argc*/, char * /*argv*/[])
+int main(int, char *[])
 {
     spdlog::set_level(spdlog::level::info);
     spdlog::info("游戏开始");
