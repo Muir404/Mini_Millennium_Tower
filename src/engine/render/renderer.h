@@ -23,6 +23,8 @@ namespace engine::render
         SDL_Renderer *renderer_ = nullptr;
         engine::resource::ResourceManager *resource_manager_ = nullptr; // 借用的指针
 
+        engine::utils::FColor background_color_ = {0.0f, 0.0f, 0.0f, 1.0f}; // 默认背景颜色
+
     public:
         Renderer(SDL_Renderer *sdl_renderer,
                  engine::resource::ResourceManager *resource_manager);
@@ -53,6 +55,8 @@ namespace engine::render
 
         void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255);       // 包装SDL_SetRenderDrawColor
         void setDrawColorFloat(float r, float g, float b, float a = 1.0f); // 包装SDL_SetRenderDrawColorFloat
+
+        void setBackgroundColor(float r, float g, float b, float a = 1.0f); // 设置背景颜色
 
     private:
         std::optional<SDL_FRect> getImageSrcRect(const Image &image);       // 获取图片源矩形，用于绘制

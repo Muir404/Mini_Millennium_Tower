@@ -19,8 +19,9 @@ namespace engine::audio
             throw std::runtime_error("[AudioPlayer] ResourceManager 指针为空，初始化失败");
         }
 
-        mixer_ = resource_manager_->getMixer(); // 获取资源管理器提供的 mixer
-
+        // 获取资源管理器提供的 mixer
+        mixer_ = resource_manager_->getMixer();
+        
         // 初始化 sound_tracks_ 数组
         for (auto &track_ptr : sound_tracks_)
         {
@@ -41,21 +42,21 @@ namespace engine::audio
         {
             if (track_ptr != nullptr)
             {
-                // 先停止轨道播放（可选，但推荐，避免销毁时音频还在播放）
+                // 先停止轨道播放
                 MIX_StopTrack(track_ptr, 0);
-                // 销毁轨道资源（SDL_mixer的核心释放函数）
+                // 销毁轨道资源
                 MIX_DestroyTrack(track_ptr);
-                // 2. 重置为nullptr，避免野指针
+                // 重置为nullptr，避免野指针
                 track_ptr = nullptr;
             }
         }
         if (music_track_.get() != nullptr)
         {
-            // 先停止轨道播放（可选，但推荐，避免销毁时音频还在播放）
+            // 先停止轨道播放
             MIX_StopTrack(music_track_.get(), 0);
-            // 销毁轨道资源（SDL_mixer的核心释放函数）
+            // 销毁轨道资源
             MIX_DestroyTrack(music_track_.get());
-            // 2. 重置为nullptr，避免野指针
+            // 重置为nullptr，避免野指针
             music_track_.reset(nullptr);
         }
     }

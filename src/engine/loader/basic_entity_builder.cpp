@@ -5,6 +5,7 @@
 #include "../component/name_component.h"
 #include "../component/sprite_component.h"
 #include "../component/transform_component.h"
+#include "../component/render_component.h"
 #include "../resource/resource_manager.h"
 #include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
@@ -82,6 +83,7 @@ namespace engine::loader
         buildBase();
         buildSprite();
         buildTransform();
+        buildRender();
         buildAnimation();
         buildAudio();
         return this;
@@ -151,6 +153,14 @@ namespace engine::loader
 
         // 添加 TransformComponent
         registry_.emplace<engine::component::TransformComponent>(entity_id_, position_, scale, rotation);
+    }
+
+    void BasicEntityBuilder::buildRender()
+    {
+        spdlog::trace("构建Render组件");
+        int layer = level_loader_.getCurrentLayer(); // 获取当前图层序号
+        float depth = position_.y;                   // 深度值设为y坐标，确保在Y轴上排序
+        registry_.emplace<engine::component::RenderComponent>(entity_id_, layer, depth);
     }
 
     void BasicEntityBuilder::buildAnimation()

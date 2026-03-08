@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <string_view>
 
 namespace engine::utils
 {
@@ -38,5 +39,51 @@ namespace engine::utils
         float b{};
         float a{};
     };
+
+    constexpr FColor parseHexColor(std::string_view hex_color)
+    {
+        auto hexToInt = [](char c) -> int // 将十六进制字符转换为整数
+        {
+            if (c >= '0' && c <= '9')
+            {
+                return c - '0'; // 0-9：0-9 的 ASCII 值减去 '0' 的 ASCII 值
+            }
+            if (c >= 'a' && c <= 'f')
+            {
+                return c - 'a' + 10; // a-f：a-f 的 ASCII 值减去 'a' 的 ASCII 值再加上 10
+            }
+            if (c >= 'A' && c <= 'F')
+            {
+                return c - 'A' + 10; // A-F：A-F 的 ASCII 值减去 'A' 的 ASCII 值再加上 10
+            }
+            return -1;
+        };
+
+        size_t len = hex_color.length(); // 获取十六进制颜色字符串的长度
+
+        // 检查十六进制颜色字符串是否有效
+        if (hex_color.empty() || hex_color[0] != '#' || (len != 7 && len != 9))
+        {
+            return {0, 0, 0, 0};
+        }
+
+        // 解析 RGB 通道
+        int r = hexToInt(hex_color[1]) * 16 + hexToInt(hex_color[2]);
+        int g = hexToInt(hex_color[3]) * 16 + hexToInt(hex_color[4]);
+        int b = hexToInt(hex_color[5]) * 16 + hexToInt(hex_color[6]);
+
+        // 解析透明度
+        int a = 255;
+        if (len == 9)
+        {
+            a = hexToInt(hex_color[7]) * 16 + hexToInt(hex_color[8]);
+        }
+
+        return {
+            static_cast<float>(r) / 255.0f,
+            static_cast<float>(g) / 255.0f,
+            static_cast<float>(b) / 255.0f,
+            static_cast<float>(a) / 255.0f}; // 归一化处理
+    }
 
 } // namespace engine::utils

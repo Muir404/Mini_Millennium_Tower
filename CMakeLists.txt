@@ -382,6 +382,7 @@ set(SOURCES
     src/engine/system/animation_system.cpp
     src/engine/system/render_system.cpp
     src/engine/system/movement_system.cpp
+    src/engine/system/ysort_system.cpp
 
     # engine-ui
     src/engine/ui/ui_manager.cpp

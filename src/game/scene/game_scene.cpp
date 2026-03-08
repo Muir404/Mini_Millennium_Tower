@@ -11,6 +11,7 @@
 #include "../../engine/system/render_system.h"
 #include "../../engine/system/movement_system.h"
 #include "../../engine/system/animation_system.h"
+#include "../../engine/system/ysort_system.h"
 #include "../../engine/ui/ui_manager.h"
 #include "../../engine/ui/ui_image.h"
 #include "../../engine/ui/ui_label.h"
@@ -28,12 +29,11 @@ namespace game::scene
     GameScene::GameScene(engine::core::Context &context)
         : engine::scene::Scene("GameScene", context)
     {
-
         // 初始化系统
         render_system_ = std::make_unique<engine::system::RenderSystem>();
         movement_system_ = std::make_unique<engine::system::MovementSystem>();
         animation_system_ = std::make_unique<engine::system::AnimationSystem>();
-
+        ysort_system_ = std::make_unique<engine::system::YSortSystem>();
         spdlog::info("GameScene 构造完成");
     }
 
@@ -55,6 +55,7 @@ namespace game::scene
     {
         movement_system_->update(registry_, delta_time);
         animation_system_->update(registry_, delta_time);
+        ysort_system_->update(registry_);
 
         Scene::update(delta_time);
     }
@@ -68,7 +69,6 @@ namespace game::scene
 
     void GameScene::clean()
     {
-
         Scene::clean();
     }
 

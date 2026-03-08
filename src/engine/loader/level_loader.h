@@ -39,6 +39,8 @@ namespace engine::loader
 
         std::unique_ptr<BasicEntityBuilder> entity_builder_;
 
+        int current_layer_ = 0; ///< 渲染顺序
+
     public:
         LevelLoader() = default;
         ~LevelLoader();
@@ -49,6 +51,7 @@ namespace engine::loader
 
         const glm::ivec2 &getMapSize() const { return map_size_; }
         const glm::ivec2 &getTileSize() const { return tile_size_; }
+        int getCurrentLayer() const { return current_layer_; }
 
     private:
         void loadImageLayer(const nlohmann::json &layer_json);

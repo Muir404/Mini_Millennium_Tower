@@ -4,7 +4,7 @@
 #include <memory>                 // 用于管理音效轨道智能指针
 #include <SDL3_mixer/SDL_mixer.h> // 用于音效和音乐播放
 #include <SDL3/SDL_properties.h>  // 用于获取 SDL_Mixer 属性
-#include <entt/entt.hpp>
+#include <entt/entt.hpp>          // 用于实体组件系统 (ECS) 中的实体标识
 
 // 前向声明 ResourceManager
 namespace engine::resource
@@ -24,7 +24,11 @@ namespace engine::audio
     class AudioPlayer final
     {
     private:
-        // 音效轨道智能指针删除器
+        /**
+         * @brief 音效轨道智能指针删除器
+         *
+         * 用于在智能指针销毁时调用 MIX_DestroyTrack 释放音效轨道资源。
+         */
         struct SDLMixTrackDeleter
         {
             void operator()(MIX_Track *track) const
@@ -37,16 +41,16 @@ namespace engine::audio
         };
 
     private:
-        engine::resource::ResourceManager *resource_manager_;        ///<  指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
-        entt::id_type current_music_;                                ///<  当前正在播放的音乐路径，用于避免重复播放同一音乐。
-        MIX_Mixer *mixer_ = nullptr;                                 ///<  非拥有指针，借用 ResourceManager 提供的 mixer
-        std::array<MIX_Track *, 8> sound_tracks_{nullptr};           ///<  音效轨道数组，用于播放多个音效。
-        std::unique_ptr<MIX_Track, SDLMixTrackDeleter> music_track_; ///<  背景音乐轨道，用于播放单条音乐。
+        engine::resource::ResourceManager *resource_manager_{nullptr};        ///<  指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
+        entt::id_type current_music_{entt::null};                             ///<  当前正在播放的音乐路径，用于避免重复播放同一音乐。
+        MIX_Mixer *mixer_{nullptr};                                           ///<  非拥有指针，借用 ResourceManager 提供的 mixer
+        std::array<MIX_Track *, 8> sound_tracks_{nullptr};                    ///<  音效轨道数组，用于播放多个音效。
+        std::unique_ptr<MIX_Track, SDLMixTrackDeleter> music_track_{nullptr}; ///<  背景音乐轨道，用于播放单条音乐。
 
     public:
         /**
          * @brief 构造函数，使用 ResourceManager 初始化。
-         * @param resource_manager 指向 ResourceManager 的指针，用于加载和管理音频资源。
+         * @param[in] resource_manager 指向 ResourceManager 的指针，用于加载和管理音频资源。
          */
         explicit AudioPlayer(engine::resource::ResourceManager *resource_manager);
         ~AudioPlayer();
@@ -58,12 +62,11 @@ namespace engine::audio
         AudioPlayer &operator=(AudioPlayer &&) = delete;
 
         // --- 播放控制方法 ---
+        bool playSound(entt::id_type id);           ///< 播放指定ID的音效。适合知道音效ID的场景。
+        bool playSound(entt::hashed_string str_hs); ///< 播放指定哈希字符串的音效。适合不知道音效ID的场景。
 
-        bool playSound(entt::id_type id);           ///< 播放指定ID的音效。
-        bool playSound(entt::hashed_string str_hs); ///< 播放指定哈希字符串的音效。
-
-        bool playMusic(entt::id_type id, int loops = -1, int fade_in_ms = 0);           ///< 播放指定ID的音乐，可选循环次数和淡入时间。
-        bool playMusic(entt::hashed_string str_hs, int loops = -1, int fade_in_ms = 0); ///< 播放指定哈希字符串的音乐，可选循环次数和淡入时间。
+        bool playMusic(entt::id_type id, int loops = -1, int fade_in_ms = 0);           ///< 播放指定ID的音乐，可选循环次数和淡入时间。适合知道音乐ID的场景。
+        bool playMusic(entt::hashed_string str_hs, int loops = -1, int fade_in_ms = 0); ///< 播放指定哈希字符串的音乐，可选循环次数和淡入时间。适合不知道音乐ID的场景。
 
         void stopMusic(int fade_out_ms = 0); ///< 停止当前播放的音乐，可选淡出效果。
         void pauseMusic();                   ///< 暂停当前播放的音乐。

@@ -12,6 +12,7 @@ namespace game::scene
         std::unique_ptr<engine::system::RenderSystem> render_system_;       ///< 渲染系统
         std::unique_ptr<engine::system::MovementSystem> movement_system_;   ///< 移动系统
         std::unique_ptr<engine::system::AnimationSystem> animation_system_; ///< 动画系统
+        std::unique_ptr<engine::system::YSortSystem> ysort_system_;         ///< Y轴排序系统
 
     public:
         GameScene(engine::core::Context &context);
@@ -23,7 +24,7 @@ namespace game::scene
         void clean() override;
 
     private:
-        bool loadLevel();
+        [[nodiscard]] bool loadLevel();
     };
 
 } // namespace game::scene
