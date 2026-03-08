@@ -446,48 +446,48 @@ else()
     target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-# ==============================================================================
-# 构建前操作 - 资源文件复制
-# ==============================================================================
-# 生成动态资源复制脚本 (按配置生成，支持多配置构建)
-file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/copy_assets_$<CONFIG>.cmake CONTENT "
-# 生成的Assets复制脚本 (自动生成，请勿手动修改)
-# 功能: 仅当资源文件大小变化时才复制，避免每次构建都全量复制
+# # ==============================================================================
+# # 构建前操作 - 资源文件复制
+# # ==============================================================================
+# # 生成动态资源复制脚本 (按配置生成，支持多配置构建)
+# file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/copy_assets_$<CONFIG>.cmake CONTENT "
+# # 生成的Assets复制脚本 (自动生成，请勿手动修改)
+# # 功能: 仅当资源文件大小变化时才复制，避免每次构建都全量复制
 
-# 资源源目录和目标目录
-set(SOURCE_DIR \"${CMAKE_CURRENT_LIST_DIR}/assets\")
-set(TARGET_DIR \"$<TARGET_FILE_DIR:${TARGET}>/assets\")
+# # 资源源目录和目标目录
+# set(SOURCE_DIR \"${CMAKE_CURRENT_LIST_DIR}/assets\")
+# set(TARGET_DIR \"$<TARGET_FILE_DIR:${TARGET}>/assets\")
 
-# 计算源目录所有文件总大小
-file(GLOB_RECURSE SOURCE_FILES \"\${SOURCE_DIR}/*\")
-set(SOURCE_SIZE 0)
-foreach(FILE IN LISTS SOURCE_FILES)
-    file(SIZE \"\${FILE}\" FILE_SIZE)
-    math(EXPR SOURCE_SIZE \"\${SOURCE_SIZE} + \${FILE_SIZE}\")
-endforeach()
+# # 计算源目录所有文件总大小
+# file(GLOB_RECURSE SOURCE_FILES \"\${SOURCE_DIR}/*\")
+# set(SOURCE_SIZE 0)
+# foreach(FILE IN LISTS SOURCE_FILES)
+#     file(SIZE \"\${FILE}\" FILE_SIZE)
+#     math(EXPR SOURCE_SIZE \"\${SOURCE_SIZE} + \${FILE_SIZE}\")
+# endforeach()
 
-# 计算目标目录所有文件总大小
-set(TARGET_SIZE 0)
-if(EXISTS \"\${TARGET_DIR}\")
-    file(GLOB_RECURSE TARGET_FILES \"\${TARGET_DIR}/*\")
-    foreach(FILE IN LISTS TARGET_FILES)
-        file(SIZE \"\${FILE}\" FILE_SIZE)
-        math(EXPR TARGET_SIZE \"\${TARGET_SIZE} + \${FILE_SIZE}\")
-    endforeach()
-endif()
+# # 计算目标目录所有文件总大小
+# set(TARGET_SIZE 0)
+# if(EXISTS \"\${TARGET_DIR}\")
+#     file(GLOB_RECURSE TARGET_FILES \"\${TARGET_DIR}/*\")
+#     foreach(FILE IN LISTS TARGET_FILES)
+#         file(SIZE \"\${FILE}\" FILE_SIZE)
+#         math(EXPR TARGET_SIZE \"\${TARGET_SIZE} + \${FILE_SIZE}\")
+#     endforeach()
+# endif()
 
-# 仅当大小不一致时才复制 (增量更新)
-if(NOT SOURCE_SIZE EQUAL TARGET_SIZE)
-    file(COPY \"\${SOURCE_DIR}/\" DESTINATION \"\${TARGET_DIR}\")
-    message(STATUS \"更新资源文件夹 (大小: \${SOURCE_SIZE} 字节)\")
-endif()
-")
+# # 仅当大小不一致时才复制 (增量更新)
+# if(NOT SOURCE_SIZE EQUAL TARGET_SIZE)
+#     file(COPY \"\${SOURCE_DIR}/\" DESTINATION \"\${TARGET_DIR}\")
+#     message(STATUS \"更新资源文件夹 (大小: \${SOURCE_SIZE} 字节)\")
+# endif()
+# ")
 
-# 添加预构建步骤: 执行资源复制脚本
-add_custom_command(TARGET ${TARGET} PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_BINARY_DIR}/copy_assets_$<CONFIG>.cmake
-    COMMENT "检查并复制资源文件"
-)
+# # 添加预构建步骤: 执行资源复制脚本
+# add_custom_command(TARGET ${TARGET} PRE_BUILD
+#     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_BINARY_DIR}/copy_assets_$<CONFIG>.cmake
+#     COMMENT "检查并复制资源文件"
+# )
 
 # ==============================================================================
 # 构建后操作 - Windows DLL自动复制
