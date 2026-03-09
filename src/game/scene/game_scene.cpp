@@ -33,7 +33,7 @@ namespace game::scene
         render_system_ = std::make_unique<engine::system::RenderSystem>();
         movement_system_ = std::make_unique<engine::system::MovementSystem>();
         animation_system_ = std::make_unique<engine::system::AnimationSystem>();
-        ysort_system_ = std::make_unique<engine::system::YSortSystem>();
+        // ysort_system_ = std::make_unique<engine::system::YSortSystem>();
         spdlog::info("GameScene 构造完成");
     }
 
@@ -55,7 +55,7 @@ namespace game::scene
     {
         movement_system_->update(registry_, delta_time);
         animation_system_->update(registry_, delta_time);
-        ysort_system_->update(registry_);
+        // ysort_system_->update(registry_);
 
         Scene::update(delta_time);
     }

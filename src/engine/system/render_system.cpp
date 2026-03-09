@@ -12,10 +12,16 @@ namespace engine::system
     void RenderSystem::update(entt::registry &registry, render::Renderer &renderer, const render::Camera &camera)
     {
         spdlog::trace("渲染系统更新");
+        // 1. 先排序
         registry.sort<component::RenderComponent>([](const auto &lhs, const auto &rhs)
-                                                  { return lhs < rhs; }); // 按深度排序
+                                                  { return lhs < rhs; });
 
+        // 2. 获取 view
         auto view = registry.view<component::RenderComponent, component::TransformComponent, component::SpriteComponent>();
+
+        // 3. 关键：使用 use<T>() 强制按照 RenderComponent 的排序顺序进行迭代
+        view.use<component::RenderComponent>();
+
         for (auto entity : view)
         {
             const auto &transform = view.get<component::TransformComponent>(entity);

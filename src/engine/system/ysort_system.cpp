@@ -15,4 +15,4 @@ namespace engine::system
             render.depth_ = transform.position_.y;                                         // 按 y 坐标排序
         }
     }
-}
+} // namespace engine::system
