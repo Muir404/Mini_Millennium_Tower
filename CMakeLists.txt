@@ -398,6 +398,13 @@ set(SOURCES
 
     # game-scene
     src/game/scene/game_scene.cpp
+
+    # game-system
+    src/game/system/remove_dead_system.cpp
+    src/game/system/followpath_system.cpp
+
+    # game-loader
+    src/game/loader/entity_builder_TD.cpp
 )
 
 # Windows系统特殊配置: 添加资源文件 (图标/版本信息等)

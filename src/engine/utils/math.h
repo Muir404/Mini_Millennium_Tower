@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <string_view>
+#include <random>
 
 namespace engine::utils
 {
@@ -84,6 +85,13 @@ namespace engine::utils
             static_cast<float>(g) / 255.0f,
             static_cast<float>(b) / 255.0f,
             static_cast<float>(a) / 255.0f}; // 归一化处理
+    }
+
+    inline int randomInt(int min, int max)
+    {
+        static thread_local std::mt19937 rng{std::random_device{}()};
+        std::uniform_int_distribution<int> dist{min, max};
+        return dist(rng);
     }
 
 } // namespace engine::utils
