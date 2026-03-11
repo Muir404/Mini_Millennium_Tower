@@ -45,7 +45,7 @@ namespace game::factory
                 // 解析 display_info
                 data::DisplayInfoBlueprint display_info = parseDisplayInfo(data_json);
 
-                enemy_class_blurprints_.emplace(class_id, data::EnemyClassBlueprint{class_id,
+                enemy_class_blueprints_.emplace(class_id, data::EnemyClassBlueprint{class_id,
                                                                                     class_name,
                                                                                     std::move(stats),
                                                                                     std::move(enemy),
@@ -62,14 +62,77 @@ namespace game::factory
         }
         return true;
     }
+
+    bool BlueprintManager::loadPlayerClassBlueprints(std::string_view player_json_path)
+    {
+        auto path = std::filesystem::path(player_json_path);
+        std::ifstream file(path);
+        nlohmann::json json;
+        file >> json;
+        file.close();
+
+        // --- 蓝图解析 ---
+        try
+        {
+            for (auto &[class_name, data_json] : json.items())
+            {
+                entt::id_type class_id = entt::hashed_string(class_name.c_str());
+
+                // 解析 stats
+                data::StatsBlueprint stats = parseStats(data_json);
+
+                // 解析 sprite
+                data::SpriteBlueprint sprite = parseSprite(data_json);
+
+                // 解析 animations
+                std::unordered_map<entt::id_type, data::AnimationBlueprint> animations = parseAnimationsMap(data_json);
+
+                // 解析 sound
+                data::SoundBlueprint sounds = parseSound(data_json);
+
+                // 解析 enemy
+                data::PlayerBlueprint player = parsePlayer(data_json);
+
+                // 解析 display_info
+                data::DisplayInfoBlueprint display_info = parseDisplayInfo(data_json);
+
+                player_class_blueprints_.emplace(class_id, data::PlayerClassblueprint{class_id,
+                                                                                      class_name,
+                                                                                      std::move(stats),
+                                                                                      std::move(player),
+                                                                                      std::move(sounds),
+                                                                                      std::move(sprite),
+                                                                                      std::move(display_info),
+                                                                                      std::move(animations)});
+            }
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::error("[BlueprintManager] 加载玩家类蓝图失败: {}", e.what());
+            return false;
+        }
+        return true;
+    }
+
     const data::EnemyClassBlueprint &BlueprintManager::getEnemyClassBlueprint(entt::id_type id) const
     {
-        if (auto it = enemy_class_blurprints_.find(id); it != enemy_class_blurprints_.end())
+        if (auto it = enemy_class_blueprints_.find(id); it != enemy_class_blueprints_.end())
         {
             return it->second;
         }
         spdlog::error("[BlueprintManager] 未找到对应ID敌人类蓝图: {}", id);
-        return enemy_class_blurprints_.begin()->second;
+        return enemy_class_blueprints_.begin()->second;
+    }
+
+    const data::PlayerClassblueprint &BlueprintManager::getPlayerClassBlueprint(entt::id_type id) const
+    {
+        // TODO: 在此处插入 return 语句
+        if (auto it = player_class_blueprints_.find(id); it != player_class_blueprints_.end())
+        {
+            return it->second;
+        }
+        spdlog::error("[BlueprintManager] 未找到对应ID玩家类蓝图: {}", id);
+        return player_class_blueprints_.begin()->second;
     }
 
     data::StatsBlueprint BlueprintManager::parseStats(const nlohmann::json &json)
@@ -147,6 +210,29 @@ namespace game::factory
     {
         // 敌人组件蓝图只包含“是否远程”和“移动速度”
         return data::EnemyBlueprint{json["ranged"].get<bool>(), json["speed"].get<float>()};
+    }
+
+    data::PlayerBlueprint BlueprintManager::parsePlayer(const nlohmann::json &json)
+    {
+        auto type_str = json["type"].get<std::string>();
+        // 根据字符串类型匹配对应的枚举值
+        auto type = type_str == "melee"    ? game::defs::PlayerType::MELEE
+                    : type_str == "ranged" ? game::defs::PlayerType::RANGED
+                    : type_str == "mixed"  ? game::defs::PlayerType::MIXED
+                                           : game::defs::PlayerType::UNKNOWN;
+
+        entt::id_type skill_id{entt::null};
+        if (json.contains("skill"))
+        {
+            skill_id = entt::hashed_string(json["skill"].get<std::string>().c_str());
+        }
+
+        data::PlayerBlueprint player{type,
+                                     skill_id,
+                                     json["healer"].get<bool>(),
+                                     json["block"].get<int>(),
+                                     json["cost"].get<int>()};
+        return player;
     }
 
     data::DisplayInfoBlueprint BlueprintManager::parseDisplayInfo(const nlohmann::json &json)

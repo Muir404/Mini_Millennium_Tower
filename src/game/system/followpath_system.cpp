@@ -5,6 +5,7 @@
 #include "../defs/events.h"
 #include "../defs/tags.h"
 #include "../component/enemy_component.h"
+#include "../component/blocked_by_component.h"
 #include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
@@ -20,7 +21,7 @@ namespace game::system
         // 筛选依据：速度组件、变换组件、敌人组件
         auto view = registry.view<engine::component::VelocityComponent,
                                   engine::component::TransformComponent,
-                                  game::component::EnemyComponent>();
+                                  game::component::EnemyComponent>(entt::exclude<game::component::BlockedByComponent>);
 
         for (auto entity : view)
         {

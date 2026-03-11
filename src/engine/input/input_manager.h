@@ -35,9 +35,9 @@ namespace engine::input
         SDL_Renderer *sdl_renderer_;   ///<  用于获取逻辑坐标的 SDL_Renderer 指针
         entt::dispatcher *dispatcher_; ///<  事件分发器，用于处理信号
 
-        std::unordered_map<std::string, std::array<entt::sigh<bool()>, 3>> actions_to_func_;                ///<  存储动作名称到函数指针的映射[动作->回调函数表]
-        std::unordered_map<std::variant<Uint32, SDL_Scancode>, std::vector<std::string>> input_to_actions_; ///<  从输入到关联的动作名称列表[按键->动作列表]
-        std::unordered_map<std::string, ActionState> action_states_;                                        ///<  存储每个动作的当前状态[动作->状态]
+        std::unordered_map<entt::id_type, std::array<entt::sigh<bool()>, 3>> actions_to_func_;                ///<  存储动作名称到函数指针的映射[动作->回调函数表]
+        std::unordered_map<std::variant<Uint32, SDL_Scancode>, std::vector<entt::id_type>> input_to_actions_; ///<  从输入到关联的动作名称列表[按键->动作列表]
+        std::unordered_map<entt::id_type, ActionState> action_states_;                                        ///<  存储每个动作的当前状态[动作->状态]
 
         glm::vec2 logical_mouse_position_; ///<  鼠标位置 (针对逻辑坐标)
         glm::vec2 mouse_position_;         ///<  鼠标位置 (针对屏幕坐标)
@@ -57,15 +57,15 @@ namespace engine::input
          * @param action_state 动作状态，默认值为 ActionState::PRESSED。
          * @return entt::sink<entt::sigh<void()>> 用于连接回调函数的 sink 对象。
          */
-        entt::sink<entt::sigh<bool()>> onAction(std::string_view action_name, ActionState action_state = ActionState::PRESSED); ///<  注册动作回调函数
+        entt::sink<entt::sigh<bool()>> onAction(entt::id_type action_name, ActionState action_state = ActionState::PRESSED); ///<  注册动作回调函数
 
         void update(); ///< 更新输入状态，每轮循环最先调用
         void quit();   ///<  触发退出事件
 
         // 动作状态检查
-        bool isActionDown(std::string_view action_name) const;     ///<  动作当前是否触发 (持续按下或本帧按下)
-        bool isActionPressed(std::string_view action_name) const;  ///<  动作是否在本帧刚刚按下
-        bool isActionReleased(std::string_view action_name) const; ///<  动作是否在本帧刚刚释放
+        bool isActionDown(entt::id_type action_name) const;     ///<  动作当前是否触发 (持续按下或本帧按下)
+        bool isActionPressed(entt::id_type action_name) const;  ///<  动作是否在本帧刚刚按下
+        bool isActionReleased(entt::id_type action_name) const; ///<  动作是否在本帧刚刚释放
 
         glm::vec2 getMousePosition() const;        ///<  获取鼠标位置 （屏幕坐标）
         glm::vec2 getLogicalMousePosition() const; ///<  获取鼠标位置 （逻辑坐标）
@@ -74,9 +74,9 @@ namespace engine::input
         void processEvent(const SDL_Event &event);                   ///<  处理 SDL 事件（将按键转换为动作状态）
         void initializeMappings(const engine::core::Config *config); ///<  根据 Config配置初始化映射表
 
-        void updateActionState(std::string_view action_name, bool is_input_active, bool is_repeat_event); ///<  辅助更新动作状态
-        SDL_Scancode scancodeFromString(std::string_view key_name);                                       ///<  将字符串键名转换为 SDL_Scancode
-        Uint32 mouseButtonUint32FromString(std::string_view button_name);                                 ///<  将字符串按钮名转换为 SDL_Button
+        void updateActionState(entt::id_type action_name, bool is_input_active, bool is_repeat_event); ///<  辅助更新动作状态
+        SDL_Scancode scancodeFromString(std::string_view key_name);                                    ///<  将字符串键名转换为 SDL_Scancode
+        Uint32 mouseButtonUint32FromString(std::string_view button_name);                              ///<  将字符串按钮名转换为 SDL_Button
     };
 
 } // namespace engine::input

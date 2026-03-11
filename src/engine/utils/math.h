@@ -99,4 +99,9 @@ namespace engine::utils
         return base * (1 + 0.1f * level) * (1 + 0.1f * rarity);
     }
 
+    inline float distanceSquared(const glm::vec2 &a, const glm::vec2 &b)
+    {
+        return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+    }
+
 } // namespace engine::utils

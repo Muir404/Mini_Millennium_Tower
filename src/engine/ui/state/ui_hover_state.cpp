@@ -26,7 +26,7 @@ namespace engine::ui::state
         { // 如果鼠标不在UI元素内，则返回正常状态
             return std::make_unique<UINormalState>(owner_);
         }
-        if (input_manager.isActionPressed("MouseLeftClick"))
+        if (input_manager.isActionPressed("mouse_left"_hs))
         { // 如果鼠标按下，则返回按下状态
             return std::make_unique<UIPressedState>(owner_);
         }

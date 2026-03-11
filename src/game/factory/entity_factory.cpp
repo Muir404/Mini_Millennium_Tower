@@ -10,8 +10,10 @@
 #include "../defs/tags.h"
 #include "../../engine/component/audio_component.h"
 #include "../component/stats_component.h"
+#include "../component/player_component.h"
 #include "../component/enemy_component.h"
 #include "../component/class_name_component.h"
+#include "../component/blocker_component.h"
 #include <entt/entity/registry.hpp>
 #include <entt/core/hashed_string.hpp>
 #include <spdlog/spdlog.h>
@@ -49,6 +51,38 @@ namespace game::factory
 
         // 添加Enemy组件
         addEnemyComponent(entity, blueprint.enemy_, target_waypoint_id);
+
+        // 补充其他必要组件
+        registry_.emplace<game::component::ClassNameComponent>(entity, class_id, blueprint.display_info_.name_);
+        registry_.emplace<engine::component::RenderComponent>(entity); // 使用默认主图层
+
+        // 未来可添加其它组件
+
+        return entity;
+    }
+
+    entt::entity EntityFactory::createPlayerUnit(entt::id_type class_id, const glm::vec2 &position, int level, int rarity)
+    {
+        auto entity = registry_.create();
+        const auto &blueprint = blueprint_manager_.getPlayerClassBlueprint(class_id);
+        // --- 添加组件 ---
+        // 添加Transform组件
+        addTransformComponent(entity, position);
+
+        // 添加Sprite组件
+        addSpriteComponent(entity, blueprint.sprite_);
+
+        // 添加Animation组件 (默认动画为“idle”)
+        addAnimationComponent(entity, blueprint.animations_, blueprint.sprite_, "idle"_hs);
+
+        // 添加Audio组件
+        addAudioComponent(entity, blueprint.sounds_);
+
+        // 添加Stats组件
+        addStatsComponent(entity, blueprint.stats_, level, rarity);
+
+        // 添加Player组件
+        addPlayerComponent(entity, blueprint.player_);
 
         // 补充其他必要组件
         registry_.emplace<game::component::ClassNameComponent>(entity, class_id, blueprint.display_info_.name_);
@@ -139,6 +173,31 @@ namespace game::factory
         else
         {
             registry_.emplace<game::defs::MeleeUnitTag>(entity);
+        }
+    }
+
+    void EntityFactory::addPlayerComponent(entt::entity entity, const data::PlayerBlueprint &player, int rarity)
+    {
+        auto cost = static_cast<int>(std::round(player.cost_ * (1.0f + 0.1f * rarity)));
+        registry_.emplace<game::component::PlayerComponent>(entity, cost);
+
+        // 添加玩家职业标签
+        if (player.type_ == game::defs::PlayerType::MELEE)
+        {
+            // 添加近战玩家标签
+            registry_.emplace<game::defs::MeleeUnitTag>(entity);
+            // 添加阻挡标签
+            registry_.emplace<game::component::BlockerComponent>(entity, player.block_);
+        }
+        else if (player.type_ == game::defs::PlayerType::RANGED)
+        {
+            // 添加远程玩家标签
+            registry_.emplace<game::defs::RangedUnitTag>(entity);
+            if (player.healer_)
+            {
+                // 添加治疗玩家标签
+                registry_.emplace<game::defs::HealerTag>(entity);
+            }
         }
     }
 

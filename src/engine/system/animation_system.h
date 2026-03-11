@@ -1,13 +1,23 @@
 #pragma once
-#include <entt/entity/fwd.hpp>
+#include "../utils/events.h"
+#include <entt/entt.hpp>
 
 namespace engine::system
 {
 
     class AnimationSystem
     {
+        entt::registry &registry_;
+        entt::dispatcher &dispatcher_;
+
     public:
-        void update(entt::registry &registry, float dt);
+        AnimationSystem(entt::registry &registry, entt::dispatcher &dispatcher);
+        ~AnimationSystem();
+
+        void update(float dt);
+
+    private:
+        void onPlayAnimationEvent(const engine::utils::PlayAnimationEvent &event);
     };
 
 } // namespace engine::system

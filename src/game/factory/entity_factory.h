@@ -26,7 +26,7 @@ namespace game::factory
         EntityFactory(entt::registry &registry, BlueprintManager &blueprint_manager);
 
         entt::entity createEnemyUnit(entt::id_type class_id, const glm::vec2 &position, int target_waypoint_id, int level = 1, int rarity = 1);
-        // TODO: 未来添加其他实体的创建函数
+        entt::entity createPlayerUnit(entt::id_type class_id, const glm::vec2 &position, int level = 1, int rarity = 1);
 
     private:
         // --- 组件创建函数 ---
@@ -38,6 +38,7 @@ namespace game::factory
                                    entt::id_type default_animation_id);
         void addStatsComponent(entt::entity entity, const data::StatsBlueprint &stats, int level = 1, int rarity = 1);
         void addEnemyComponent(entt::entity entity, const data::EnemyBlueprint &enemy, int target_waypoint_id);
+        void addPlayerComponent(entt::entity entity, const data::PlayerBlueprint &player, int rarity = 1);
         void addAudioComponent(entt::entity entity, const data::SoundBlueprint &sounds);
         // TODO: 未来添加其他组件创建函数
     };

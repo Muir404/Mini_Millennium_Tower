@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <entt/entity/entity.hpp>
 
 namespace engine::scene
 {
@@ -48,5 +49,18 @@ namespace engine::utils
     struct ReplaceSceneEvent
     {
         std::unique_ptr<engine::scene::Scene> scene;
+    };
+
+    /**
+     * @struct PlayAnimationEvent
+     * @brief 表示播放动画事件的结构体。
+     *
+     * 当触发播放动画事件时，通常会导致指定实体播放指定动画。
+     */
+    struct PlayAnimationEvent
+    {
+        entt::entity entity_{entt::null};
+        entt::id_type animation_id_{entt::null};
+        bool loop_{false};
     };
 } // namespace engine::utils

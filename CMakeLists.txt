@@ -402,6 +402,7 @@ set(SOURCES
     # game-system
     src/game/system/remove_dead_system.cpp
     src/game/system/followpath_system.cpp
+    src/game/system/block_system.cpp
 
     # game-loader
     src/game/loader/entity_builder_TD.cpp

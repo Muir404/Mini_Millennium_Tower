@@ -161,7 +161,7 @@ namespace engine::loader
         int layer = level_loader_.getCurrentLayer(); // 获取当前图层序号
         float depth = position_.y;                   // 深度值设为y坐标，确保在Y轴上排序
         registry_.emplace<engine::component::RenderComponent>(entity_id_, layer, depth);
-        spdlog::info("添加 RenderComponent 组件，layer: {}, depth: {}", layer, depth);
+        //spdlog::info("添加 RenderComponent 组件，layer: {}, depth: {}", layer, depth);
     }
 
     void BasicEntityBuilder::buildAnimation()

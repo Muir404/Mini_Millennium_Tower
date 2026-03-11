@@ -25,11 +25,11 @@ namespace engine::input
         spdlog::trace("初始鼠标位置: ({}, {})", mouse_position_.x, mouse_position_.y);
     }
 
-    entt::sink<entt::sigh<bool()>> InputManager::onAction(std::string_view action_name, ActionState action_state)
+    entt::sink<entt::sigh<bool()>> InputManager::onAction(entt::id_type action_name, ActionState action_state)
     {
         // 如果action_name不存在，自动创建一个std::array<...>
         // .at() 会安全检查
-        return actions_to_func_[std::string(action_name)].at(static_cast<size_t>(action_state));
+        return actions_to_func_[action_name].at(static_cast<size_t>(action_state));
     }
 
     void InputManager::update()
@@ -60,7 +60,7 @@ namespace engine::input
             if (state != ActionState::INACTIVE) // 如果动作不是INACTIVE，说明有回调函数需要触发
             {
                 // 绑定回调
-                if (auto it = actions_to_func_.find(std::string(action_name)); it != actions_to_func_.end())
+                if (auto it = actions_to_func_.find(action_name); it != actions_to_func_.end())
                 {
                     // collect 可以获取回调函数的返回值
                     // lambda 函数的返回值真，停止分发信号
@@ -78,28 +78,28 @@ namespace engine::input
         dispatcher_->trigger<engine::utils::QuitEvent>();
     }
 
-    bool InputManager::isActionDown(std::string_view action_name) const
+    bool InputManager::isActionDown(entt::id_type action_name) const
     {
         // C++17 引入的 “带有初始化语句的 if 语句”
-        if (auto it = action_states_.find(std::string(action_name)); it != action_states_.end())
+        if (auto it = action_states_.find(action_name); it != action_states_.end())
         {
             return it->second == ActionState::PRESSED || it->second == ActionState::HELD;
         }
         return false;
     }
 
-    bool InputManager::isActionPressed(std::string_view action_name) const
+    bool InputManager::isActionPressed(entt::id_type action_name) const
     {
-        if (auto it = action_states_.find(std::string(action_name)); it != action_states_.end())
+        if (auto it = action_states_.find(action_name); it != action_states_.end())
         {
             return it->second == ActionState::PRESSED;
         }
         return false;
     }
 
-    bool InputManager::isActionReleased(std::string_view action_name) const
+    bool InputManager::isActionReleased(entt::id_type action_name) const
     {
-        if (auto it = action_states_.find(std::string(action_name)); it != action_states_.end())
+        if (auto it = action_states_.find(action_name); it != action_states_.end())
         {
             return it->second == ActionState::RELEASED;
         }
@@ -130,7 +130,7 @@ namespace engine::input
             auto it = input_to_actions_.find(scancode);
             if (it != input_to_actions_.end())
             {
-                const std::vector<std::string> &associated_actions = it->second; // 如果按键有对应的action
+                const std::vector<entt::id_type> &associated_actions = it->second; // 如果按键有对应的action
                 for (const auto &action_name : associated_actions)
                 {
                     updateActionState(action_name, is_down, is_repeat); // 更新action状态
@@ -146,7 +146,7 @@ namespace engine::input
             auto it = input_to_actions_.find(button);
             if (it != input_to_actions_.end())
             { // 如果鼠标按钮有对应的action
-                const std::vector<std::string> &associated_actions = it->second;
+                const std::vector<entt::id_type> &associated_actions = it->second;
                 for (const auto &action_name : associated_actions)
                 {
                     // 鼠标事件不考虑repeat, 所以第三个参数传false
@@ -197,8 +197,9 @@ namespace engine::input
         for (const auto &[action_name, key_names] : actions_to_keyname)
         {
             // 每个动作对应一个动作状态，初始化为 INACTIVE
-            action_states_[action_name] = ActionState::INACTIVE;
-            spdlog::trace("[InputManager] 映射动作: {}", action_name);
+            auto action_name_id = entt::hashed_string(action_name.c_str());
+            action_states_[action_name_id] = ActionState::INACTIVE;
+            spdlog::trace("[InputManager] 映射动作: {}", action_name_id.data());
             // 设置 "按键 -> 动作" 的映射
             for (const auto &key_name : key_names)
             {
@@ -209,28 +210,28 @@ namespace engine::input
                 if (scancode != SDL_SCANCODE_UNKNOWN)
                 {
                     // 如果scancode有效,则将action添加到scancode_to_actions_map_中
-                    input_to_actions_[scancode].push_back(action_name);
-                    spdlog::trace("[InputManager] 映射按键: {} (Scancode: {}) 到动作: {}", key_name, static_cast<int>(scancode), action_name);
+                    input_to_actions_[scancode].push_back(action_name_id);
+                    spdlog::trace("[InputManager] 映射按键: {} (Scancode: {}) 到动作: {}", key_name, static_cast<int>(scancode), action_name_id.data());
                 }
                 else if (mouse_button != 0)
                 {
                     // 如果鼠标按钮有效,则将action添加到mouse_button_to_actions_map_中
-                    input_to_actions_[mouse_button].push_back(action_name);
-                    spdlog::trace("[InputManager] 映射鼠标按钮: {} (Button ID: {}) 到动作: {}", key_name, static_cast<int>(mouse_button), action_name);
+                    input_to_actions_[mouse_button].push_back(action_name_id);
+                    spdlog::trace("[InputManager] 映射鼠标按钮: {} (Button ID: {}) 到动作: {}", key_name, static_cast<int>(mouse_button), action_name_id.data());
                     // else if: 未来可添加其它输入类型 ...
                 }
                 else
                 {
-                    spdlog::warn("[InputManager] 映射警告: 未知键或按钮名称 '{}' 用于动作 '{}'.", key_name, action_name);
+                    spdlog::warn("[InputManager] 映射警告: 未知键或按钮名称 '{}' 用于动作 '{}'.", key_name, action_name_id.data());
                 }
             }
         }
         spdlog::trace("[InputManager] 输入映射初始化完成.");
     }
 
-    void InputManager::updateActionState(std::string_view action_name, bool is_input_active, bool is_repeat_event)
+    void InputManager::updateActionState(entt::id_type action_name, bool is_input_active, bool is_repeat_event)
     {
-        auto it = action_states_.find(std::string(action_name));
+        auto it = action_states_.find(action_name);
         if (it == action_states_.end())
         {
             spdlog::warn("[InputManager] 尝试更新未注册的动作状态: {}", action_name);

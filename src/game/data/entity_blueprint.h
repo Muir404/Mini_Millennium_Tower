@@ -1,5 +1,6 @@
 #pragma once
 #include "../../engine/utils/math.h"
+#include "../defs/constants.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -54,6 +55,18 @@ namespace game::data
     };
 
     /**
+     * @brief 玩家蓝图, 用于创建玩家组件
+     */
+    struct PlayerBlueprint
+    {
+        game::defs::PlayerType type_{game::defs::PlayerType::UNKNOWN};
+        entt::id_type skill_id_{entt::null};
+        bool healer_{false};
+        int block_{0};
+        int cost_{0};
+    };
+
+    /**
      * @brief 敌人蓝图, 用于创建敌人组件（EnemyComponent）
      */
     struct EnemyBlueprint
@@ -69,6 +82,21 @@ namespace game::data
     {
         std::string name_;
         std::string description_;
+    };
+
+    /**
+     * @brief 玩家职业蓝图, 包含所有必要的子蓝图，用于创建玩家实体中的所有组件
+     */
+    struct PlayerClassblueprint
+    {
+        entt::id_type class_id_{entt::null};
+        std::string class_name_{""};
+        StatsBlueprint stats_{};
+        PlayerBlueprint player_{};
+        SoundBlueprint sounds_{};
+        SpriteBlueprint sprite_{};
+        DisplayInfoBlueprint display_info_{};
+        std::unordered_map<entt::id_type, AnimationBlueprint> animations_;
     };
 
     /**
