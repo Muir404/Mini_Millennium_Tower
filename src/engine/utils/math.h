@@ -94,4 +94,9 @@ namespace engine::utils
         return dist(rng);
     }
 
+    inline float statModify(float base, int level = 1, int rarity = 1)
+    {
+        return base * (1 + 0.1f * level) * (1 + 0.1f * rarity);
+    }
+
 } // namespace engine::utils

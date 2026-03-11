@@ -7,4 +7,16 @@ namespace game::defs
     {
     };
 
+    struct FaceLeftTag
+    {
+    };
+
+    struct MeleeUnitTag
+    {
+    };
+
+    struct RangedUnitTag
+    {
+    };
+
 }

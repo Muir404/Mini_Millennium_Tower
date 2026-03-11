@@ -250,8 +250,8 @@ find_or_fetch_dependency(
     SDL3_mixer
     SDL3_mixer
     "https://github.com/libsdl-org/SDL_mixer.git"
-    "prerelease-3.1.2"
-    "external/SDL_mixer-prerelease-3.1.2"
+    "release-3.2.0"
+    "external/SDL_mixer-release-3.2.0"
     AUTO
 )
 
@@ -405,6 +405,10 @@ set(SOURCES
 
     # game-loader
     src/game/loader/entity_builder_TD.cpp
+
+    # game-factory
+    src/game/factory/entity_factory.cpp
+    src/game/factory/blueprint_manager.cpp
 )
 
 # Windows系统特殊配置: 添加资源文件 (图标/版本信息等)
