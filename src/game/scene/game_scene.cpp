@@ -4,8 +4,12 @@
 #include "../defs/tags.h"
 #include "../defs/events.h"
 
-#include "../system/fwd.h"
+#include "../component/enemy_component.h"
+#include "../component/player_component.h"
+#include "../component/stats_component.h"
+#include "../component/target_component.h"
 
+#include "../system/fwd.h"
 #include "../system/remove_dead_system.h"
 #include "../system/followpath_system.h"
 #include "../system/block_system.h"
@@ -14,22 +18,13 @@
 #include "../system/timer_system.h"
 #include "../system/set_target_system.h"
 #include "../system/animation_state_system.h"
-
-#include "../component/enemy_component.h"
-#include "../component/player_component.h"
-#include "../component/stats_component.h"
-#include "../component/target_component.h"
+#include "../system/animation_event_system.h"
+#include "../system/combat_resolve_system.h"
 
 #include "../factory/entity_factory.h"
 #include "../factory/blueprint_manager.h"
 
 #include "../../engine/core/context.h"
-
-#include "../../engine/component/transform_component.h"
-#include "../../engine/component/sprite_component.h"
-#include "../../engine/component/velocity_component.h"
-#include "../../engine/component/animation_component.h"
-#include "../../engine/component/render_component.h"
 
 #include "../../engine/input/input_manager.h"
 
@@ -39,10 +34,18 @@
 
 #include "../../engine/render/text_renderer.h"
 
+#include "../../engine/component/transform_component.h"
+#include "../../engine/component/sprite_component.h"
+#include "../../engine/component/velocity_component.h"
+#include "../../engine/component/animation_component.h"
+#include "../../engine/component/render_component.h"
+#include "../../engine/component/audio_component.h"
+
 #include "../../engine/system/render_system.h"
 #include "../../engine/system/movement_system.h"
 #include "../../engine/system/animation_system.h"
 #include "../../engine/system/ysort_system.h"
+#include "../../engine/system/audio_system.h"
 
 #include "../../engine/ui/ui_manager.h"
 #include "../../engine/ui/ui_image.h"
@@ -71,6 +74,7 @@ namespace game::scene
         movement_system_ = std::make_unique<engine::system::MovementSystem>();
         animation_system_ = std::make_unique<engine::system::AnimationSystem>(registry_, dispatcher);
         ysort_system_ = std::make_unique<engine::system::YSortSystem>();
+        audio_system_ = std::make_unique<engine::system::AudioSystem>(registry_, context_);
 
         followpath_system_ = std::make_unique<game::system::FollowPathSystem>();
         remove_dead_system_ = std::make_unique<game::system::RemoveDeadSystem>();
@@ -80,6 +84,8 @@ namespace game::scene
         orientation_system_ = std::make_unique<game::system::OrientationSystem>();
         timer_system_ = std::make_unique<game::system::TimerSystem>();
         animation_state_system_ = std::make_unique<game::system::AnimationStateSystem>(registry_, dispatcher);
+        animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
+        combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
 
         spdlog::info("GameScene 构造完成");
     }

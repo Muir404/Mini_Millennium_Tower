@@ -2,6 +2,7 @@
 #include <string>                 // 用于存储音乐路径
 #include <array>                  // 用于管理音效轨道
 #include <memory>                 // 用于管理音效轨道智能指针
+#include <unordered_set>          // 用于存储已播放音效 ID，避免重复播放
 #include <SDL3_mixer/SDL_mixer.h> // 用于音效和音乐播放
 #include <SDL3/SDL_properties.h>  // 用于获取 SDL_Mixer 属性
 #include <entt/entt.hpp>          // 用于实体组件系统 (ECS) 中的实体标识
@@ -44,8 +45,15 @@ namespace engine::audio
         engine::resource::ResourceManager *resource_manager_{nullptr};        ///<  指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
         entt::id_type current_music_{entt::null};                             ///<  当前正在播放的音乐路径，用于避免重复播放同一音乐。
         MIX_Mixer *mixer_{nullptr};                                           ///<  非拥有指针，借用 ResourceManager 提供的 mixer
-        std::array<MIX_Track *, 8> sound_tracks_{nullptr};                    ///<  音效轨道数组，用于播放多个音效。
+        std::array<MIX_Track *, 16> sound_tracks_{nullptr};                   ///<  音效轨道数组，用于播放多个音效。
         std::unique_ptr<MIX_Track, SDLMixTrackDeleter> music_track_{nullptr}; ///<  背景音乐轨道，用于播放单条音乐。
+
+        // 同帧去重记录
+        uint64_t last_frame_time_{0};                         // 记录上次请求的时间戳（ms）
+        std::unordered_set<entt::id_type> played_this_frame_; // 本帧已播 ID 集合
+
+        // 强制征用（Voice Stealing）轮询索引
+        size_t next_replacement_track_{0};
 
     public:
         /**

@@ -9,5 +9,6 @@ namespace game::system
     class OrientationSystem;    // 方向系统
     class TimerSystem;          // 定时器系统
     class SetTargetSystem;      // 设置目标系统
-
+    class AnimationEventSystem; // 动画事件系统
+    class CombatResolveSystem;  // 战斗解析系统
 } // namespace game::system

@@ -19,10 +19,12 @@ namespace game::scene
     class GameScene final : public engine::scene::Scene
     {
     private:
-        std::unique_ptr<engine::system::RenderSystem> render_system_;                ///< 渲染系统
-        std::unique_ptr<engine::system::MovementSystem> movement_system_;            ///< 移动系统
-        std::unique_ptr<engine::system::AnimationSystem> animation_system_;          ///< 动画系统
-        std::unique_ptr<engine::system::YSortSystem> ysort_system_;                  ///< Y轴排序系统
+        std::unique_ptr<engine::system::RenderSystem> render_system_;       ///< 渲染系统
+        std::unique_ptr<engine::system::MovementSystem> movement_system_;   ///< 移动系统
+        std::unique_ptr<engine::system::AnimationSystem> animation_system_; ///< 动画系统
+        std::unique_ptr<engine::system::YSortSystem> ysort_system_;         ///< Y轴排序系统
+        std::unique_ptr<engine::system::AudioSystem> audio_system_;         ///< 音频系统
+
         std::unique_ptr<game::system::FollowPathSystem> followpath_system_;          ///< 跟随系统
         std::unique_ptr<game::system::RemoveDeadSystem> remove_dead_system_;         ///< 删除死亡系统
         std::unique_ptr<game::system::BlockSystem> block_system_;                    ///< 阻挡系统
@@ -31,6 +33,8 @@ namespace game::scene
         std::unique_ptr<game::system::TimerSystem> timer_system_;                    ///< 定时器系统
         std::unique_ptr<game::system::SetTargetSystem> set_target_system_;           ///< 设置目标系统
         std::unique_ptr<game::system::AnimationStateSystem> animation_state_system_; ///< 动画状态系统
+        std::unique_ptr<game::system::AnimationEventSystem> animation_event_system_; ///< 动画事件系统
+        std::unique_ptr<game::system::CombatResolveSystem> combat_resolve_system_;   ///< 战斗解析系统
 
         std::unique_ptr<game::factory::EntityFactory> entity_factory_;       ///< 实体工厂
         std::shared_ptr<game::factory::BlueprintManager> blueprint_manager_; ///< 蓝图管理器

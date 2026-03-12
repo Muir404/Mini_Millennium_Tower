@@ -75,4 +75,29 @@ namespace engine::utils
         entt::entity entity_{entt::null};
         entt::id_type animation_id_{entt::null};
     };
+
+    /**
+     * @struct AnimationEvent
+     * @brief 表示动画事件的结构体。
+     *
+     * 当触发动画事件时，通常会导致指定实体的动画触发指定事件。
+     */
+    struct AnimationEvent
+    {
+        entt::entity entity_{entt::null};
+        entt::id_type event_name_id_{entt::null};
+        entt::id_type animation_name_id_{entt::null};
+    };
+
+    /**
+     * @struct PlaySoundEvent
+     * @brief 表示播放音效事件的结构体。
+     *
+     * 当触发播放音效事件时，通常会导致指定实体播放指定音效。
+     */
+    struct PlaySoundEvent
+    {
+        entt::entity entity_{entt::null};
+        entt::id_type sound_id_{entt::null};
+    };
 } // namespace engine::utils

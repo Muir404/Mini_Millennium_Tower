@@ -29,12 +29,15 @@ namespace engine::component
      */
     struct Animation
     {
-        std::vector<AnimationFrame> frames_; ///< 动画帧
-        float total_duration_ms_{};          ///< 动画总时长（毫秒）
-        bool loop_{true};                    ///< 是否循环
+        std::vector<AnimationFrame> frames_;            ///< 动画帧
+        std::unordered_map<int, entt::id_type> events_; ///< 事件映射，键为索引，值为事件ID
+        float total_duration_ms_{};                     ///< 动画总时长（毫秒）
+        bool loop_{true};                               ///< 是否循环
 
         Animation(std::vector<AnimationFrame> frames,
+                  std::unordered_map<int, entt::id_type> events = {},
                   bool loop = true) : frames_(std::move(frames)),
+                                      events_(std::move(events)),
                                       loop_(loop)
         {
             // 计算动画总时长 (总时长 = 所有帧时长之和)

@@ -383,6 +383,7 @@ set(SOURCES
     src/engine/system/render_system.cpp
     src/engine/system/movement_system.cpp
     src/engine/system/ysort_system.cpp
+    src/engine/system/audio_system.cpp
 
     # engine-ui
     src/engine/ui/ui_manager.cpp
@@ -408,6 +409,8 @@ set(SOURCES
     src/game/system/orientation_system.cpp
     src/game/system/timer_system.cpp
     src/game/system/set_target_system.cpp
+    src/game/system/combat_resolve_system.cpp
+    src/game/system/animation_event_system.cpp
 
     # game-loader
     src/game/loader/entity_builder_TD.cpp

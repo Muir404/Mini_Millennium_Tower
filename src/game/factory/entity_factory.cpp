@@ -136,7 +136,7 @@ namespace game::factory
                 frames.emplace_back(source_rect, anim_blueprint.ms_per_frame_);
             }
             // 将创建好的动画帧容器插入动画map容器
-            animations.emplace(anim_id, engine::component::Animation(std::move(frames)));
+            animations.emplace(anim_id, engine::component::Animation(std::move(frames), anim_blueprint.events_));
         }
         // 通过动画map容器创建动画组件
         registry_.emplace<engine::component::AnimationComponent>(entity, std::move(animations), default_animation_id);

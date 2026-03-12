@@ -53,6 +53,10 @@ namespace game::system
         for (auto entity : view_blocked)
         {
             const auto &blocked_by = view_blocked.get<game::component::BlockedByComponent>(entity);
+            if (!registry.valid(blocked_by.entity_))
+            {
+                continue;
+            }
             const auto &blocked_by_transform = view_blocked.get<engine::component::TransformComponent>(blocked_by.entity_);
             const auto &transform = view_blocked.get<engine::component::TransformComponent>(entity);
             auto &sprite = view_blocked.get<engine::component::SpriteComponent>(entity);

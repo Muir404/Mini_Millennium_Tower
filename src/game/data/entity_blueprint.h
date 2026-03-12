@@ -43,7 +43,8 @@ namespace game::data
     {
         float ms_per_frame_{0.0f};
         int row_{0};
-        std::vector<int> frames_; ///< @brief 动画帧索引数组
+        std::vector<int> frames_;                       ///< @brief 动画帧索引数组
+        std::unordered_map<int, entt::id_type> events_; ///< @brief 事件映射，键为索引，值为事件ID
     };
 
     /**

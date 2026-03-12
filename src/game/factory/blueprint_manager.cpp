@@ -176,12 +176,21 @@ namespace game::factory
         {
             // 解析具体的动画
             auto anim_name_id = entt::hashed_string(anim_name.c_str());
-            // 动画帧信息
-            std::vector<int> frames = anim_data["frames"].get<std::vector<int>>();
+            std::vector<int> frames = anim_data["frames"].get<std::vector<int>>(); // 动画帧信息
+            // 处理事件映射
+            std::unordered_map<int, entt::id_type> events;
+            if (anim_data.contains("events"))
+            {
+                for (auto &[event_name, event_frame] : anim_data["events"].items())
+                {
+                    events.emplace(event_frame.get<int>(), entt::hashed_string(event_name.c_str()));
+                }
+            }
             // 创建单个动画蓝图并插入容器
             data::AnimationBlueprint animation{anim_data.value("duration", 100.0f),
                                                anim_data.value("row", 0),
-                                               std::move(frames)};
+                                               std::move(frames),
+                                               std::move(events)};
             animations.emplace(anim_name_id, animation);
         }
         return animations;
