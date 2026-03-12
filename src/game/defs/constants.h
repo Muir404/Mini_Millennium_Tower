@@ -4,6 +4,7 @@
 namespace game::defs
 {
     constexpr float BLOCK_RADIUS{50.0f};
+    constexpr float UNIT_RADIUS{25.0f};
 
     /**
      * @brief 玩家职业类型

@@ -21,7 +21,8 @@ namespace game::system
         // 筛选依据：速度组件、变换组件、敌人组件
         auto view = registry.view<engine::component::VelocityComponent,
                                   engine::component::TransformComponent,
-                                  game::component::EnemyComponent>(entt::exclude<game::component::BlockedByComponent>);
+                                  game::component::EnemyComponent>(entt::exclude<game::component::BlockedByComponent,
+                                                                                 game::defs::ActionLockTag>);
 
         for (auto entity : view)
         {

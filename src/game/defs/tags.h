@@ -42,4 +42,26 @@ namespace game::defs
     struct HealerTag
     {
     };
+
+    /**
+     * @brief 攻击准备就绪标签
+     *
+     */
+    struct AttackReadyTag
+    {
+    };
+
+    /**
+     * @brief 受伤标签，存在HP损失
+     */
+    struct InjuredTag
+    {
+    };
+
+    /**
+     * @brief 行动锁定标签，单位行动被锁定，播完动画后才能继续行动
+     */
+    struct ActionLockTag
+    {
+    };
 }

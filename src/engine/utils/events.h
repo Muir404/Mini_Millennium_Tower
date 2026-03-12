@@ -63,4 +63,16 @@ namespace engine::utils
         entt::id_type animation_id_{entt::null};
         bool loop_{false};
     };
+
+    /**
+     * @struct AnimationFinishedEvent
+     * @brief 表示动画完成事件的结构体。
+     *
+     * 当触发动画完成事件时，通常会导致指定实体的动画完成。
+     */
+    struct AnimationFinishedEvent
+    {
+        entt::entity entity_{entt::null};
+        entt::id_type animation_id_{entt::null};
+    };
 } // namespace engine::utils
