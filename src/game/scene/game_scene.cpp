@@ -124,18 +124,19 @@ namespace game::scene
     {
         auto &dispatcher = context_.getDispatcher();
 
-        remove_dead_system_->update(registry_); // 删除死亡实体，优先处理
+        // 每一帧最先清理死亡实体(要在dispatcher处理完事件后再清理，因此放在下一帧开头)
+        remove_dead_system_->update(registry_);
 
-        timer_system_->update(registry_, delta_time);                       // 更新计时器系统
-        set_target_system_->update(registry_);                              // 更新设置目标系统
-        orientation_system_->update(registry_);                             // 更新朝向系统
-        followpath_system_->update(registry_, dispatcher, waypoint_nodes_); // 跟随系统，更新实体跟随目标
-        block_system_->update(registry_, dispatcher);                       // 更新阻塞系统
-        attack_starter_system_->update(registry_, dispatcher);              // 更新攻击启动系统
-        movement_system_->update(registry_, delta_time);                    // 更新移动, 确保在动画之前更新，在跟随系统之后更新
-        animation_system_->update(delta_time);                              // 更新动画
-        ysort_system_->update(registry_);                                   // Y轴排序，确保渲染顺序正确，在movement_system_之后更新
-
+        // 注意系统更新的顺序
+        timer_system_->update(registry_, delta_time);
+        block_system_->update(registry_, dispatcher);
+        set_target_system_->update(registry_);
+        followpath_system_->update(registry_, dispatcher, waypoint_nodes_);
+        orientation_system_->update(registry_); // 调用顺序要在Block、SetTarget、FollowPath之后
+        attack_starter_system_->update(registry_, dispatcher);
+        movement_system_->update(registry_, delta_time);
+        animation_system_->update(delta_time);
+        ysort_system_->update(registry_); // 调用顺序要在MovementSystem之后
         Scene::update(delta_time);
     }
 

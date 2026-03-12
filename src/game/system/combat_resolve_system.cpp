@@ -40,8 +40,14 @@ namespace game::system
         // 如果目标是玩家
         if (registry_.all_of<game::component::PlayerComponent>(event.target_))
         {
-            spdlog::info("玩家 ID: {} 受到 ID: {} 的伤害, 剩余生命值: {}",
-                         entt::to_integral(event.target_), entt::to_integral(event.attacker_), target_stats.hp_);
+
+            if (registry_.all_of<game::defs::DeadTag>(event.target_))
+            {
+                return;
+            }
+
+            spdlog::info("玩家 ID: {} 受到 ID: {} 的伤害, 剩余生命值: {}", entt::to_integral(event.target_), entt::to_integral(event.attacker_), target_stats.hp_);
+            
             // 死亡情况
             if (target_stats.hp_ <= 0)
             {
@@ -67,10 +73,16 @@ namespace game::system
             if (target_stats.hp_ <= 0)
             {
                 target_stats.hp_ = 0;
-                registry_.emplace<game::defs::DeadTag>(event.target_);
+                // 确保敌人没有死亡标签
+                if (!registry_.all_of<game::defs::DeadTag>(event.target_))
+                {
+                    registry_.emplace<game::defs::DeadTag>(event.target_);
+                }
                 spdlog::info("敌人 ID: {} 死亡", entt::to_integral(event.target_));
+
                 // TODO: 添加死亡特效
                 // TODO: 更新统计信息
+
                 // 如果敌人被阻挡，减少阻挡者的阻挡计数
                 if (auto blocked_by = registry_.try_get<game::component::BlockedByComponent>(event.target_); blocked_by)
                 {

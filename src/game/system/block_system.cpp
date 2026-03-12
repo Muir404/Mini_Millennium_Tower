@@ -28,6 +28,13 @@ namespace game::system
             if (!registry.valid(blocked_by_component.entity_))
             {
                 registry.remove<game::component::BlockedByComponent>(blocked_by_entity);
+
+                // 如果被阻挡者有ActionLockTag标签，移除它
+                if (registry.all_of<game::defs::ActionLockTag>(blocked_by_entity))
+                {
+                    registry.remove<game::defs::ActionLockTag>(blocked_by_entity);
+                }
+
                 dispatcher.enqueue(engine::utils::PlayAnimationEvent{blocked_by_entity, "walk"_hs, true});
                 spdlog::info("阻挡者: ID: {}, 无效, 移除阻挡者组件", entt::to_integral(blocked_by_entity));
             }
@@ -61,8 +68,14 @@ namespace game::system
                     }
                     blocker_blocker.current_count_++;                 // 增加阻挡数量
                     enemy_velocity.velocity_ = glm::vec2(0.0f, 0.0f); // 设置敌人速度为0
+
                     // 给敌人添加被阻挡组件
-                    registry.emplace<game::component::BlockedByComponent>(enemy_entity, blocker_entity);
+                    // 只有在没被阻挡的情况下才添加组件
+                    if (!registry.all_of<game::component::BlockedByComponent>(enemy_entity))
+                    {
+                        registry.emplace<game::component::BlockedByComponent>(enemy_entity, blocker_entity);
+                    }
+
                     spdlog::info("敌人: ID: {}, 被阻挡, 阻挡者: ID: {}", entt::to_integral(enemy_entity), entt::to_integral(blocker_entity));
 
                     // 播放动画“attack” （临时测试用，未来会将攻击逻辑放在其他系统里）
