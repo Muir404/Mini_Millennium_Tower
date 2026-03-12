@@ -30,8 +30,11 @@ namespace game::system
 
     void CombatResolveSystem::onAttackEvent(const game::defs::AttackEvent &event)
     {
-        if (!registry_.valid(event.target_))
+        if (!registry_.valid(event.target_) || registry_.all_of<game::defs::DeadTag>(event.target_))
+        {
             return;
+        }
+
         // 根据伤害公式，让目标扣血
         auto &target_stats = registry_.get<game::component::StatsComponent>(event.target_);
         float damage = calculateEffectiveDamage(event.damage_, target_stats.def_);
@@ -41,18 +44,18 @@ namespace game::system
         if (registry_.all_of<game::component::PlayerComponent>(event.target_))
         {
 
-            if (registry_.all_of<game::defs::DeadTag>(event.target_))
-            {
-                return;
-            }
+            // if (registry_.all_of<game::defs::DeadTag>(event.target_))
+            // {
+            //     return;
+            // }
 
             spdlog::info("玩家 ID: {} 受到 ID: {} 的伤害, 剩余生命值: {}", entt::to_integral(event.target_), entt::to_integral(event.attacker_), target_stats.hp_);
-            
+
             // 死亡情况
             if (target_stats.hp_ <= 0)
             {
                 target_stats.hp_ = 0;
-                registry_.emplace<game::defs::DeadTag>(event.target_);
+                registry_.emplace_or_replace<game::defs::DeadTag>(event.target_);
                 spdlog::info("玩家 ID: {} 死亡", entt::to_integral(event.target_));
                 // NOTE: 可添加死亡特效, 统计信息等
                 // 受伤情况

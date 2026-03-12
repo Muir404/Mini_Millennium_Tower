@@ -411,6 +411,7 @@ set(SOURCES
     src/game/system/set_target_system.cpp
     src/game/system/combat_resolve_system.cpp
     src/game/system/animation_event_system.cpp
+    src/game/system/projectile_system.cpp
 
     # game-loader
     src/game/loader/entity_builder_TD.cpp

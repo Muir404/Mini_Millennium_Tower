@@ -35,6 +35,7 @@ namespace game::scene
         std::unique_ptr<game::system::AnimationStateSystem> animation_state_system_; ///< 动画状态系统
         std::unique_ptr<game::system::AnimationEventSystem> animation_event_system_; ///< 动画事件系统
         std::unique_ptr<game::system::CombatResolveSystem> combat_resolve_system_;   ///< 战斗解析系统
+        std::unique_ptr<game::system::ProjectileSystem> projectile_system_;          ///< 投射物系统
 
         std::unique_ptr<game::factory::EntityFactory> entity_factory_;       ///< 实体工厂
         std::shared_ptr<game::factory::BlueprintManager> blueprint_manager_; ///< 蓝图管理器
@@ -56,6 +57,7 @@ namespace game::scene
         [[nodiscard]] bool initEventConnections();
         [[nodiscard]] bool initInputConnections();
         [[nodiscard]] bool initEntityFactory();
+        [[nodiscard]] bool initSystems();
 
         void onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &event);
 

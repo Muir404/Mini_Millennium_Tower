@@ -11,4 +11,5 @@ namespace game::system
     class SetTargetSystem;      // 设置目标系统
     class AnimationEventSystem; // 动画事件系统
     class CombatResolveSystem;  // 战斗解析系统
+    class ProjectileSystem;     // 投射物系统
 } // namespace game::system

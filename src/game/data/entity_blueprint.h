@@ -88,9 +88,10 @@ namespace game::data
     /**
      * @brief 玩家职业蓝图, 包含所有必要的子蓝图，用于创建玩家实体中的所有组件
      */
-    struct PlayerClassblueprint
+    struct PlayerClassBlueprint
     {
         entt::id_type class_id_{entt::null};
+        entt::id_type projectile_id_{entt::null};
         std::string class_name_{""};
         StatsBlueprint stats_{};
         PlayerBlueprint player_{};
@@ -106,13 +107,27 @@ namespace game::data
     struct EnemyClassBlueprint
     {
         entt::id_type class_id_{entt::null};
-        std::string class_name_;
+        entt::id_type projectile_id_{entt::null};
+        std::string class_name_{""};
         StatsBlueprint stats_{};
         EnemyBlueprint enemy_{};
         SoundBlueprint sounds_{};
         SpriteBlueprint sprite_{};
         DisplayInfoBlueprint display_info_{};
         std::unordered_map<entt::id_type, AnimationBlueprint> animations_;
+    };
+
+    /**
+     * @brief 投射物蓝图, 包含所有必要的子蓝图，用于创建投射物实体中的所有组件
+     */
+    struct ProjectileBlueprint
+    {
+        entt::id_type id_{entt::null}; ///< 投射物ID
+        std::string name_{""};
+        float arc_height_{0.0f};
+        float total_flight_time_{0.0f};
+        SpriteBlueprint sprite_{};
+        SoundBlueprint sounds_{};
     };
 
 } // namespace game::data

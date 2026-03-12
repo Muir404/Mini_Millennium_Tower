@@ -27,6 +27,9 @@ namespace game::factory
             {
                 entt::id_type class_id = entt::hashed_string(class_name.c_str());
 
+                // 解析 projectile
+                entt::id_type projectile_id = parseProjectileId(data_json);
+
                 // 解析 stats
                 data::StatsBlueprint stats = parseStats(data_json);
 
@@ -46,6 +49,7 @@ namespace game::factory
                 data::DisplayInfoBlueprint display_info = parseDisplayInfo(data_json);
 
                 enemy_class_blueprints_.emplace(class_id, data::EnemyClassBlueprint{class_id,
+                                                                                    projectile_id,
                                                                                     class_name,
                                                                                     std::move(stats),
                                                                                     std::move(enemy),
@@ -78,6 +82,9 @@ namespace game::factory
             {
                 entt::id_type class_id = entt::hashed_string(class_name.c_str());
 
+                // 解析 projectile
+                entt::id_type projectile_id = parseProjectileId(data_json);
+
                 // 解析 stats
                 data::StatsBlueprint stats = parseStats(data_json);
 
@@ -96,7 +103,8 @@ namespace game::factory
                 // 解析 display_info
                 data::DisplayInfoBlueprint display_info = parseDisplayInfo(data_json);
 
-                player_class_blueprints_.emplace(class_id, data::PlayerClassblueprint{class_id,
+                player_class_blueprints_.emplace(class_id, data::PlayerClassBlueprint{class_id,
+                                                                                      projectile_id,
                                                                                       class_name,
                                                                                       std::move(stats),
                                                                                       std::move(player),
@@ -114,6 +122,43 @@ namespace game::factory
         return true;
     }
 
+    bool BlueprintManager::loadProjectileBlueprints(std::string_view projectile_json_path)
+    {
+        auto path = std::filesystem::path(projectile_json_path);
+        std::ifstream file(path);
+        nlohmann::json json;
+        file >> json;
+        file.close();
+        // --- 解析蓝图 ---
+        try
+        {
+            for (auto &[name, data_json] : json.items())
+            {
+                // 解析基础数据
+                entt::id_type id = entt::hashed_string(name.c_str());
+                float arc_height = data_json["arc_height"].get<float>();
+                float total_flight_time = data_json["total_flight_time"].get<float>();
+                // 解析 Sprite
+                data::SpriteBlueprint sprite = parseSprite(data_json);
+                // 解析 Sound
+                data::SoundBlueprint sounds = parseSound(data_json);
+                // 解析其它数据，组合蓝图并插入容器
+                projectile_blueprints_.emplace(id, data::ProjectileBlueprint{id,
+                                                                             name,
+                                                                             arc_height,
+                                                                             total_flight_time,
+                                                                             std::move(sprite),
+                                                                             std::move(sounds)});
+            }
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::error("加载投射物数据时出错: {}", e.what());
+            return false;
+        }
+        return true;
+    }
+
     const data::EnemyClassBlueprint &BlueprintManager::getEnemyClassBlueprint(entt::id_type id) const
     {
         if (auto it = enemy_class_blueprints_.find(id); it != enemy_class_blueprints_.end())
@@ -124,7 +169,7 @@ namespace game::factory
         return enemy_class_blueprints_.begin()->second;
     }
 
-    const data::PlayerClassblueprint &BlueprintManager::getPlayerClassBlueprint(entt::id_type id) const
+    const data::PlayerClassBlueprint &BlueprintManager::getPlayerClassBlueprint(entt::id_type id) const
     {
         // TODO: 在此处插入 return 语句
         if (auto it = player_class_blueprints_.find(id); it != player_class_blueprints_.end())
@@ -133,6 +178,26 @@ namespace game::factory
         }
         spdlog::error("[BlueprintManager] 未找到对应ID玩家类蓝图: {}", id);
         return player_class_blueprints_.begin()->second;
+    }
+
+    const data::ProjectileBlueprint &BlueprintManager::getProjectileBlueprint(entt::id_type id) const
+    {
+        if (auto it = projectile_blueprints_.find(id); it != projectile_blueprints_.end())
+        {
+            return it->second;
+        }
+        spdlog::error("[BlueprintManager] 未找到对应ID投射物蓝图: {}", id);
+        return projectile_blueprints_.begin()->second;
+    }
+
+    entt::id_type BlueprintManager::parseProjectileId(const nlohmann::json &json)
+    {
+        if (json.contains("projectile"))
+        {
+            return entt::hashed_string(json["projectile"].get<std::string>().c_str());
+        }
+
+        return entt::null;
     }
 
     data::StatsBlueprint BlueprintManager::parseStats(const nlohmann::json &json)

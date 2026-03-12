@@ -27,6 +27,7 @@ namespace game::factory
 
         entt::entity createEnemyUnit(entt::id_type class_id, const glm::vec2 &position, int target_waypoint_id, int level = 1, int rarity = 1);
         entt::entity createPlayerUnit(entt::id_type class_id, const glm::vec2 &position, int level = 1, int rarity = 1);
+        entt::entity createProjectile(entt::id_type id, const glm::vec2 &start_position, const glm::vec2 &target_position, entt::entity target, float damage);
 
     private:
         // --- 组件创建函数 ---
@@ -40,6 +41,8 @@ namespace game::factory
         void addEnemyComponent(entt::entity entity, const data::EnemyBlueprint &enemy, int target_waypoint_id);
         void addPlayerComponent(entt::entity entity, const data::PlayerBlueprint &player, int rarity = 1);
         void addAudioComponent(entt::entity entity, const data::SoundBlueprint &sounds);
+        void addProjectileComponent(entt::entity entity, entt::id_type id);
+
         // TODO: 未来添加其他组件创建函数
     };
 

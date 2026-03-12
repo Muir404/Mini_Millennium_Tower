@@ -1,9 +1,12 @@
 #include "animation_event_system.h"
+#include "../../engine/component/transform_component.h"
+
 #include "../component/enemy_component.h"
 #include "../component/player_component.h"
 #include "../component/blocked_by_component.h"
 #include "../component/target_component.h"
 #include "../component/stats_component.h"
+#include "../component/projectile_component.h"
 #include "../defs/tags.h"
 #include "../defs/events.h"
 
@@ -38,6 +41,10 @@ namespace game::system
         if (event.event_name_id_ == "hit"_hs)
         {
             handleHitEvent(event);
+        }
+        else if (event.event_name_id_ == "emit"_hs)
+        {
+            handleEmitEvent(event);
         }
         // TODO: 其他事件类型
     }
@@ -79,6 +86,34 @@ namespace game::system
             // NOTE: 只有远程敌人才有Target组件，但远程攻击动画事件id为"emit"，不在这里处理
             // NOTE: 敌人命中事件不播放音效，未来如果需要可以补充
         }
+    }
+
+    void AnimationEventSystem::handleEmitEvent(const engine::utils::AnimationEvent &event)
+    {
+        if (!registry_.valid(event.entity_))
+        {
+            return;
+        }
+
+        const auto [transform, stats, projectile_id] = registry_.get<engine::component::TransformComponent,
+                                                                     game::component::StatsComponent,
+                                                                     game::component::ProjectileIDComponent>(event.entity_);
+
+        auto target = registry_.try_get<game::component::TargetComponent>(event.entity_);
+        if (!target || !registry_.valid(target->entity_))
+        {
+            return;
+        }
+
+        // 执行攻击事件
+        dispatcher_.enqueue(game::defs::EmitProjectileEvent{projectile_id.id_,
+                                                            target->entity_,
+                                                            transform.position_,
+                                                            registry_.get<engine::component::TransformComponent>(target->entity_).position_,
+                                                            stats.atk_});
+
+        // 播放“emit”音效
+        dispatcher_.enqueue(engine::utils::PlaySoundEvent{event.entity_, "emit"_hs});
     }
 
 } // namespace game::system

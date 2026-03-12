@@ -1,5 +1,6 @@
 #pragma once
 #include <entt/entity/entity.hpp>
+#include <glm/vec2.hpp>
 
 namespace game::defs
 {
@@ -32,5 +33,16 @@ namespace game::defs
         float amount_{};                  ///< @brief 治疗量
     };
 
+    /**
+     * @brief 发射项目事件
+     */
+    struct EmitProjectileEvent
+    {
+        entt::id_type id_{entt::null};    ///< @brief 投射物id
+        entt::entity target_{entt::null}; ///< @brief 目标
+        glm::vec2 start_position_{};      ///< @brief 发射位置
+        glm::vec2 target_position_{};     ///< @brief 目标位置
+        float damage_{};                  ///< @brief 伤害量
+    };
 
 } // namespace game::defs
