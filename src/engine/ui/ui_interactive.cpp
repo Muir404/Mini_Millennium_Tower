@@ -6,6 +6,8 @@
 #include "../audio/audio_player.h"
 #include <spdlog/spdlog.h>
 
+using namespace entt::literals;
+
 namespace engine::ui
 {
 
@@ -29,7 +31,12 @@ namespace engine::ui
         state_->enter();
     }
 
-    void UIInteractive::addImage(entt::id_type name_id, engine::render::Image image)
+    void UIInteractive::setNextState(std::unique_ptr<engine::ui::state::UIState> state)
+    {
+        next_state_ = std::move(state);
+    }
+
+    void UIInteractive::addImage(entt::id_type id, engine::render::Image image)
     {
         // 可交互UI元素必须有一个size用于交互检测，因此如果参数列表中没有指定，则用图片大小作为size
         if (size_.x == 0.0f && size_.y == 0.0f)
@@ -37,66 +44,68 @@ namespace engine::ui
             size_ = context_.getResourceManager().getTextureSize(image.getTextureId());
         }
         // 添加精灵
-        images_.emplace(name_id, std::move(image));
+        images_.insert_or_assign(id, std::move(image));
     }
 
-    void UIInteractive::setImage(entt::id_type name_id)
+    void UIInteractive::setCurrentImage(entt::id_type id)
     {
-        if (images_.find(name_id) != images_.end())
+        if (images_.find(id) != images_.end())
         {
-            current_image_id_ = name_id;
+            current_image_id_ = id;
         }
         else
         {
-            spdlog::warn("Image '{}' 未找到", name_id);
+            spdlog::warn("Image '{}' 未找到", id);
         }
     }
 
-    void UIInteractive::addSound(entt::id_type name_id, entt::hashed_string hashed_path)
+    void UIInteractive::setHoverSound(entt::id_type id, std::string_view path)
     {
-        // 插入容器
-        sounds_.emplace(name_id, hashed_path.value());
-        // 载入音效资源
-        context_.getResourceManager().loadSound(hashed_path);
+        context_.getResourceManager().loadSound(id, path);
+        sounds_.emplace("ui_hover"_hs, id);
     }
 
-    void UIInteractive::playSound(entt::id_type name_id)
+    void UIInteractive::setClickSound(entt::id_type id, std::string_view path)
+    {
+        context_.getResourceManager().loadSound(id, path);
+        sounds_.emplace("ui_click"_hs, id);
+    }
+
+    void UIInteractive::playSound(entt::id_type id)
     {
         // 先尝试在自定义sounds_中查找（map的值）
-        if (auto it = sounds_.find(name_id); it != sounds_.end())
+        if (auto it = sounds_.find(id); it != sounds_.end())
         {
             if (!context_.getAudioPlayer().playSound(it->second))
             {
-                spdlog::warn("Sound '{}' 未找到或无法播放", name_id);
+                spdlog::warn("Sound '{}' 未找到或无法播放", id);
             }
         }
         // 如果自定义sounds_中没有找到，则使用默认音效（map的键）
         else
         {
-            if (!context_.getAudioPlayer().playSound(name_id))
+            if (!context_.getAudioPlayer().playSound(id))
             {
-                spdlog::error("Sound '{}' 未找到或无法播放", name_id);
+                spdlog::error("Sound '{}' 未找到或无法播放", id);
             }
         }
     }
 
-    bool UIInteractive::handleInput(engine::core::Context &context)
+    void UIInteractive::update(float delta_time, engine::core::Context &context)
     {
-        if (UIElement::handleInput(context))
-        {
-            return true;
-        }
+        // 先更新子节点
+        UIElement::update(delta_time, context);
 
-        // 先更新子节点，再更新自己（状态）
+        // 再更新自己（状态）
         if (state_ && interactive_)
         {
-            if (auto next_state = state_->handleInput(context); next_state)
+            if (next_state_)
             {
-                setState(std::move(next_state));
-                return true;
+                setState(std::move(next_state_));
+                next_state_.reset();
             }
+            state_->update(delta_time, context);
         }
-        return false;
     }
 
     void UIInteractive::render(engine::core::Context &context)

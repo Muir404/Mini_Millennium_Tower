@@ -45,7 +45,6 @@ namespace engine::scene
         virtual void init();                   ///< 初始化场景。
         virtual void update(float delta_time); ///< 更新场景。
         virtual void render();                 ///< 渲染场景。
-        virtual void handleInput();            ///< 处理输入。
         virtual void clean();                  ///< 清理场景。
 
         void requestPopScene();

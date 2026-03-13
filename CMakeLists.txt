@@ -424,6 +424,7 @@ set(SOURCES
 
     # game-data
     src/game/data/session_data.cpp
+    src/game/data/ui_config.cpp
 )
 
 # Windows系统特殊配置: 添加资源文件 (图标/版本信息等)

@@ -43,7 +43,7 @@ namespace engine::ui::state
     protected:
         // --- 核心方法 ---
         virtual void enter() {}
-        virtual std::unique_ptr<UIState> handleInput(engine::core::Context &context) = 0;
+        virtual void update(float, engine::core::Context &) {}
     };
 
 } // namespace engine::ui::state

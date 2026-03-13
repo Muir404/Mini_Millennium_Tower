@@ -14,12 +14,14 @@ namespace engine::ui::state
         friend class engine::ui::UIInteractive;
 
     public:
-        UIHoverState(engine::ui::UIInteractive *owner) : UIState(owner) {}
-        ~UIHoverState() override = default;
+        UIHoverState(engine::ui::UIInteractive *owner);
+        ~UIHoverState();
 
     private:
         void enter() override;
-        std::unique_ptr<UIState> handleInput(engine::core::Context &context) override;
+        void update(float delta_time, engine::core::Context &context) override;
+        
+        bool onMousePressed();
     };
 
 } // namespace engine::ui::state

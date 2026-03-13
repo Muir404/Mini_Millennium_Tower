@@ -56,7 +56,6 @@ namespace engine::scene
         // 核心循环函数
         void update(float delta_time); ///< 更新场景栈中所有场景的状态。
         void render();                 ///< 渲染场景栈中所有场景的内容。
-        void handleInput();            ///< 处理场景栈中所有场景的输入事件。
         void close();                  ///< 关闭场景栈中所有场景，清理资源。
 
     private:

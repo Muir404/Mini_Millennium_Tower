@@ -2,6 +2,7 @@
 #include <SDL3/SDL_rect.h>
 #include <memory>
 #include <vector>
+#include <entt/entity/entity.hpp>
 #include "../utils/math.h"
 
 namespace engine::core
@@ -22,10 +23,12 @@ namespace engine::ui
     class UIElement
     {
     protected:
-        glm::vec2 position_;       ///< @brief 相对于父元素的局部位置
-        glm::vec2 size_;           ///< @brief 元素大小
-        bool visible_ = true;      ///< @brief 元素当前是否可见
-        bool need_remove_ = false; ///< @brief 是否需要移除(延迟删除)
+        glm::vec2 position_;           ///< @brief 相对于父元素的局部位置
+        glm::vec2 size_;               ///< @brief 元素大小
+        bool visible_ = true;          ///< @brief 元素当前是否可见
+        bool need_remove_ = false;     ///< @brief 是否需要移除(延迟删除)
+        int order_index_ = 0;          ///< 排序索引
+        entt::id_type id_{entt::null}; ///< 用于标记或查找ID
 
         UIElement *parent_ = nullptr;                      ///< @brief 指向父节点的非拥有指针
         std::vector<std::unique_ptr<UIElement>> children_; ///< @brief 子元素列表(容器)
@@ -49,9 +52,10 @@ namespace engine::ui
         virtual void render(engine::core::Context &context);
 
         // --- 层次结构管理 ---
-        void addChild(std::unique_ptr<UIElement> child);              ///< @brief 添加子元素
-        std::unique_ptr<UIElement> removeChild(UIElement *child_ptr); ///< @brief 将指定子元素从列表中移除，并返回其智能指针
-        void removeAllChildren();                                     ///< @brief 移除所有子元素
+        void addChild(std::unique_ptr<UIElement> child, int order_index = -1); ///< @brief 添加子元素
+        std::unique_ptr<UIElement> removeChild(UIElement *child_ptr);          ///< @brief 将指定子元素从列表中移除，并返回其智能指针
+        std::unique_ptr<UIElement> removeChild(entt::id_type id);              ///< @brief 将指定子元素从列表中移除，并返回其智能指针
+        void removeAllChildren();                                              ///< @brief 移除所有子元素
 
         // --- Getters and Setters ---
         const glm::vec2 &getSize() const { return size_; }                                       ///< @brief 获取元素大小
@@ -60,12 +64,19 @@ namespace engine::ui
         bool isNeedRemove() const { return need_remove_; }                                       ///< @brief 检查元素是否需要移除
         UIElement *getParent() const { return parent_; }                                         ///< @brief 获取父元素
         const std::vector<std::unique_ptr<UIElement>> &getChildren() const { return children_; } ///< @brief 获取子元素列表
+        int getOrderIndex() const { return order_index_; }                                       ///< @brief 获取排序索引
+        entt::id_type getID() const { return id_; }                                              ///< @brief 获取ID
+        UIElement *getChildByID(entt::id_type id) const;                                         ///< @brief 根据ID获取子元素
 
         void setSize(glm::vec2 size) { size_ = std::move(size); }                 ///< @brief 设置元素大小
         void setVisible(bool visible) { visible_ = visible; }                     ///< @brief 设置元素的可见性
         void setParent(UIElement *parent) { parent_ = parent; }                   ///< @brief 设置父节点
         void setPosition(glm::vec2 position) { position_ = std::move(position); } ///< @brief 设置元素位置(相对于父节点)
         void setNeedRemove(bool need_remove) { need_remove_ = need_remove; }      ///< @brief 设置元素是否需要移除
+        void setOrderIndex(int order_index) { order_index_ = order_index; }       ///< @brief 设置排序索引
+        void setId(entt::id_type id) { id_ = id; }                                ///< @brief 设置ID
+
+        void sortChildrenByOrderIndex(); ///< @brief 按排序索引对子元素进行排序
 
         // --- 辅助方法 ---
         engine::utils::Rect getBounds() const;            ///< @brief 获取(计算)元素的边界(屏幕坐标)

@@ -71,7 +71,7 @@ namespace engine::render
                                const glm::vec2 &position,
                                const std::optional<glm::vec2> &size)
     {
-        auto texture = resource_manager_->getTexture(image.getTextureId());
+        auto texture = resource_manager_->getTexture(image.getTextureId(), image.getTexturePath());
         if (!texture)
         {
             spdlog::error("无法为 ID {} 获取纹理。", image.getTextureId());

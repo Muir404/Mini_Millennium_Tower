@@ -7,6 +7,11 @@
 #include "../system/fwd.h"
 #include <memory>
 
+namespace engine::ui
+{
+    class UIElement;
+}
+
 namespace game::factory
 {
     class EntityFactory;
@@ -16,6 +21,7 @@ namespace game::factory
 namespace game::data
 {
     class SessionData;
+    class UIConfig;
 }
 
 namespace game::scene
@@ -51,6 +57,7 @@ namespace game::scene
         std::vector<int> start_points_;                                    // 起始点的ID列表
 
         std::shared_ptr<game::data::SessionData> session_data_; ///< 会话数据
+        std::shared_ptr<game::data::UIConfig> ui_config_;       ///< UI配置
 
         int level_number_{1};
 
@@ -65,11 +72,15 @@ namespace game::scene
 
     private:
         [[nodiscard]] bool initSessionData();
+        [[nodiscard]] bool initUIConfig();
         [[nodiscard]] bool loadLevel();
         [[nodiscard]] bool initEventConnections();
         [[nodiscard]] bool initInputConnections();
         [[nodiscard]] bool initEntityFactory();
         [[nodiscard]] bool initSystems();
+
+        void createUnitsPortraitUI();                                                   ///< 创建单位肖像UI
+        void arrangeUnitsPortraitUI(engine::ui::UIElement *, const glm::vec2 &, float); ///< 排列单位肖像UI
 
         void onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &event);
 

@@ -37,7 +37,6 @@ namespace engine::ui
         void clearElements();                                  ///< @brief 清除所有UI元素，通常用于重置UI状态。
 
         // --- 核心循环方法 ---
-        bool handleInput(engine::core::Context &); ///< @brief 处理输入事件，如果事件被处理则返回true。
         void update(float delta_time, engine::core::Context &);
         void render(engine::core::Context &);
 
