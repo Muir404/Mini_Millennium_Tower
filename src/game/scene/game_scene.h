@@ -13,6 +13,11 @@ namespace game::factory
     class BlueprintManager;
 }
 
+namespace game::data
+{
+    class SessionData;
+}
+
 namespace game::scene
 {
 
@@ -45,6 +50,10 @@ namespace game::scene
         std::unordered_map<int, game::data::WaypointNode> waypoint_nodes_; // 路径节点ID到节点数据的映射
         std::vector<int> start_points_;                                    // 起始点的ID列表
 
+        std::shared_ptr<game::data::SessionData> session_data_; ///< 会话数据
+
+        int level_number_{1};
+
     public:
         GameScene(engine::core::Context &context);
         ~GameScene();
@@ -55,6 +64,7 @@ namespace game::scene
         void clean() override;
 
     private:
+        [[nodiscard]] bool initSessionData();
         [[nodiscard]] bool loadLevel();
         [[nodiscard]] bool initEventConnections();
         [[nodiscard]] bool initInputConnections();
@@ -63,6 +73,7 @@ namespace game::scene
 
         void onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &event);
 
+        void testSessionData();
         void createTestEnemy();
         bool onCreateTestPlayerMelee();
         bool onCreateTestPlayerRanged();
