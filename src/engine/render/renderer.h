@@ -48,6 +48,16 @@ namespace engine::render
         void drawUIFilledRect(const engine::utils::Rect &rect,
                               const engine::utils::FColor &color);
 
+        void drawFilledRect(const Camera &camera,
+                            const glm::vec2 &position,
+                            const glm::vec2 &size,
+                            const engine::utils::FColor &color);
+
+        void drawRect(const Camera &camera,
+                      const glm::vec2 &position,
+                      const glm::vec2 &size,
+                      const engine::utils::FColor &color, const int thickness = 1);
+
         void present();     // 更新屏幕，包装SDL_RenderPresent
         void clearScreen(); // 清屏，包装SDL_RenderClear
 

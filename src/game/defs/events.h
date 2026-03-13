@@ -45,4 +45,14 @@ namespace game::defs
         float damage_{};                  ///< @brief 伤害量
     };
 
+    /**
+     * @brief 敌人死亡特效事件
+     */
+    struct EnemyDeadEffectEvent
+    {
+        entt::id_type class_id_{entt::null}; ///< @brief 敌人ID
+        glm::vec2 position_{};               ///< @brief 敌人位置
+        bool is_flipped_{false};             ///< @brief 是否面向左侧
+    };
+
 } // namespace game::defs

@@ -56,6 +56,13 @@ namespace game::system
             spdlog::info("玩家动画结束, 返回idle动画, ID: {}", entt::to_integral(event.entity_));
             return;
         }
+
+        // 敌人死亡特效动画结束，添加死亡标签
+        if (registry_.all_of<game::defs::OneShotReadyTag>(event.entity_))
+        {
+            registry_.emplace_or_replace<game::defs::DeadTag>(event.entity_);
+            return;
+        }
     }
 
 } // namespace game::system

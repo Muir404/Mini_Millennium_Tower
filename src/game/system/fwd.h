@@ -12,4 +12,6 @@ namespace game::system
     class AnimationEventSystem; // 动画事件系统
     class CombatResolveSystem;  // 战斗解析系统
     class ProjectileSystem;     // 投射物系统
+    class EffectSystem;         // 特效系统
+    class HealthBarSystem;      // 健康条系统
 } // namespace game::system

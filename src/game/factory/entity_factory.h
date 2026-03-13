@@ -28,6 +28,7 @@ namespace game::factory
         entt::entity createEnemyUnit(entt::id_type class_id, const glm::vec2 &position, int target_waypoint_id, int level = 1, int rarity = 1);
         entt::entity createPlayerUnit(entt::id_type class_id, const glm::vec2 &position, int level = 1, int rarity = 1);
         entt::entity createProjectile(entt::id_type id, const glm::vec2 &start_position, const glm::vec2 &target_position, entt::entity target, float damage);
+        entt::entity createEnemyDeadEffect(entt::id_type class_id, const glm::vec2 &position, const bool is_flipped = false);
 
     private:
         // --- 组件创建函数 ---
@@ -37,6 +38,12 @@ namespace game::factory
                                    const std::unordered_map<entt::id_type, data::AnimationBlueprint> &animation_blueprints,
                                    const data::SpriteBlueprint &sprite_blueprint,
                                    entt::id_type default_animation_id);
+
+        void addOneAnimationComponent(entt::entity entity,
+                                      const data::AnimationBlueprint &animation_blueprint,
+                                      const data::SpriteBlueprint &sprite_blueprint,
+                                      entt::id_type animation_id,
+                                      bool loop = false);
         void addStatsComponent(entt::entity entity, const data::StatsBlueprint &stats, int level = 1, int rarity = 1);
         void addEnemyComponent(entt::entity entity, const data::EnemyBlueprint &enemy, int target_waypoint_id);
         void addPlayerComponent(entt::entity entity, const data::PlayerBlueprint &player, int rarity = 1);

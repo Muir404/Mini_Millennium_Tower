@@ -64,4 +64,18 @@ namespace game::defs
     struct ActionLockTag
     {
     };
+
+    /**
+     * @brief 一次性播放标签，例如死亡
+     */
+    struct OneShotReadyTag
+    {
+    };
+
+    /**
+     * @brief 健康值标签，用于计算健康值变化
+     */
+    struct HasHealthBarTag
+    {
+    };
 }

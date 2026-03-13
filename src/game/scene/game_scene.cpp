@@ -22,6 +22,8 @@
 #include "../system/animation_event_system.h"
 #include "../system/combat_resolve_system.h"
 #include "../system/projectile_system.h"
+#include "../system/effect_system.h"
+#include "../system/health_bar_system.h"
 
 #include "../factory/entity_factory.h"
 #include "../factory/blueprint_manager.h"
@@ -133,7 +135,12 @@ namespace game::scene
 
     void GameScene::render()
     {
-        render_system_->update(registry_, context_.getRenderer(), context_.getCamera());
+        auto &renderer = context_.getRenderer();
+        auto &camera = context_.getCamera();
+
+        // 渲染顺序
+        render_system_->update(registry_, renderer, camera);
+        health_bar_system_->update(registry_, renderer, camera);
 
         Scene::render();
     }
@@ -217,6 +224,8 @@ namespace game::scene
         animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
         combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
         projectile_system_ = std::make_unique<game::system::ProjectileSystem>(registry_, dispatcher, *entity_factory_);
+        effect_system_ = std::make_unique<game::system::EffectSystem>(registry_, dispatcher, *entity_factory_);
+        health_bar_system_ = std::make_unique<game::system::HealthBarSystem>();
         spdlog::info("系统初始化完成");
         return true;
     }

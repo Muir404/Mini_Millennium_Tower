@@ -39,9 +39,40 @@ namespace engine::utils
         float g{};
         float b{};
         float a{};
+
+        // 预设颜色
+        static constexpr FColor WHITE() noexcept
+        {
+            return {1.0f, 1.0f, 1.0f, 1.0f};
+        }
+        static constexpr FColor BLACK() noexcept
+        {
+            return {0.0f, 0.0f, 0.0f, 1.0f};
+        }
+        static constexpr FColor RED() noexcept
+        {
+            return {1.0f, 0.0f, 0.0f, 1.0f};
+        }
+        static constexpr FColor GREEN() noexcept
+        {
+            return {0.0f, 1.0f, 0.0f, 1.0f};
+        }
+        static constexpr FColor BLUE() noexcept
+        {
+            return {0.0f, 0.0f, 1.0f, 1.0f};
+        }
+        static constexpr FColor YELLOW() noexcept
+        {
+            return {1.0f, 1.0f, 0.0f, 1.0f};
+        }
+        static constexpr FColor CYAN() noexcept
+        {
+            return {0.0f, 1.0f, 1.0f, 1.0f};
+        }
     };
 
-    constexpr FColor parseHexColor(std::string_view hex_color)
+    constexpr FColor
+    parseHexColor(std::string_view hex_color)
     {
         auto hexToInt = [](char c) -> int // 将十六进制字符转换为整数
         {
