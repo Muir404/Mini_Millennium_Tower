@@ -103,7 +103,7 @@ namespace engine::ui
         return nullptr; // 未找到子元素
     }
 
-    std::unique_ptr<UIElement> UIElement::removeChild(entt::id_type id)
+    std::unique_ptr<UIElement> UIElement::removeChildByID(entt::id_type id)
     {
         auto it = std::find_if(children_.begin(),
                                children_.end(),

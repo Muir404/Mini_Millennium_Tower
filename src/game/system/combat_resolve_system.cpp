@@ -62,7 +62,7 @@ namespace game::system
             if (target_stats.hp_ <= 0)
             {
                 target_stats.hp_ = 0;
-                registry_.emplace_or_replace<game::defs::DeadTag>(event.target_);
+                dispatcher_.enqueue(game::defs::RemovePlayerUnitEvent{event.target_});
                 spdlog::info("玩家 ID: {} 死亡", entt::to_integral(event.target_));
                 // NOTE: 可添加死亡特效, 统计信息等
                 // 受伤情况

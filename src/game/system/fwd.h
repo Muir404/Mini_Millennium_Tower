@@ -15,4 +15,6 @@ namespace game::system
     class EffectSystem;         // 特效系统
     class HealthBarSystem;      // 健康条系统
     class GameRuleSystem;       // 游戏规则系统
+    class RenderRangeSystem;    // 渲染范围系统
+    class PlaceUnitSystem;      // 放置单位系统
 } // namespace game::system

@@ -7,6 +7,7 @@
 #include "../../engine/component/animation_component.h"
 #include "../../engine/component/velocity_component.h"
 #include "../../engine/component/render_component.h"
+
 #include "../defs/tags.h"
 #include "../../engine/component/audio_component.h"
 #include "../component/stats_component.h"
@@ -15,6 +16,8 @@
 #include "../component/class_name_component.h"
 #include "../component/blocker_component.h"
 #include "../component/projectile_component.h"
+#include "../component/unit_prep_component.h"
+
 #include <entt/entity/registry.hpp>
 #include <entt/core/hashed_string.hpp>
 #include <spdlog/spdlog.h>
@@ -27,10 +30,16 @@ namespace game::factory
 {
 
     EntityFactory::EntityFactory(entt::registry &registry,
-                                 BlueprintManager &blueprint_manager)
-        : registry_(registry), blueprint_manager_(blueprint_manager) {}
+                                 BlueprintManager &blueprint_manager) : registry_(registry),
+                                                                        blueprint_manager_(blueprint_manager)
+    {
+    }
 
-    entt::entity EntityFactory::createEnemyUnit(entt::id_type class_id, const glm::vec2 &position, int target_waypoint_id, int level, int rarity)
+    entt::entity EntityFactory::createEnemyUnit(entt::id_type class_id,
+                                                const glm::vec2 &position,
+                                                int target_waypoint_id,
+                                                int level,
+                                                int rarity)
     {
         auto entity = registry_.create();
         const auto &blueprint = blueprint_manager_.getEnemyClassBlueprint(class_id);
@@ -66,7 +75,10 @@ namespace game::factory
         return entity;
     }
 
-    entt::entity EntityFactory::createPlayerUnit(entt::id_type class_id, const glm::vec2 &position, int level, int rarity)
+    entt::entity EntityFactory::createPlayerUnit(entt::id_type class_id,
+                                                 const glm::vec2 &position,
+                                                 int level,
+                                                 int rarity)
     {
         auto entity = registry_.create();
         const auto &blueprint = blueprint_manager_.getPlayerClassBlueprint(class_id);
@@ -101,7 +113,11 @@ namespace game::factory
         return entity;
     }
 
-    entt::entity EntityFactory::createProjectile(entt::id_type id, const glm::vec2 &start_position, const glm::vec2 &target_position, entt::entity target, float damage)
+    entt::entity EntityFactory::createProjectile(entt::id_type id,
+                                                 const glm::vec2 &start_position,
+                                                 const glm::vec2 &target_position,
+                                                 entt::entity target,
+                                                 float damage)
     {
         // 创建投射物实体
         auto entity = registry_.create();
@@ -149,12 +165,43 @@ namespace game::factory
 
         return entity;
     }
-    void EntityFactory::addTransformComponent(entt::entity entity, const glm::vec2 &position, const glm::vec2 &scale, float rotation)
+
+    entt::entity EntityFactory::createUnitPrep(entt::id_type name_id,
+                                               entt::id_type class_id,
+                                               int cost,
+                                               const glm::vec2 &position)
+    {
+        auto entity = registry_.create();
+        const auto &blueprint = blueprint_manager_.getPlayerClassBlueprint(class_id);
+        addTransformComponent(entity, position);
+        addSpriteComponent(entity, blueprint.sprite_);
+        // 直接添加UnitPrepComponent组件
+        registry_.emplace<game::component::UnitPrepComponent>(entity,
+                                                              name_id,
+                                                              blueprint.player_.type_,
+                                                              blueprint.stats_.range_,
+                                                              cost);
+
+        // 补充渲染组件与显示攻击范围标志
+        registry_.emplace<engine::component::RenderComponent>(entity, 100); // 显示优先度很高
+        if (blueprint.player_.type_ == game::defs::PlayerType::RANGED)
+        {
+            registry_.emplace<game::defs::ShowRangeTag>(entity);
+        }
+        return entity;
+    }
+
+    void EntityFactory::addTransformComponent(entt::entity entity,
+                                              const glm::vec2 &position,
+                                              const glm::vec2 &scale,
+                                              float rotation)
     {
         registry_.emplace<engine::component::TransformComponent>(entity, position, scale, rotation);
     }
 
-    void EntityFactory::addSpriteComponent(entt::entity entity, const data::SpriteBlueprint &sprite, const bool is_flipped)
+    void EntityFactory::addSpriteComponent(entt::entity entity,
+                                           const data::SpriteBlueprint &sprite,
+                                           const bool is_flipped)
     {
         registry_.emplace<engine::component::SpriteComponent>(entity,
                                                               engine::component::Sprite(sprite.path_,
@@ -223,7 +270,10 @@ namespace game::factory
         registry_.emplace<engine::component::AnimationComponent>(entity, std::move(animations), animation_id);
     }
 
-    void EntityFactory::addStatsComponent(entt::entity entity, const data::StatsBlueprint &stats, int level, int rarity)
+    void EntityFactory::addStatsComponent(entt::entity entity,
+                                          const data::StatsBlueprint &stats,
+                                          int level,
+                                          int rarity)
     {
         // 计算等级和稀有度对属性的影响 (未来可改成数据驱动方便调整)
         auto hp = engine::utils::statModify(stats.hp_, level, rarity);
@@ -242,7 +292,9 @@ namespace game::factory
                                                                       rarity);
     }
 
-    void EntityFactory::addEnemyComponent(entt::entity entity, const data::EnemyBlueprint &enemy, int target_waypoint_id)
+    void EntityFactory::addEnemyComponent(entt::entity entity,
+                                          const data::EnemyBlueprint &enemy,
+                                          int target_waypoint_id)
     {
         registry_.emplace<game::component::EnemyComponent>(entity, target_waypoint_id, enemy.speed_);
         registry_.emplace<engine::component::VelocityComponent>(entity, glm::vec2(0, 0));
@@ -257,7 +309,9 @@ namespace game::factory
         }
     }
 
-    void EntityFactory::addPlayerComponent(entt::entity entity, const data::PlayerBlueprint &player, int rarity)
+    void EntityFactory::addPlayerComponent(entt::entity entity,
+                                           const data::PlayerBlueprint &player,
+                                           int rarity)
     {
         auto cost = static_cast<int>(std::round(player.cost_ * (1.0f + 0.1f * rarity)));
         registry_.emplace<game::component::PlayerComponent>(entity, cost);
@@ -282,7 +336,8 @@ namespace game::factory
         }
     }
 
-    void EntityFactory::addAudioComponent(entt::entity entity, const data::SoundBlueprint &sounds)
+    void EntityFactory::addAudioComponent(entt::entity entity,
+                                          const data::SoundBlueprint &sounds)
     {
         if (sounds.sounds_.empty())
         {
@@ -297,7 +352,8 @@ namespace game::factory
         registry_.emplace<engine::component::AudioComponent>(entity, std::move(audio_map));
     }
 
-    void EntityFactory::addProjectileComponent(entt::entity entity, entt::id_type id)
+    void EntityFactory::addProjectileComponent(entt::entity entity,
+                                               entt::id_type id)
     {
         if (id == entt::null)
         {

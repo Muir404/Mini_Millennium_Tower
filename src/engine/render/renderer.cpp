@@ -6,6 +6,8 @@
 #include <stdexcept> // For std::runtime_error
 #include <spdlog/spdlog.h>
 
+using namespace entt::literals;
+
 namespace engine::render
 {
     Renderer::Renderer(SDL_Renderer *sdl_renderer, engine::resource::ResourceManager *resource_manager)
@@ -29,7 +31,8 @@ namespace engine::render
                               const component::Sprite &sprite,
                               const glm::vec2 &position,
                               const glm::vec2 &size,
-                              const float rotation)
+                              const float rotation,
+                              const engine::utils::FColor &color)
     {
         auto texture = resource_manager_->getTexture(sprite.texture_id_, sprite.texture_path_);
         if (!texture)
@@ -59,6 +62,10 @@ namespace engine::render
             sprite.src_rect_.position.y,
             sprite.src_rect_.size.x,
             sprite.src_rect_.size.y};
+
+        // 设置绘制颜色
+        SDL_SetTextureColorModFloat(texture, color.r, color.g, color.b);
+        SDL_SetTextureAlphaModFloat(texture, color.a);
 
         // 执行绘制(默认旋转中心为精灵的中心点)
         if (!SDL_RenderTextureRotated(renderer_, texture, &src_rect, &dest_rect, rotation, NULL, sprite.is_flipped_ ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE))
@@ -153,6 +160,26 @@ namespace engine::render
         }
         // 重置绘制颜色
         setDrawColorFloat(0, 0, 0, 1.0f);
+    }
+
+    void Renderer::drawFilledCircle(const Camera &camera, const glm::vec2 &position, const float radius, const engine::utils::FColor &color)
+    {
+        auto circle_texture = resource_manager_->getTexture("assets/textures/UI/circle.png"_hs);
+        if (!circle_texture)
+        {
+            spdlog::error("无法获取圆纹理");
+            return;
+        }
+        auto screen_position = camera.worldToScreen(position);
+        // 设置颜色和透明度
+        SDL_SetTextureColorMod(circle_texture, color.r, color.g, color.b);
+        SDL_SetTextureAlphaMod(circle_texture, color.a);
+        // 绘制圆
+        SDL_FRect dest_rect = {screen_position.x - radius, screen_position.y - radius, radius * 2, radius * 2};
+        if (!SDL_RenderTextureRotated(renderer_, circle_texture, nullptr, &dest_rect, 0.0, nullptr, SDL_FLIP_NONE))
+        {
+            spdlog::error("绘制圆失败：{}", SDL_GetError());
+        }
     }
 
     void Renderer::present()

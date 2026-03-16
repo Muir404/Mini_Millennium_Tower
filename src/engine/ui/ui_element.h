@@ -54,7 +54,7 @@ namespace engine::ui
         // --- 层次结构管理 ---
         void addChild(std::unique_ptr<UIElement> child, int order_index = -1); ///< @brief 添加子元素
         std::unique_ptr<UIElement> removeChild(UIElement *child_ptr);          ///< @brief 将指定子元素从列表中移除，并返回其智能指针
-        std::unique_ptr<UIElement> removeChild(entt::id_type id);              ///< @brief 将指定子元素从列表中移除，并返回其智能指针
+        std::unique_ptr<UIElement> removeChildByID(entt::id_type id);          ///< @brief 将指定子元素从列表中移除，并返回其智能指针
         void removeAllChildren();                                              ///< @brief 移除所有子元素
 
         // --- Getters and Setters ---

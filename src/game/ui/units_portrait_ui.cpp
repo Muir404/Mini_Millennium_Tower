@@ -28,10 +28,14 @@ namespace game::ui
     {
         // 构造函数中直接初始化（创建单位肖像UI），可省去init函数
         createUnitsPortraitUI();
+        context_.getDispatcher().sink<game::defs::RemoveUIPortraitEvent>().connect<&UnitsPortraitUI::onRemoveUIPortraitEvent>(this);
         spdlog::trace("UnitsPortraitUI 构造完成。");
     }
 
-    UnitsPortraitUI::~UnitsPortraitUI() = default;
+    UnitsPortraitUI::~UnitsPortraitUI()
+    {
+        context_.getDispatcher().sink<game::defs::RemoveUIPortraitEvent>().disconnect<&UnitsPortraitUI::onRemoveUIPortraitEvent>(this);
+    }
 
     void UnitsPortraitUI::update(float)
     {
@@ -101,15 +105,22 @@ namespace game::ui
 
             // 依次添加四个元素，为了能够交互，将frame设置为按钮，并绑定点击事件
             frame_panel->addChild(std::make_unique<engine::ui::UIImage>(portrait, glm::vec2(0.0f, 0.0f), frame_size));
+
             frame_panel->addChild(std::make_unique<engine::ui::UIButton>(context_,
                                                                          frame,
                                                                          frame,
                                                                          frame,
                                                                          glm::vec2(0.0f, 0.0f),
-                                                                         frame_size
-                                                                         // TODO: 添加点击事件回调函数
-                                                                         ));
+                                                                         frame_size,
+                                                                         [this, name_id, &unit_data, cost]()
+                                                                         {
+                                                                             // 点击事件回调函数
+                                                                             // 发送选择单位事件
+                                                                             context_.getDispatcher().enqueue(game::defs::PrepUnitEvent{name_id, unit_data.class_id_, cost});
+                                                                         }));
+
             frame_panel->addChild(std::make_unique<engine::ui::UIImage>(icon, glm::vec2(0.0f, 0.0f), frame_size / 2.0f));
+
             frame_panel->addChild(std::make_unique<engine::ui::UILabel>(context_.getTextRenderer(),
                                                                         std::to_string(cost),
                                                                         ui_config->getUnitPanelFontPath(),
@@ -152,6 +163,12 @@ namespace game::ui
         // 更新panel的size
         anchor_panel_->setSize(glm::vec2(padding + anchor_panel_->getChildren().size() * (frame_size.x + padding),
                                          frame_size.y + 2 * padding));
+    }
+
+    void UnitsPortraitUI::onRemoveUIPortraitEvent(const game::defs::RemoveUIPortraitEvent &event)
+    {
+        anchor_panel_->removeChildByID(event.name_id_);
+        arrangeUnitsPortraitUI(); // 重新排列单位肖像UI
     }
 
 } // namespace game::ui

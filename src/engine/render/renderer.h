@@ -39,7 +39,8 @@ namespace engine::render
                         const component::Sprite &sprite,
                         const glm::vec2 &position,
                         const glm::vec2 &size,
-                        const float rotation = 0.0f);
+                        const float rotation = 0.0f,
+                        const engine::utils::FColor &color = engine::utils::FColor::WHITE());
 
         void drawUIImage(const Image &image,
                          const glm::vec2 &position,
@@ -57,6 +58,11 @@ namespace engine::render
                       const glm::vec2 &position,
                       const glm::vec2 &size,
                       const engine::utils::FColor &color, const int thickness = 1);
+
+        void drawFilledCircle(const Camera &camera,
+                              const glm::vec2 &position,
+                              const float radius,
+                              const engine::utils::FColor &color = engine::utils::FColor::WHITE());
 
         void present();     // 更新屏幕，包装SDL_RenderPresent
         void clearScreen(); // 清屏，包装SDL_RenderClear
