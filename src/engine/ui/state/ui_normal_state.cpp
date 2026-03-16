@@ -18,12 +18,12 @@ namespace engine::ui::state
         spdlog::debug("切换到正常状态");
     }
 
-    void UINormalState::update(float delta_time, engine::core::Context &context)
+    void UINormalState::update(float /*delta_time*/, engine::core::Context &context)
     {
         auto &input_manager = context.getInputManager();
         auto mouse_pos = input_manager.getLogicalMousePosition();
         if (owner_->isPointInside(mouse_pos))
-        { 
+        {
             // 如果鼠标在UI元素内，则切换到悬停状态
             owner_->playSound("ui_hover"_hs);
             owner_->setNextState(std::make_unique<UIHoverState>(owner_));

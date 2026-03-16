@@ -1,6 +1,8 @@
 #include "entity_builder_TD.h"
 #include "../../engine/loader/basic_entity_builder.h"
-#include "../../game/data/waypoint_node.h"
+#include "../../engine/component/tilelayer_component.h"
+#include "../data/waypoint_node.h"
+#include "../defs/tags.h"
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
@@ -26,6 +28,7 @@ namespace game::loader
         else
         {
             BasicEntityBuilder::build();
+            buildPlace();
         }
 
         return this;
@@ -74,4 +77,26 @@ namespace game::loader
         spdlog::trace("waypoint_nodes_ size: {}", waypoint_nodes_.size());
     }
 
+    void EntityBuilderTD::buildPlace()
+    {
+        if (tile_info_ && tile_info_->properties_)
+        {
+            auto &properties = tile_info_->properties_.value();
+            for (auto &property : properties)
+            {
+                if (property.value("name", "") == "place")
+                {
+                    auto type = property.value("value", "");
+                    if (type == "melee")
+                    {
+                        registry_.emplace<game::defs::MeleePlaceTag>(entity_id_);
+                    }
+                    else if (type == "ranged")
+                    {
+                        registry_.emplace<game::defs::RangedPlaceTag>(entity_id_);
+                    }
+                }
+            }
+        }
+    }
 }

@@ -78,4 +78,18 @@ namespace game::defs
     struct HasHealthBarTag
     {
     };
+
+     /**
+      * @brief 近战地点标签，用于近战单位攻击
+      */
+    struct MeleePlaceTag
+    {
+    };
+
+     /**
+      * @brief 远程地点标签，用于远程单位攻击
+      */
+    struct RangedPlaceTag
+    {
+    };
 }

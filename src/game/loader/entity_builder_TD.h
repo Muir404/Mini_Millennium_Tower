@@ -1,9 +1,9 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
-#include "../../engine/loader/level_loader.h"  // 确保路径正确
+#include "../../engine/loader/level_loader.h" // 确保路径正确
 #include "../../engine/core/context.h"
-#include "../data/waypoint_node.h"  // 假设 WaypointNode 在这里
+#include "../data/waypoint_node.h" // 假设 WaypointNode 在这里
 
 namespace game::loader
 {
@@ -25,6 +25,7 @@ namespace game::loader
         EntityBuilderTD *build() override;
 
     private:
-        void buildPath(); ///< 生成路径节点
+        void buildPath();  ///< 生成路径节点
+        void buildPlace(); ///< 生成放置点
     };
 }

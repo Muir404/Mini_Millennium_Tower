@@ -39,7 +39,6 @@ namespace engine::utils
         float g{};
         float b{};
         float a{};
-
         // 预设颜色
         static constexpr FColor WHITE() noexcept
         {

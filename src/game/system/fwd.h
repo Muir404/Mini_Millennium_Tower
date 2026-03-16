@@ -14,4 +14,5 @@ namespace game::system
     class ProjectileSystem;     // 投射物系统
     class EffectSystem;         // 特效系统
     class HealthBarSystem;      // 健康条系统
+    class GameRuleSystem;       // 游戏规则系统
 } // namespace game::system

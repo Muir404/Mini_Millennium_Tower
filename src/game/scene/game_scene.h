@@ -2,6 +2,7 @@
 #include "../../engine/scene/scene.h"
 #include "../../engine/system/fwd.h"
 #include "../../game/data/waypoint_node.h"
+#include "../data/game_stats.h"
 #include "../defs/tags.h"
 #include "../defs/events.h"
 #include "../system/fwd.h"
@@ -10,6 +11,11 @@
 namespace engine::ui
 {
     class UIElement;
+}
+
+namespace game::ui
+{
+    class UnitsPortraitUI;
 }
 
 namespace game::factory
@@ -49,6 +55,8 @@ namespace game::scene
         std::unique_ptr<game::system::ProjectileSystem> projectile_system_;          ///< 投射物系统
         std::unique_ptr<game::system::EffectSystem> effect_system_;                  ///< 特效系统
         std::unique_ptr<game::system::HealthBarSystem> health_bar_system_;           ///< 血量条系统
+        std::unique_ptr<game::system::GameRuleSystem> game_rule_system_;             ///< 游戏规则系统
+        std::unique_ptr<game::ui::UnitsPortraitUI> units_portrait_ui_;               // 封装的单位肖像UI，负责管理单位肖像UI的创建、更新和排列
 
         std::unique_ptr<game::factory::EntityFactory> entity_factory_;       ///< 实体工厂
         std::shared_ptr<game::factory::BlueprintManager> blueprint_manager_; ///< 蓝图管理器
@@ -58,6 +66,8 @@ namespace game::scene
 
         std::shared_ptr<game::data::SessionData> session_data_; ///< 会话数据
         std::shared_ptr<game::data::UIConfig> ui_config_;       ///< UI配置
+
+        game::data::GameStats game_stats_; ///< 游戏内统计数据
 
         int level_number_{1};
 
@@ -76,13 +86,10 @@ namespace game::scene
         [[nodiscard]] bool loadLevel();
         [[nodiscard]] bool initEventConnections();
         [[nodiscard]] bool initInputConnections();
+        [[nodiscard]] bool initRegistryContext();
+        [[nodiscard]] bool initUnitsPortraitUI();
         [[nodiscard]] bool initEntityFactory();
         [[nodiscard]] bool initSystems();
-
-        void createUnitsPortraitUI();                                                   ///< 创建单位肖像UI
-        void arrangeUnitsPortraitUI(engine::ui::UIElement *, const glm::vec2 &, float); ///< 排列单位肖像UI
-
-        void onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &event);
 
         void testSessionData();
         void createTestEnemy();
