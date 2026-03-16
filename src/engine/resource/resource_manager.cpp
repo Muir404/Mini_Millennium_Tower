@@ -36,13 +36,13 @@ namespace engine::resource
         spdlog::trace("[ResourceManager] 中的资源通过 clear() 清空。");
     }
 
-    bool ResourceManager::loadResources(std::string_view file_path)
+    void ResourceManager::loadResources(std::string_view file_path)
     {
         std::filesystem::path path(file_path);
         if (!std::filesystem::exists(path))
         {
             spdlog::warn("[ResourceManager] 资源映射文件不存在: {}", file_path);
-            return false;
+            return;
         }
         std::ifstream file(path);
         nlohmann::json json;
@@ -81,9 +81,7 @@ namespace engine::resource
         catch (const nlohmann::json::exception &e)
         {
             spdlog::error("[ResourceManager] 加载资源文件失败: {}", e.what());
-            return false;
         }
-        return true;
     }
 
     // --- 纹理接口实现 ---

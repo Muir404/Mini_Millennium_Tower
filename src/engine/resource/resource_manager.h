@@ -10,7 +10,6 @@ struct SDL_Renderer;
 struct SDL_Texture;
 struct MIX_Audio;
 struct TTF_Font;
-
 struct MIX_Mixer;
 
 namespace engine::resource
@@ -46,7 +45,7 @@ namespace engine::resource
         ResourceManager &operator=(ResourceManager &&) = delete;
 
         // 加载资源
-        bool loadResources(std::string_view file_path); ///< 从 JSON 文件加载所有资源
+        void loadResources(std::string_view file_path); ///< 从 JSON 文件加载所有资源
 
         // --- 统一资源访问接口 ---
         // -- Texture --

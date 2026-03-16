@@ -71,22 +71,22 @@ namespace engine::ui
         sounds_.emplace("ui_click"_hs, id);
     }
 
-    void UIInteractive::playSound(entt::id_type id)
+    void UIInteractive::playSound(entt::id_type name_id)
     {
         // 先尝试在自定义sounds_中查找（map的值）
-        if (auto it = sounds_.find(id); it != sounds_.end())
+        if (auto it = sounds_.find(name_id); it != sounds_.end())
         {
-            if (!context_.getAudioPlayer().playSound(it->second))
+            if (context_.getAudioPlayer().playSound(it->second) == -1)
             {
-                spdlog::warn("Sound '{}' 未找到或无法播放", id);
+                spdlog::warn("Sound '{}' 未找到或无法播放", name_id);
             }
         }
         // 如果自定义sounds_中没有找到，则使用默认音效（map的键）
         else
         {
-            if (!context_.getAudioPlayer().playSound(id))
+            if (context_.getAudioPlayer().playSound(name_id) == -1)
             {
-                spdlog::error("Sound '{}' 未找到或无法播放", id);
+                spdlog::error("Sound '{}' 未找到或无法播放", name_id);
             }
         }
     }

@@ -23,7 +23,7 @@ namespace engine::ui::state
 
     void UIHoverState::enter()
     {
-        owner_->setCurrentImage("ui_hover"_hs);
+        owner_->setCurrentImage("hover"_hs);
         owner_->hover_enter();
 
         spdlog::debug("切换到悬停状态");

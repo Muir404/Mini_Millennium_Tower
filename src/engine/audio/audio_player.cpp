@@ -1,339 +1,184 @@
 #include "audio_player.h"
 #include "../resource/resource_manager.h"
 #include <SDL3_mixer/SDL_mixer.h>
-#include <SDL3/SDL_properties.h>
 #include <spdlog/spdlog.h>
-#include <glm/glm.hpp>
-#include <stdexcept>
-#include <optional>
-#include <string>
+#include <entt/core/hashed_string.hpp>
 
 namespace engine::audio
 {
+    AudioPlayer::~AudioPlayer()
+    {
+        if (music_track_)
+        {
+            MIX_DestroyTrack(music_track_);
+            music_track_ = nullptr;
+        }
+    }
+
     AudioPlayer::AudioPlayer(engine::resource::ResourceManager *resource_manager)
         : resource_manager_(resource_manager)
     {
-        // 校验资源管理器有效性
         if (!resource_manager_)
         {
-            throw std::runtime_error("[AudioPlayer] ResourceManager 指针为空，初始化失败");
+            throw std::runtime_error("AudioPlayer 构造失败: 提供的 ResourceManager 指针为空。");
         }
-
-        // 获取资源管理器提供的 mixer
         mixer_ = resource_manager_->getMixer();
-        
-        // 初始化 sound_tracks_ 数组
-        for (auto &track_ptr : sound_tracks_)
+        music_track_ = MIX_CreateTrack(mixer_);
+        if (!music_track_)
         {
-            track_ptr = MIX_CreateTrack(mixer_);
-            if (!track_ptr)
-            {
-                spdlog::error("[AudioPlayer] 创建音效轨道失败");
-            }
-        }
-        auto raw_music_track = MIX_CreateTrack(mixer_);
-        music_track_.reset(raw_music_track);
-        spdlog::trace("[AudioPlayer] 初始化成功");
-    }
-
-    AudioPlayer::~AudioPlayer()
-    {
-        for (auto &track_ptr : sound_tracks_)
-        {
-            if (track_ptr != nullptr)
-            {
-                // 先停止轨道播放
-                MIX_StopTrack(track_ptr, 0);
-                // 销毁轨道资源
-                MIX_DestroyTrack(track_ptr);
-                // 重置为nullptr，避免野指针
-                track_ptr = nullptr;
-            }
-        }
-        if (music_track_.get() != nullptr)
-        {
-            // 先停止轨道播放
-            MIX_StopTrack(music_track_.get(), 0);
-            // 销毁轨道资源
-            MIX_DestroyTrack(music_track_.get());
-            // 重置为nullptr，避免野指针
-            music_track_.reset(nullptr);
+            throw std::runtime_error("AudioPlayer 构造失败: 无法创建音乐轨道: " + std::string(SDL_GetError()));
         }
     }
 
-    bool AudioPlayer::playSound(entt::id_type id)
+    int AudioPlayer::playSound(entt::id_type sound_id)
     {
-        MIX_Audio *sound = resource_manager_->getSound(id);
-        if (!sound)
+
+        MIX_Audio *audio = resource_manager_->getSound(sound_id); // 通过 ResourceManager 获取资源
+        if (!audio)
         {
-            spdlog::error("[AudioPlayer] 音效资源加载失败，ID: {}", id);
-            return false;
+            spdlog::error("AudioPlayer: 无法获取音效 '{}' 播放。", sound_id);
+            return -1;
         }
 
-        // 查找可用的轨道
-        for (auto &track_ptr : sound_tracks_)
-        {
-            if (track_ptr)
-            {
-                // 检查轨道当前是否空闲
-                if (!MIX_TrackPlaying(track_ptr))
-                {
-                    // 绑定音效到轨道
-                    if (!MIX_SetTrackAudio(track_ptr, sound)) // 如果失败
-                    {
-                        spdlog::error("[AudioPlayer] 音效轨道绑定资源失败，ID: {}, 错误: {}", id, SDL_GetError());
-                        continue; // 尝试下一个轨道
-                    }
-
-                    // 播放
-                    if (!MIX_PlayTrack(track_ptr, 0)) // 如果失败
-                    {
-                        spdlog::error("[AudioPlayer] 播放音效,ID: {} 失败，错误: {}", id, SDL_GetError());
-                        continue; // 尝试下一个轨道
-                    }
-                    spdlog::trace("[AudioPlayer] 播放音效,ID: {} 成功", id);
-                    return true;
-                }
-            }
+        if (!MIX_PlayAudio(mixer_, audio))
+        { // 即发即忘方式播放音效
+            spdlog::error("AudioPlayer: 无法播放音效 id: '{}': {}", sound_id, SDL_GetError());
+            return -1;
         }
-
-        spdlog::error("[AudioPlayer] 无可用音效轨道，ID: {}", id);
-        return false;
+        spdlog::trace("AudioPlayer: 播放音效 id: '{}'。", sound_id);
+        return 0;
     }
 
-    bool AudioPlayer::playSound(entt::hashed_string str_hs)
+    int AudioPlayer::playSound(entt::hashed_string hashed_path)
     {
-        MIX_Audio *sound = resource_manager_->getSound(str_hs.value(), str_hs.data());
-        if (!sound)
+        MIX_Audio *audio = resource_manager_->getSound(hashed_path, hashed_path.data()); // 通过 ResourceManager 获取资源
+        if (!audio)
         {
-            spdlog::error("[AudioPlayer] 音效资源加载失败，ID: {}", str_hs.data());
-            return false;
+            spdlog::error("AudioPlayer: 无法获取音效 id: {}, path: {} 播放。", hashed_path.value(), hashed_path.data());
+            return -1;
         }
 
-        // 查找可用的轨道
-        for (auto &track_ptr : sound_tracks_)
-        {
-            if (track_ptr)
-            {
-                // 检查轨道当前是否空闲
-                if (!MIX_TrackPlaying(track_ptr))
-                {
-                    // 绑定音效到轨道
-                    if (!MIX_SetTrackAudio(track_ptr, sound)) // 如果失败
-                    {
-                        spdlog::error("[AudioPlayer] 音效轨道绑定资源失败，ID: {}, 错误: {}", str_hs.data(), SDL_GetError());
-                        continue; // 尝试下一个轨道
-                    }
-
-                    // 播放
-                    if (!MIX_PlayTrack(track_ptr, 0)) // 如果失败
-                    {
-                        spdlog::error("[AudioPlayer] 播放音效,ID: {} 失败，错误: {}", str_hs.data(), SDL_GetError());
-                        continue; // 尝试下一个轨道
-                    }
-                    spdlog::trace("[AudioPlayer] 播放音效,ID: {} 成功", str_hs.data());
-                    return true;
-                }
-            }
+        if (!MIX_PlayAudio(mixer_, audio))
+        { // 即发即忘方式播放音效
+            spdlog::error("AudioPlayer: 无法播放音效 id: {}, path: {}: {}", hashed_path.value(), hashed_path.data(), SDL_GetError());
+            return -1;
         }
-
-        spdlog::error("[AudioPlayer] 无可用音效轨道，ID: {}", str_hs.data());
-        return false;
+        spdlog::trace("AudioPlayer: 播放音效 id: {}, path: {}。", hashed_path.value(), hashed_path.data());
+        return 0;
     }
 
-    bool AudioPlayer::playMusic(entt::id_type id, int loops, int fade_in_ms)
+    bool AudioPlayer::playMusic(entt::id_type music_id, int loops, int fade_in_ms)
     {
-        // 1. 判重：当前已在播放该音乐，直接返回成功
-        if (id == current_music_)
-        {
-            spdlog::trace("[AudioPlayer] 背景音乐 {} 已在播放，无需重复播放", id);
-            return true;
-        }
-
-        // 2. stop music 平滑停止当前背景音乐
-        if (MIX_TrackPlaying(music_track_.get()))
-        {
-            MIX_StopTrack(music_track_.get(), MIX_TrackMSToFrames(music_track_.get(), fade_in_ms));
-        }
-
-        // 3. 通过 ResourceManager 加载/获取音乐资源
-        // 向 ResourceManager 要 音频资源
-        MIX_Audio *music = resource_manager_->getMusic(id);
-
+        if (music_id == current_music_id_)
+            return true; // 如果当前音乐已经在播放，则不重复播放
+        current_music_id_ = music_id;
+        MIX_Audio *music = resource_manager_->getMusic(music_id); // 通过 ResourceManager 获取资源
         if (!music)
         {
-            spdlog::error("[AudioPlayer] 背景音乐资源加载失败，ID: {}", id);
-            return false;
-        }
-        // 4. 更新当前播放标记
-        current_music_ = id;
-
-        // 5. 绑定音乐资源到背景音乐轨道
-        if (!MIX_SetTrackAudio(music_track_.get(), music))
-        {
-            spdlog::error("[AudioPlayer] 背景音乐轨道绑定资源失败, ID: {}, 错误: {}", id, SDL_GetError());
+            spdlog::error("AudioPlayer: 无法获取音乐 '{}' 播放。", music_id);
             return false;
         }
 
-        // 6. 配置播放属性（SDL3_mixer 标准属性）
+        MIX_StopTrack(music_track_, 0);         // 立即停止之前的音乐
+        MIX_SetTrackAudio(music_track_, music); // 设置音乐轨道的音频源
+
+        // 配置播放参数（循环次数、淡入时长）
         SDL_PropertiesID props = SDL_CreateProperties();
-        if (!props)
-        {
-            spdlog::error("[AudioPlayer] 创建背景音乐播放属性失败: {}", SDL_GetError());
-            return false;
-        }
-
-        // 7. 配置循环次数（SDL3_mixer 标准属性：MIX_PROP_PLAY_LOOPS_NUMBER）
         SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, loops);
-        spdlog::trace("[AudioPlayer] 背景音乐 ID:{} 循环次数设置为: {}", id, loops);
-
-        // 8. 启动播放
-        if (!MIX_PlayTrack(music_track_.get(), props))
+        if (fade_in_ms > 0)
         {
-            spdlog::error("[AudioPlayer] 播放背景音乐 ID:{} 失败: {}", id, SDL_GetError());
+            SDL_SetNumberProperty(props, MIX_PROP_PLAY_FADE_IN_MILLISECONDS_NUMBER, fade_in_ms);
+        }
+        bool result = MIX_PlayTrack(music_track_, props);
+        SDL_DestroyProperties(props);
+
+        if (!result)
+        {
+            spdlog::error("AudioPlayer: 无法播放音乐 '{}': {}", music_id, SDL_GetError());
         }
         else
         {
-            spdlog::info("[AudioPlayer] 播放背景音乐 ID:{} 成功（循环：{}）", id, loops);
+            spdlog::trace("AudioPlayer: 播放音乐 '{}'。", music_id);
         }
-
-        // 9. 销毁属性对象（避免内存泄漏）
-        SDL_DestroyProperties(props);
-
-        return true;
+        return result;
     }
 
-    bool AudioPlayer::playMusic(entt::hashed_string str_hs, int loops, int fade_in_ms)
+    bool AudioPlayer::playMusic(entt::hashed_string hashed_path, int loops, int fade_in_ms)
     {
-        // 1. 判重：当前已在播放该音乐，直接返回成功
-        if (str_hs.value() == current_music_)
-        {
-            spdlog::trace("[AudioPlayer] 背景音乐 {} 已在播放，无需重复播放", str_hs.data());
-            return true;
-        }
-
-        // 2. stop music 平滑停止当前背景音乐
-        if (MIX_TrackPlaying(music_track_.get()))
-        {
-            MIX_StopTrack(music_track_.get(), MIX_TrackMSToFrames(music_track_.get(), fade_in_ms));
-        }
-
-        // 3. 通过 ResourceManager 加载/获取音乐资源
-        // 向 ResourceManager 要 音频资源
-        MIX_Audio *music = resource_manager_->getMusic(str_hs.value(), str_hs.data());
-
+        if (hashed_path.value() == current_music_id_)
+            return true; // 如果当前音乐已经在播放，则不重复播放
+        current_music_id_ = hashed_path;
+        MIX_Audio *music = resource_manager_->getMusic(hashed_path, hashed_path.data()); // 通过 ResourceManager 获取资源
         if (!music)
         {
-            spdlog::error("[AudioPlayer] 背景音乐资源加载失败，ID: {}", str_hs.data());
-            return false;
-        }
-        // 4. 更新当前播放标记
-        current_music_ = str_hs.value();
-
-        // 5. 绑定音乐资源到背景音乐轨道
-        if (!MIX_SetTrackAudio(music_track_.get(), music))
-        {
-            spdlog::error("[AudioPlayer] 背景音乐轨道绑定资源失败, ID: {}, 错误: {}", str_hs.data(), SDL_GetError());
+            spdlog::error("AudioPlayer: 无法获取音乐 id: {}, path: {} 播放。", hashed_path.value(), hashed_path.data());
             return false;
         }
 
-        // 6. 配置播放属性（SDL3_mixer 标准属性）
+        MIX_StopTrack(music_track_, 0);         // 立即停止之前的音乐
+        MIX_SetTrackAudio(music_track_, music); // 设置音乐轨道的音频源
+
+        // 配置播放参数（循环次数、淡入时长）
         SDL_PropertiesID props = SDL_CreateProperties();
-        if (!props)
-        {
-            spdlog::error("[AudioPlayer] 创建背景音乐播放属性失败: {}", SDL_GetError());
-            return false;
-        }
-
-        // 7. 配置循环次数（SDL3_mixer 标准属性：MIX_PROP_PLAY_LOOPS_NUMBER）
         SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, loops);
-        spdlog::trace("[AudioPlayer] 背景音乐 ID:{} 循环次数设置为: {}", str_hs.data(), loops);
-
-        // 8. 启动播放
-        if (!MIX_PlayTrack(music_track_.get(), props))
+        if (fade_in_ms > 0)
         {
-            spdlog::error("[AudioPlayer] 播放背景音乐 ID:{} 失败: {}", str_hs.data(), SDL_GetError());
+            SDL_SetNumberProperty(props, MIX_PROP_PLAY_FADE_IN_MILLISECONDS_NUMBER, fade_in_ms);
+        }
+        bool result = MIX_PlayTrack(music_track_, props);
+        SDL_DestroyProperties(props);
+
+        if (!result)
+        {
+            spdlog::error("AudioPlayer: 无法播放音乐 id: {}, path: {} 播放。error: {}", hashed_path.value(), hashed_path.data(), SDL_GetError());
         }
         else
         {
-            spdlog::info("[AudioPlayer] 播放背景音乐 ID:{} 成功（循环：{}）", str_hs.data(), loops);
+            spdlog::trace("AudioPlayer: 播放音乐 id: {}, path: {}。", hashed_path.value(), hashed_path.data());
         }
-
-        // 9. 销毁属性对象（避免内存泄漏）
-        SDL_DestroyProperties(props);
-
-        return true;
+        return result;
     }
 
     void AudioPlayer::stopMusic(int fade_out_ms)
     {
-        if (!(music_track_.get()))
-        {
-            return;
-        }
-        auto time = fade_out_ms > 0 ? MIX_TrackMSToFrames(music_track_.get(), fade_out_ms) : MIX_TrackMSToFrames(music_track_.get(), 0);
-        // 淡出时长
-        MIX_StopTrack(music_track_.get(), time);
-        spdlog::trace("[AudioPlayer] 停止背景音乐（淡出时长：{}ms）", fade_out_ms);
+        Sint64 fade_frames = (fade_out_ms > 0) ? MIX_TrackMSToFrames(music_track_, fade_out_ms) : 0;
+        MIX_StopTrack(music_track_, fade_frames);
+        spdlog::trace("AudioPlayer: 停止音乐。");
     }
 
     void AudioPlayer::pauseMusic()
     {
-
-        MIX_PauseTrack(music_track_.get());
-        spdlog::trace("[AudioPlayer] 暂停背景音乐播放");
+        MIX_PauseTrack(music_track_);
+        spdlog::trace("AudioPlayer: 暂停音乐。");
     }
 
     void AudioPlayer::resumeMusic()
     {
-
-        MIX_ResumeTrack(music_track_.get());
-        spdlog::trace("[AudioPlayer] 恢复背景音乐播放");
+        MIX_ResumeTrack(music_track_);
+        spdlog::trace("AudioPlayer: 恢复音乐。");
     }
 
     void AudioPlayer::setSoundVolume(float volume)
     {
-        auto sound_volume = glm::clamp(volume, 0.0f, 1.0f);
-        // 批量更新所有音效轨道音量（通过 ResourceManager 按标签控制）
-        for (auto &track_ptr : sound_tracks_)
-        {
-            MIX_SetTrackGain(track_ptr, volume);
-        }
-        spdlog::info("[AudioPlayer] 全局音效音量设置为: {}", sound_volume);
+        // 通过混音器整体增益控制音效音量（0.0-1.0）
+        MIX_SetMixerGain(mixer_, volume);
+        spdlog::trace("AudioPlayer: 设置音效音量为 {:.2f}。", volume);
     }
 
     void AudioPlayer::setMusicVolume(float volume)
     {
-        auto music_volume = glm::clamp(volume, 0.0f, 1.0f);
-        MIX_SetTrackGain(music_track_.get(), music_volume);
-        spdlog::info("[AudioPlayer] 背景音乐音量设置为: {}", music_volume);
+        MIX_SetTrackGain(music_track_, volume);
+        spdlog::trace("AudioPlayer: 设置音乐音量为 {:.2f}。", volume);
     }
 
-    float AudioPlayer::getMusicVolume() const
+    float AudioPlayer::getMusicVolume()
     {
-        auto gain = 0.0f;
-        if (!music_track_.get())
-        {
-            gain = 0.0f;
-        }
-        else
-        {
-            gain = static_cast<float>(MIX_GetTrackGain(music_track_.get()) / 1.0f);
-        }
-        return gain;
+        return MIX_GetTrackGain(music_track_);
     }
 
-    float AudioPlayer::getSoundVolume() const
+    float AudioPlayer::getSoundVolume()
     {
-        auto gain = 0.0f;
-        for (auto &track_ptr : sound_tracks_)
-        {
-            if (!track_ptr)
-            {
-                continue;
-            }
-            gain = static_cast<float>(MIX_GetTrackGain(track_ptr) / 1.0f);
-        }
-        return gain;
+        return MIX_GetMixerGain(mixer_);
     }
+
 } // namespace engine::audio

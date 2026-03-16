@@ -13,7 +13,7 @@ namespace engine::resource
             throw std::runtime_error("[AudioManager] 错误: MIX_Init 失败: " + std::string(SDL_GetError()));
         }
 
-        mixer_ = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
+        mixer_ = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr);
         if (!mixer_)
         {
             MIX_Quit();
@@ -25,20 +25,9 @@ namespace engine::resource
 
     AudioManager::~AudioManager()
     {
-        // 暂停音频
         MIX_StopAllTracks(mixer_, 0);
-
-        // 清理所有音频资源
         clearAudio();
-
-        // 销毁Mixer
-        if (mixer_ != nullptr)
-        {
-            MIX_DestroyMixer(mixer_);
-            mixer_ = nullptr; // 置空，避免野指针
-            spdlog::trace("[AudioManager] mixer销毁成功");
-        }
-        // 退出 SDL_mixer 子系统
+        MIX_DestroyMixer(mixer_);
         MIX_Quit();
 
         spdlog::trace("[AudioManager] 析构完成");
@@ -51,13 +40,12 @@ namespace engine::resource
         auto it = sounds_.find(id);
         if (it != sounds_.end())
         {
-            spdlog::trace("[AudioManager] 音效已缓存，直接返回:ID: {}, 路径: {}", id, file_path);
             return it->second.get();
         }
 
         // 加载音效文件（predecode=false：不预解码，播放时实时解码，节省内存）
-        spdlog::debug("[AudioManager] 开始加载音效: ID: {}, 路径: {}", id, file_path);
-        MIX_Audio *audio = MIX_LoadAudio(mixer_, file_path.data(), false);
+        spdlog::debug("[AudioManager] 开始加载音效:{}", id);
+        MIX_Audio *audio = MIX_LoadAudio(mixer_, file_path.data(), true);
         if (!audio)
         {
             spdlog::error("[AudioManager] 加载音效失败: ID: {}, 路径: {} | 错误信息: {}", id, file_path, SDL_GetError());
@@ -84,6 +72,12 @@ namespace engine::resource
         if (it != sounds_.end())
         {
             return it->second.get();
+        }
+        // 如果未找到，判断是否提供了file_path
+        if (file_path.empty())
+        {
+            spdlog::error("音效 '{}' 未找到缓存，且未提供文件路径，返回nullptr。", id);
+            return nullptr;
         }
         spdlog::warn("[AudioManager] 音效缓存未命中，尝试动态加载: ID: {}, 路径: {}", id, file_path);
         return loadSound(id, file_path);
@@ -155,6 +149,13 @@ namespace engine::resource
         if (it != music_.end())
         {
             return it->second.get();
+        }
+
+        // 如果未找到，判断是否提供了file_path
+        if (file_path.empty())
+        {
+            spdlog::error("音乐 '{}' 未找到缓存，且未提供文件路径，返回nullptr。", id);
+            return nullptr;
         }
 
         // 缓存未命中，尝试加载

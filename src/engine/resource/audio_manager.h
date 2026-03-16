@@ -43,7 +43,7 @@ namespace engine::resource
         // 资源缓存
         std::unordered_map<entt::id_type, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> sounds_; ///< 短音效缓存 (ID -> 音频资源)
         std::unordered_map<entt::id_type, std::unique_ptr<MIX_Audio, SDLMixAudioDeleter>> music_;  ///< 长音乐缓存 (ID -> 音频资源)
-        MIX_Mixer *mixer_;
+        MIX_Mixer *mixer_{nullptr};                                                                ///< SDL 音频 Mixer 指针
 
     public:
         AudioManager();

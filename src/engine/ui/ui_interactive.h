@@ -56,7 +56,7 @@ namespace engine::ui
         void setCurrentImage(entt::id_type id);                       ///< 设置当前显示的图片
         void setHoverSound(entt::id_type id, std::string_view path);  ///< 设置悬停音效（ID + 路径）
         void setClickSound(entt::id_type id, std::string_view path);  ///< 设置点击音效（ID + 路径）
-        void playSound(entt::id_type id);                             ///< 播放指定ID的音效
+        void playSound(entt::id_type name_id);                        ///< 播放指定ID的音效
 
         // -------------------------- 状态管理 --------------------------
         void setState(std::unique_ptr<engine::ui::state::UIState> state);     ///< 设置当前UI状态

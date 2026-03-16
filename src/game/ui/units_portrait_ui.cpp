@@ -86,7 +86,7 @@ namespace game::ui
         // 设置背景色
         anchor_panel->setBackgroundColor(engine::utils::FColor(0.1f, 0.1f, 0.1f, 0.1f));
         // 设置ID，以后即可根据ID找到该panel
-        anchor_panel->setId("anchor_panel"_hs);
+        anchor_panel->setID("anchor_panel"_hs);
 
         // 依次添加角色肖像，每个肖像显示由四部分依次叠加：portrait，frame，icon，cost，可以通过一个frame_panel定位（位于上层anchor_panel之中）
         int index = 0;
@@ -101,7 +101,7 @@ namespace game::ui
             // 创建每个肖像的 frame_panel
             auto frame_pos = glm::vec2(padding + index * (frame_size.x + padding), padding);
             auto frame_panel = std::make_unique<engine::ui::UIPanel>(frame_pos, frame_size);
-            frame_panel->setId(name_id);
+            frame_panel->setID(name_id);
 
             // 依次添加四个元素，为了能够交互，将frame设置为按钮，并绑定点击事件
             frame_panel->addChild(std::make_unique<engine::ui::UIImage>(portrait, glm::vec2(0.0f, 0.0f), frame_size));
@@ -130,7 +130,7 @@ namespace game::ui
             // 最后添加一个灰色的遮盖panel，cost不足以支持该角色出击时显示
             auto cover_panel = std::make_unique<engine::ui::UIPanel>(glm::vec2(0.0f, 0.0f), frame_size);
             cover_panel->setBackgroundColor(engine::utils::FColor(0.0f, 0.0f, 0.0f, 0.2f));
-            cover_panel->setId("cover_panel"_hs);
+            cover_panel->setID("cover_panel"_hs);
             frame_panel->addChild(std::move(cover_panel));
 
             // 将frame_panel添加到anchor_panel中，并使用cost作为排序键

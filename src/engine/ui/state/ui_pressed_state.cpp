@@ -13,18 +13,18 @@ namespace engine::ui::state
 {
     UIPressedState::UIPressedState(engine::ui::UIInteractive *owner) : UIState(owner)
     {
-        owner_->getContext().getInputManager().onAction("mouse_left"_hs).connect<&UIPressedState::onMouseReleased>(this);
+        owner_->getContext().getInputManager().onAction("mouse_left"_hs, engine::input::ActionState::RELEASED).connect<&UIPressedState::onMouseReleased>(this);
     }
 
     UIPressedState::~UIPressedState()
     {
-        owner_->getContext().getInputManager().onAction("mouse_left"_hs).disconnect<&UIPressedState::onMouseReleased>(this);
+        owner_->getContext().getInputManager().onAction("mouse_left"_hs, engine::input::ActionState::RELEASED).disconnect<&UIPressedState::onMouseReleased>(this);
     }
 
     void UIPressedState::enter()
     {
         owner_->setCurrentImage("pressed"_hs);
-        owner_->playSound("pressed"_hs);
+        owner_->playSound("ui_click"_hs);
         spdlog::debug("切换到按下状态");
     }
 

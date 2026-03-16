@@ -74,7 +74,7 @@ namespace engine::ui
         void setPosition(glm::vec2 position) { position_ = std::move(position); } ///< @brief 设置元素位置(相对于父节点)
         void setNeedRemove(bool need_remove) { need_remove_ = need_remove; }      ///< @brief 设置元素是否需要移除
         void setOrderIndex(int order_index) { order_index_ = order_index; }       ///< @brief 设置排序索引
-        void setId(entt::id_type id) { id_ = id; }                                ///< @brief 设置ID
+        void setID(entt::id_type id) { id_ = id; }                                ///< @brief 设置ID
 
         void sortChildrenByOrderIndex(); ///< @brief 按排序索引对子元素进行排序
 
