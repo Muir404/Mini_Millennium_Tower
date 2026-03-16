@@ -172,8 +172,10 @@ namespace engine::render
         }
         auto screen_position = camera.worldToScreen(position);
         // 设置颜色和透明度
-        SDL_SetTextureColorMod(circle_texture, color.r, color.g, color.b);
-        SDL_SetTextureAlphaMod(circle_texture, color.a);
+        SDL_SetTextureColorModFloat(circle_texture, color.r, color.g, color.b);
+        SDL_SetTextureAlphaModFloat(circle_texture, color.a);
+
+        SDL_SetTextureBlendMode(circle_texture, SDL_BLENDMODE_BLEND);
         // 绘制圆
         SDL_FRect dest_rect = {screen_position.x - radius, screen_position.y - radius, radius * 2, radius * 2};
         if (!SDL_RenderTextureRotated(renderer_, circle_texture, nullptr, &dest_rect, 0.0, nullptr, SDL_FLIP_NONE))
