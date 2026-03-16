@@ -91,7 +91,7 @@ namespace game::loader
                     {
                         registry_.emplace<game::defs::MeleePlaceTag>(entity_id_);
                     }
-                    else if (type == "ranged")
+                    else if (type == "range")
                     {
                         registry_.emplace<game::defs::RangedPlaceTag>(entity_id_);
                     }
