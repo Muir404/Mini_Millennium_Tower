@@ -68,6 +68,7 @@ namespace game::scene
         std::unique_ptr<game::system::PlaceUnitSystem> place_unit_system_;           ///< 放置单位系统
         std::unique_ptr<game::system::RenderRangeSystem> render_range_system_;       ///< 渲染范围系统
         std::unique_ptr<game::system::DebugUISystem> debug_ui_system_;               ///< 调试UI系统
+        std::unique_ptr<game::system::SelectionSystem> selection_system_;            ///< 选择单位系统
 
         std::unique_ptr<game::spawner::EnemySpawner> enemy_spawner_;   ///< 敌人生成系统
         std::unique_ptr<game::ui::UnitsPortraitUI> units_portrait_ui_; // 封装的单位肖像UI，负责管理单位肖像UI的创建、更新和排列
@@ -84,7 +85,9 @@ namespace game::scene
         game::data::GameStats game_stats_;                                 ///< 游戏内统计数据
         game::data::Waves waves_;                                          ///< 敌人波次数据
 
-        int level_number_{1};
+        int level_number_{1};                    ///< 当前关卡编号
+        entt::entity selected_unit_{entt::null}; ///< 当前选中的单位实体
+        entt::entity hovered_unit_{entt::null};  ///< 当前悬停的单位实体
 
     public:
         GameScene(engine::core::Context &context);

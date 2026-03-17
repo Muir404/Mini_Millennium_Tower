@@ -34,6 +34,7 @@
 #include "../system/place_unit_system.h"
 #include "../system/render_range_system.h"
 #include "../system/debug_ui_system.h"
+#include "../system/selection_system.h"
 
 #include "../ui/units_portrait_ui.h"
 
@@ -178,6 +179,7 @@ namespace game::scene
         animation_system_->update(delta_time);
         place_unit_system_->update(delta_time);
         ysort_system_->update(registry_); // 调用顺序要在MovementSystem之后
+        selection_system_->update();
 
         enemy_spawner_->update(delta_time);
         units_portrait_ui_->update(delta_time);
@@ -325,6 +327,7 @@ namespace game::scene
         place_unit_system_ = std::make_unique<game::system::PlaceUnitSystem>(registry_, *entity_factory_, context_);
         render_range_system_ = std::make_unique<game::system::RenderRangeSystem>();
         debug_ui_system_ = std::make_unique<game::system::DebugUISystem>(registry_, context_);
+        selection_system_ = std::make_unique<game::system::SelectionSystem>(registry_, context_);
 
         spdlog::info("系统初始化完成");
         return true;
@@ -364,6 +367,8 @@ namespace game::scene
 
         // 5. UI/其他配置 (可能最后使用)
         registry_.ctx().emplace<std::shared_ptr<game::data::UIConfig>>(ui_config_);
+        registry_.ctx().emplace_as<entt::entity &>("selected_unit"_hs, selected_unit_);
+        registry_.ctx().emplace_as<entt::entity &>("hovered_unit"_hs, hovered_unit_);
 
         spdlog::info("初始化游戏上下文");
         return true;

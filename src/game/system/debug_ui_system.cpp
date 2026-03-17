@@ -27,9 +27,8 @@ namespace game::system
     void DebugUISystem::update()
     {
         beginFrame();
-        renderDemoUI();
-        // renderHoveredUnit();
-        // renderSelectedUnit();
+        renderHoveredUnit();
+        renderSelectedUnit();
         endFrame();
     }
 
@@ -124,12 +123,6 @@ namespace game::system
     }
     */
 
-    void DebugUISystem::renderDemoUI()
-    {
-        ImGui::ShowDemoWindow();
-    }
-
-    /*
     void DebugUISystem::renderHoveredUnit()
     {
         // 确定鼠标悬浮的单位存在
@@ -208,5 +201,4 @@ namespace game::system
         // TODO: 技能相关按钮与信息
         ImGui::End();
     }
-    */
 } // namespace game::system

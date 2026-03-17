@@ -18,4 +18,5 @@ namespace game::system
     class RenderRangeSystem;    // 渲染范围系统
     class PlaceUnitSystem;      // 放置单位系统
     class DebugUISystem;        // 调试UI系统
+    class SelectionSystem;      // 选择系统
 } // namespace game::system

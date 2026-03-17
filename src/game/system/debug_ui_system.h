@@ -33,9 +33,8 @@ namespace game::system
         void endFrame();
 
         // 封装每个UI显示模块
-        void renderDemoUI();
-        // void renderHoveredUnit();
-        // void renderSelectedUnit();
+        void renderHoveredUnit();
+        void renderSelectedUnit();
     };
 
 } // namespace game::system

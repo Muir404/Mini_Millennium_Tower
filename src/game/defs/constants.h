@@ -8,6 +8,7 @@ namespace game::defs
     constexpr float BLOCK_RADIUS{50.0f};
     constexpr float UNIT_RADIUS{25.0f};
     constexpr float PLACE_RADIUS{50.0f};
+    constexpr float HOVER_RADIUS{35.0f};
 
     constexpr engine::utils::FColor RANGE_COLOR{0.0f, 1.0f, 0.0f, 0.2f}; ///< 攻击范围显示颜色
 
