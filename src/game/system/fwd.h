@@ -17,4 +17,5 @@ namespace game::system
     class GameRuleSystem;       // 游戏规则系统
     class RenderRangeSystem;    // 渲染范围系统
     class PlaceUnitSystem;      // 放置单位系统
+    class DebugUISystem;        // 调试UI系统
 } // namespace game::system

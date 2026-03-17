@@ -6,6 +6,8 @@
 #include <glm/vec2.hpp>
 #include "../utils/events.h"
 #include <entt/signal/dispatcher.hpp>
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
 
 namespace engine::input
 {
@@ -47,10 +49,12 @@ namespace engine::input
             }
         }
 
+        // 步骤系列二：处理 SDL 事件
         // 2. 处理所有待处理的 SDL 事件 (这将设定 action_states_ 的值)
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
+            ImGui_ImplSDL3_ProcessEvent(&event);
             processEvent(event);
         }
 
@@ -118,6 +122,12 @@ namespace engine::input
 
     void InputManager::processEvent(const SDL_Event &event)
     {
+        // 如果 ImGui 捕获了鼠标事件，直接返回，不处理，避免事件穿透
+        if (ImGui::GetIO().WantCaptureMouse)
+        {
+            return;
+        }
+
         switch (event.type)
         {
         case SDL_EVENT_KEY_DOWN:

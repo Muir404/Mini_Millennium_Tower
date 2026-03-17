@@ -14,6 +14,9 @@
 #include <SDL3/SDL.h>
 #include <spdlog/spdlog.h>
 #include <entt/signal/dispatcher.hpp>
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
 
 namespace engine::core
 {
@@ -118,6 +121,10 @@ namespace engine::core
         {
             return false;
         }
+        if (!initImGui())
+        {
+            return false;
+        }
 
         // 调用场景设置函数 (创建第一个场景并压入栈)
         scene_setup_func_(*context_);
@@ -160,6 +167,12 @@ namespace engine::core
     void GameApp::close()
     {
         spdlog::trace("关闭 GameApp ...");
+
+        // 步骤系列四：清理 ImGui 资源
+        // 9. 清理 ImGui 资源，接续initImGui()
+        ImGui_ImplSDLRenderer3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
 
         // 断开事件处理函数
         dispatcher_->sink<utils::QuitEvent>().disconnect<&GameApp::onQuitEvent>(this);
@@ -410,6 +423,57 @@ namespace engine::core
             return false;
         }
         spdlog::trace("场景管理器初始化成功。");
+        return true;
+    }
+
+    bool GameApp::initImGui()
+    {
+        // 步骤系列一：初始化ImGui上下文
+        // 1- 初始化ImGui上下文
+        IMGUI_CHECKVERSION();   // 检查ImGui版本是否匹配
+        ImGui::CreateContext(); // 创建ImGui上下文
+
+        // 2- 配置ImGui上下文
+        ImGuiIO &io = ImGui::GetIO();                         // 获取ImGui IO 接口
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 启用键盘导航
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // 启用游戏手柄导航
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // 启用Docking功能
+
+        // 3- 初始化ImGui样式
+        ImGui::StyleColorsDark(); // 使用暗色主题
+        // ImGui::StyleColorsLight(); // 使用亮色主题
+
+        // 4- 初始化缩放因子
+        float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()); // 获取主显示器的缩放因子
+        // float main_scale = 1.0f; // 直接设置为1.0f
+        ImGuiStyle &style = ImGui::GetStyle(); // 获取ImGui样式接口
+        style.ScaleAllSizes(main_scale);       // 应用缩放因子
+        style.FontScaleDpi = main_scale;       // 应用缩放因子到字体
+
+        // 5- 初始化透明度
+        float window_alpha = 0.3f; // 设置窗口透明度为30%
+
+        // 6- 应用透明度
+        style.Colors[ImGuiCol_WindowBg].w = window_alpha; // 应用透明度到窗口背景
+        style.Colors[ImGuiCol_PopupBg].w = window_alpha;  // 应用透明度到弹窗背景
+
+        // 7- 初始化字体
+        ImFont *font = io.Fonts->AddFontFromFileTTF("assets/fonts/VonwaonBitmap-16px.ttf",              // 字体文件路径
+                                                    16.0f,                                              // 字体大小
+                                                    nullptr,                                            // 字体配置
+                                                    io.Fonts->GetGlyphRangesChineseSimplifiedCommon()); // 添加默认字体
+        if (!font)
+        {
+            io.Fonts->AddFontDefault();
+            spdlog::error("初始化字体失败，不支持中文");
+        }
+
+        // 8- 初始化后端渲染器
+        ImGui_ImplSDL3_InitForSDLRenderer(window_, sdl_renderer_);
+        ImGui_ImplSDLRenderer3_Init(sdl_renderer_);
+
+        // 9- 清理ImGui上下文，详细参看clean()
+        spdlog::info("ImGui初始化完成");
         return true;
     }
 

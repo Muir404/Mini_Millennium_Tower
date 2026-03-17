@@ -33,6 +33,7 @@
 #include "../system/game_rule_system.h"
 #include "../system/place_unit_system.h"
 #include "../system/render_range_system.h"
+#include "../system/debug_ui_system.h"
 
 #include "../ui/units_portrait_ui.h"
 
@@ -194,6 +195,8 @@ namespace game::scene
         render_range_system_->update(registry_, renderer, camera);
 
         Scene::render();
+
+        debug_ui_system_->update();
     }
 
     void GameScene::clean()
@@ -321,6 +324,7 @@ namespace game::scene
         game_rule_system_ = std::make_unique<game::system::GameRuleSystem>(registry_, dispatcher);
         place_unit_system_ = std::make_unique<game::system::PlaceUnitSystem>(registry_, *entity_factory_, context_);
         render_range_system_ = std::make_unique<game::system::RenderRangeSystem>();
+        debug_ui_system_ = std::make_unique<game::system::DebugUISystem>(registry_, context_);
 
         spdlog::info("系统初始化完成");
         return true;

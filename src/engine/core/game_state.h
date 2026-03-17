@@ -50,6 +50,10 @@ namespace engine::core
         glm::vec2 getLogicalSize() const;
         void setLogicalSize(const glm::vec2 &logical_size);
 
+        // 关闭/启用逻辑分辨率的函数，应用于ImGui
+        // bool disableLogicalPresentation(); ///< @brief 禁用逻辑分辨率的呈现，适用于 ImGui
+        // bool enableLogicalPresentation();  ///< @brief 启用逻辑分辨率的呈现，适用于 ImGui
+
         // --- 便捷查询方法 ---
 
         bool isInTitle() const { return current_state_ == State::Title; }

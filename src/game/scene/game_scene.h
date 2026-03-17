@@ -67,6 +67,7 @@ namespace game::scene
         std::unique_ptr<game::system::GameRuleSystem> game_rule_system_;             ///< 游戏规则系统
         std::unique_ptr<game::system::PlaceUnitSystem> place_unit_system_;           ///< 放置单位系统
         std::unique_ptr<game::system::RenderRangeSystem> render_range_system_;       ///< 渲染范围系统
+        std::unique_ptr<game::system::DebugUISystem> debug_ui_system_;               ///< 调试UI系统
 
         std::unique_ptr<game::spawner::EnemySpawner> enemy_spawner_;   ///< 敌人生成系统
         std::unique_ptr<game::ui::UnitsPortraitUI> units_portrait_ui_; // 封装的单位肖像UI，负责管理单位肖像UI的创建、更新和排列
