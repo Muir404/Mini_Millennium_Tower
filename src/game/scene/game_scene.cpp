@@ -13,6 +13,8 @@
 #include "../data/session_data.h"
 #include "../data/ui_config.h"
 #include "../data/game_stats.h"
+#include "../data/level_config.h"
+#include "../data/level_data.h"
 
 #include "../system/fwd.h"
 #include "../system/remove_dead_system.h"
@@ -36,6 +38,8 @@
 
 #include "../factory/entity_factory.h"
 #include "../factory/blueprint_manager.h"
+
+#include "../spawner/enemy_spawner.h"
 
 #include "../../engine/core/context.h"
 #include "../../engine/core/game_state.h"
@@ -100,6 +104,11 @@ namespace game::scene
             spdlog::error("初始化session_data_失败");
             return;
         }
+        if (!initLevelConfig())
+        {
+            spdlog::error("初始化level_config_失败");
+            return;
+        }
         if (!initUIConfig())
         {
             spdlog::error("初始化ui_config_失败");
@@ -140,7 +149,11 @@ namespace game::scene
             spdlog::error("初始化系统失败");
             return;
         }
-        createTestEnemy();
+        if (!initEnemySpawner())
+        {
+            spdlog::error("初始化敌人生成器失败");
+            return;
+        }
         Scene::init();
     }
 
@@ -165,6 +178,7 @@ namespace game::scene
         place_unit_system_->update(delta_time);
         ysort_system_->update(registry_); // 调用顺序要在MovementSystem之后
 
+        enemy_spawner_->update(delta_time);
         units_portrait_ui_->update(delta_time);
         Scene::update(delta_time);
     }
@@ -208,6 +222,22 @@ namespace game::scene
         return true;
     }
 
+    bool GameScene::initLevelConfig()
+    {
+        if (!level_config_)
+        {
+            level_config_ = std::make_shared<game::data::LevelConfig>();
+            if (!level_config_->loadFromFile("assets/data/level_config.json"))
+            {
+                spdlog::error("初始化level_config_失败");
+                return false;
+            }
+        }
+        waves_ = level_config_->getWavesData(level_number_);
+        game_stats_.enemy_count_ = level_config_->getTotalEnemyCount(level_number_);
+        return true;
+    }
+
     bool GameScene::initUIConfig()
     {
         if (!ui_config_)
@@ -232,17 +262,20 @@ namespace game::scene
                                                                                       waypoint_nodes_,
                                                                                       start_points_));
 
-        if (!level_loader.loadLevel("assets/maps/level1.tmj", this))
+        auto map_path = level_config_->getMapPath(level_number_);
+        if (!level_loader.loadLevel(map_path, this))
         {
             spdlog::error("加载关卡失败");
             return false;
         }
         return true;
     }
+
     bool GameScene::initEventConnections()
     {
         return true;
     }
+
     bool GameScene::initEntityFactory()
     {
         if (!blueprint_manager_)
@@ -288,8 +321,15 @@ namespace game::scene
         game_rule_system_ = std::make_unique<game::system::GameRuleSystem>(registry_, dispatcher);
         place_unit_system_ = std::make_unique<game::system::PlaceUnitSystem>(registry_, *entity_factory_, context_);
         render_range_system_ = std::make_unique<game::system::RenderRangeSystem>();
-        
+
         spdlog::info("系统初始化完成");
+        return true;
+    }
+
+    bool GameScene::initEnemySpawner()
+    {
+        enemy_spawner_ = std::make_unique<game::spawner::EnemySpawner>(registry_, *entity_factory_);
+        spdlog::info("敌人生成器初始化完成");
         return true;
     }
 
@@ -302,10 +342,25 @@ namespace game::scene
 
     bool GameScene::initRegistryContext()
     {
+        // 1. 核心系统管理器 (其他系统依赖的基础设施)
         registry_.ctx().emplace<std::shared_ptr<game::factory::BlueprintManager>>(blueprint_manager_);
-        registry_.ctx().emplace<std::shared_ptr<game::data::SessionData>>(session_data_);
-        registry_.ctx().emplace<std::shared_ptr<game::data::UIConfig>>(ui_config_);
+
+        // 2. 游戏核心配置 (依赖蓝图管理器来解析/创建)
+        registry_.ctx().emplace<std::shared_ptr<game::data::LevelConfig>>(level_config_);
+        registry_.ctx().emplace<int>(level_number_);
+        registry_.ctx().emplace<game::data::Waves>(waves_);
+
+        // 3. 游戏运行状态
         registry_.ctx().emplace<game::data::GameStats>(game_stats_);
+        registry_.ctx().emplace<std::shared_ptr<game::data::SessionData>>(session_data_);
+
+        // 4. 场景/地图数据
+        registry_.ctx().emplace<std::unordered_map<int, game::data::WaypointNode> &>(waypoint_nodes_);
+        registry_.ctx().emplace<std::vector<int> &>(start_points_);
+
+        // 5. UI/其他配置 (可能最后使用)
+        registry_.ctx().emplace<std::shared_ptr<game::data::UIConfig>>(ui_config_);
+
         spdlog::info("初始化游戏上下文");
         return true;
     }
@@ -322,21 +377,6 @@ namespace game::scene
             return false;
         }
         return true;
-    }
-
-    void GameScene::createTestEnemy()
-    {
-        // 测试函数
-        // 每个起点创建一批敌人
-        for (auto start_index : start_points_)
-        {
-            auto position = waypoint_nodes_[start_index].position_;
-
-            entity_factory_->createEnemyUnit("wolf"_hs, position, start_index);
-            entity_factory_->createEnemyUnit("slime"_hs, position, start_index);
-            entity_factory_->createEnemyUnit("goblin"_hs, position, start_index);
-            entity_factory_->createEnemyUnit("dark_witch"_hs, position, start_index);
-        }
     }
 
     bool GameScene::onClearAllPlayers()

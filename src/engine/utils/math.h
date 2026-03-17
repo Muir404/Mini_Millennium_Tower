@@ -134,4 +134,11 @@ namespace engine::utils
         return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
     }
 
+    template <typename RandomIt>
+    inline void shuffle(RandomIt first, RandomIt last)
+    {
+        static thread_local std::mt19937 rng{std::random_device{}()};
+        std::shuffle(first, last, rng);
+    }
+
 } // namespace engine::utils

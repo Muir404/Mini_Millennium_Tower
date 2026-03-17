@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.27.0 FATAL_ERROR)
 #   - 版本号: 1.0.0
 #   - 描述: A TOWER DEFENSE GAME BASED ON SDL3
 #   - 支持语言: C/C++
-project(TD 
+project(TDSDL 
         VERSION 1.0.0 
         DESCRIPTION "A TOWER DEFENSE GAME BASED ON SDL3"
         LANGUAGES C CXX)
@@ -428,9 +428,13 @@ set(SOURCES
     # game-data
     src/game/data/session_data.cpp
     src/game/data/ui_config.cpp
+    src/game/data/level_config.cpp
 
     # game-ui
     src/game/ui/units_portrait_ui.cpp
+
+    # game-spawner
+    src/game/spawner/enemy_spawner.cpp
 )
 
 # Windows系统特殊配置: 添加资源文件 (图标/版本信息等)
