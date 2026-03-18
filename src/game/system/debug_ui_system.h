@@ -1,5 +1,7 @@
 #pragma once
 #include <entt/entity/fwd.hpp>
+#include <entt/entity/entity.hpp>
+#include "../defs/events.h"
 
 namespace engine::core
 {
@@ -20,6 +22,9 @@ namespace game::system
         entt::registry &registry_;
         engine::core::Context &context_;
 
+        entt::id_type hovered_portrait_{entt::null}; ///< @brief 悬浮肖像的角色名称ID
+        bool show_debug_ui_{true};                   ///< @brief 是否显示调试UI
+
     public:
         DebugUISystem(entt::registry &registry, engine::core::Context &context);
 
@@ -34,7 +39,14 @@ namespace game::system
 
         // 封装每个UI显示模块
         void renderHoveredUnit();
+        void renderHoveredPortrait();
         void renderSelectedUnit();
+        void renderInfoUI();
+        void renderSettingUI();
+        void renderDebugUI();
+
+        void onUIPortraitHoverEnterEvent(const game::defs::UIPortraitHoverEnterEvent &event);
+        void onUIPortraitHoverExitEvent();
     };
 
 } // namespace game::system

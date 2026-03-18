@@ -5,6 +5,7 @@
 #include "../factory/blueprint_manager.h"
 #include "../../engine/core/context.h"
 #include "../../engine/core/game_state.h"
+#include "../../engine/input/input_manager.h"
 #include "../../engine/ui/ui_element.h"
 #include "../../engine/ui/ui_panel.h"
 #include "../../engine/ui/ui_image.h"
@@ -37,9 +38,18 @@ namespace game::ui
         context_.getDispatcher().sink<game::defs::RemoveUIPortraitEvent>().disconnect<&UnitsPortraitUI::onRemoveUIPortraitEvent>(this);
     }
 
-    void UnitsPortraitUI::update(float)
+    void UnitsPortraitUI::update(float delta_time)
     {
         updatePortraitCover();
+        auto &input_manager = context_.getInputManager();
+        if (input_manager.isActionDown("move_left"_hs))
+        {
+            movePortraitPanelLeft(delta_time);
+        }
+        if (input_manager.isActionDown("move_right"_hs))
+        {
+            movePortraitPanelRight(delta_time);
+        }
     }
 
     void UnitsPortraitUI::updatePortraitCover()
@@ -84,7 +94,7 @@ namespace game::ui
         auto size = glm::vec2(unit_num * frame_size.x + (unit_num + 1) * padding, frame_size.y + 2 * padding);
         auto anchor_panel = std::make_unique<engine::ui::UIPanel>(pos, size);
         // 设置背景色
-        anchor_panel->setBackgroundColor(engine::utils::FColor(0.1f, 0.1f, 0.1f, 0.1f));
+        anchor_panel->setBackgroundColor(engine::utils::FColor{0.1f, 0.1f, 0.1f, 0.1f});
         // 设置ID，以后即可根据ID找到该panel
         anchor_panel->setID("anchor_panel"_hs);
 
@@ -104,22 +114,35 @@ namespace game::ui
             frame_panel->setID(name_id);
 
             // 依次添加四个元素，为了能够交互，将frame设置为按钮，并绑定点击事件
-            frame_panel->addChild(std::make_unique<engine::ui::UIImage>(portrait, glm::vec2(0.0f, 0.0f), frame_size));
+            frame_panel->addChild(std::make_unique<engine::ui::UIImage>(portrait,
+                                                                        glm::vec2(0.0f, 0.0f),
+                                                                        frame_size));
 
-            frame_panel->addChild(std::make_unique<engine::ui::UIButton>(context_,
+            // 向面板添加UI按钮
+            frame_panel->addChild(std::make_unique<engine::ui::UIButton>(context_, // 基础参数：上下文、frame相关（重复传参保留原逻辑）
+                                                                         frame, 
+                                                                         frame, 
                                                                          frame,
-                                                                         frame,
-                                                                         frame,
+                                                                         // 按钮位置
                                                                          glm::vec2(0.0f, 0.0f),
+                                                                         // 按钮尺寸
                                                                          frame_size,
-                                                                         [this, name_id, &unit_data, cost]()
-                                                                         {
-                                                                             // 点击事件回调函数
-                                                                             // 发送选择单位事件
-                                                                             context_.getDispatcher().enqueue(game::defs::PrepUnitEvent{name_id, unit_data.class_id_, cost});
-                                                                         }));
 
-            frame_panel->addChild(std::make_unique<engine::ui::UIImage>(icon, glm::vec2(0.0f, 0.0f), frame_size / 2.0f));
+                                                                         // 回调1：按钮点击事件（发送准备单位事件）
+                                                                         [this, name_id, &unit_data, cost]()
+                                                                         { context_.getDispatcher().enqueue(game::defs::PrepUnitEvent{name_id, unit_data.class_id_, cost}); },
+
+                                                                         // 回调2：悬浮进入事件（移除角色肖像悬浮进入标记）
+                                                                         [this, name_id]()
+                                                                         { context_.getDispatcher().enqueue(game::defs::UIPortraitHoverEnterEvent{name_id}); },
+
+                                                                         // 回调3：悬浮退出事件（移除角色肖像悬浮退出标记）
+                                                                         [this]()
+                                                                         { context_.getDispatcher().enqueue(game::defs::UIPortraitHoverLeaveEvent{}); }));
+
+            frame_panel->addChild(std::make_unique<engine::ui::UIImage>(icon,
+                                                                        glm::vec2(0.0f, 0.0f),
+                                                                        frame_size / 2.0f));
 
             frame_panel->addChild(std::make_unique<engine::ui::UILabel>(context_.getTextRenderer(),
                                                                         std::to_string(cost),
@@ -129,7 +152,7 @@ namespace game::ui
                                                                         ui_config->getUnitPanelFontOffset()));
             // 最后添加一个灰色的遮盖panel，cost不足以支持该角色出击时显示
             auto cover_panel = std::make_unique<engine::ui::UIPanel>(glm::vec2(0.0f, 0.0f), frame_size);
-            cover_panel->setBackgroundColor(engine::utils::FColor(0.0f, 0.0f, 0.0f, 0.2f));
+            cover_panel->setBackgroundColor(engine::utils::FColor{0.0f, 0.0f, 0.0f, 0.2f});
             cover_panel->setID("cover_panel"_hs);
             frame_panel->addChild(std::move(cover_panel));
 
@@ -163,6 +186,34 @@ namespace game::ui
         // 更新panel的size
         anchor_panel_->setSize(glm::vec2(padding + anchor_panel_->getChildren().size() * (frame_size.x + padding),
                                          frame_size.y + 2 * padding));
+    }
+
+    void UnitsPortraitUI::movePortraitPanelRight(float delta_time)
+    {
+        // 获取当前面板位置
+        auto panel_position = anchor_panel_->getPosition();
+        // 如果位置为负数就向右移动，最多达到0.0f
+        panel_position.x = glm::min(0.0f, panel_position.x + delta_time * 400.0f);
+        // 更新面板位置
+        anchor_panel_->setPosition(panel_position);
+    }
+
+    void UnitsPortraitUI::movePortraitPanelLeft(float delta_time)
+    {
+        // 获取窗口大小
+        const auto &windows_size = context_.getGameState().getLogicalSize();
+        // 获取panel位置
+        auto panel_position = anchor_panel_->getPosition();
+        const auto &panel_size = anchor_panel_->getSize();
+        // 如果面板宽度小于窗口宽度，就不移动
+        if (panel_size.x < windows_size.x)
+        {
+            return;
+        }
+        // 如果位置为正数就向左移动，最多达到负的面板宽度
+        panel_position.x = glm::max(-panel_size.x + windows_size.x, panel_position.x - delta_time * 400.0f);
+        // 更新面板位置
+        anchor_panel_->setPosition(panel_position);
     }
 
     void UnitsPortraitUI::onRemoveUIPortraitEvent(const game::defs::RemoveUIPortraitEvent &event)

@@ -115,4 +115,62 @@ namespace game::defs
         entt::entity entity_{entt::null}; ///< @brief 单位实体
     };
 
+    /**
+     * @brief 角色肖像悬浮进入事件
+     */
+    struct UIPortraitHoverEnterEvent
+    {
+        entt::id_type name_id_{entt::null}; ///< @brief 角色名称ID
+    };
+
+    /**
+     * @brief 角色肖像悬浮退出事件
+     */
+    struct UIPortraitHoverLeaveEvent
+    {
+    };
+
+    /**
+     * @brief 升级单位事件
+     */
+    struct UpgradeUnitEvent
+    {
+        entt::entity entity_{entt::null}; ///< @brief 单位实体
+        int cost_{0};                     ///< @brief 消耗费用
+    };
+
+    /**
+     * @brief 撤退单位事件
+     */
+    struct RetreatEvent
+    {
+        entt::entity entity_{entt::null}; ///< @brief 单位实体
+        int cost_{0};                     ///< @brief 返还费用
+    };
+
+    /**
+     * @brief 重新开始事件
+     */
+    struct RestartEvent
+    {
+    };
+
+    /**
+     * @brief 返回主菜单事件
+     */
+    struct BackToTitleEvent
+    {
+    };
+
+    /**
+     * @brief 保存游戏事件
+     */
+    struct SaveEvent
+    {
+    };
+
+    struct LevelClearEvent
+    {
+    };
+
 } // namespace game::defs

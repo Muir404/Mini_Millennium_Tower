@@ -26,6 +26,7 @@ namespace engine::audio
 namespace engine::core
 {
     class GameState;
+    class Time;
 
     /**
      * @brief 持有对核心引擎模块引用的上下文对象。
@@ -44,6 +45,7 @@ namespace engine::core
         engine::resource::ResourceManager &resource_manager_; ///< 资源管理器
         engine::audio::AudioPlayer &audio_player_;            ///< 音频播放器
         engine::core::GameState &game_state_;                 ///< 游戏状态
+        engine::core::Time &time_;                            ///< 游戏时间
 
     public:
         /**
@@ -66,7 +68,8 @@ namespace engine::core
             engine::render::TextRenderer &texture_renderer,
             engine::resource::ResourceManager &resource_manager,
             engine::audio::AudioPlayer &audio_player_,
-            engine::core::GameState &game_state_);
+            engine::core::GameState &game_state_,
+            engine::core::Time &time_);
 
         // 禁止拷贝和移动，Context 对象通常是唯一的或按需创建/传递
         Context(const Context &) = delete;
@@ -106,6 +109,10 @@ namespace engine::core
         engine::core::GameState &getGameState() const
         {
             return game_state_; // 获取游戏状态
+        }
+        engine::core::Time &getTime() const
+        {
+            return time_; // 获取游戏时间
         }
     };
 

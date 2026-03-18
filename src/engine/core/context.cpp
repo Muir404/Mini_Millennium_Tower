@@ -1,5 +1,6 @@
 #include "context.h"
 #include "game_state.h"
+#include "time.h"
 #include "../input/input_manager.h"
 #include "../render/renderer.h"
 #include "../render/camera.h"
@@ -20,14 +21,16 @@ namespace engine::core
         engine::render::TextRenderer &texture_renderer,
         engine::resource::ResourceManager &resource_manager,
         engine::audio::AudioPlayer &audio_player,
-        engine::core::GameState &game_state) : dispatcher_(dispatcher),
-                                               input_manager_(input_manager),
-                                               renderer_(renderer),
-                                               camera_(camera),
-                                               texture_renderer_(texture_renderer),
-                                               resource_manager_(resource_manager),
-                                               audio_player_(audio_player),
-                                               game_state_(game_state)
+        engine::core::GameState &game_state,
+        engine::core::Time &time) : dispatcher_(dispatcher),
+                                    input_manager_(input_manager),
+                                    renderer_(renderer),
+                                    camera_(camera),
+                                    texture_renderer_(texture_renderer),
+                                    resource_manager_(resource_manager),
+                                    audio_player_(audio_player),
+                                    game_state_(game_state),
+                                    time_(time)
     {
         spdlog::trace("[Context] 上下文已创建并初始化。");
     }

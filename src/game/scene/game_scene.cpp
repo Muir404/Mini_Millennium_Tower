@@ -89,10 +89,16 @@ using namespace entt::literals;
 namespace game::scene
 {
 
-    GameScene::GameScene(engine::core::Context &context)
-        : engine::scene::Scene("GameScene", context)
+    GameScene::GameScene(engine::core::Context &context,
+                         std::shared_ptr<game::factory::BlueprintManager> blueprint_manager,
+                         std::shared_ptr<game::data::SessionData> session_data,
+                         std::shared_ptr<game::data::UIConfig> ui_config,
+                         std::shared_ptr<game::data::LevelConfig> level_config) : engine::scene::Scene("GameScene", context),
+                                                                                  blueprint_manager_(blueprint_manager),
+                                                                                  session_data_(session_data),
+                                                                                  ui_config_(ui_config),
+                                                                                  level_config_(level_config)
     {
-
         spdlog::info("GameScene 构造完成");
     }
 
@@ -157,6 +163,8 @@ namespace game::scene
             spdlog::error("初始化敌人生成器失败");
             return;
         }
+
+        context_.getGameState().setState(engine::core::State::Playing);
         Scene::init();
     }
 
@@ -167,6 +175,16 @@ namespace game::scene
         // 每一帧最先清理死亡实体(要在dispatcher处理完事件后再清理，因此放在下一帧开头)
         remove_dead_system_->update(registry_);
 
+        // 处理暂停状态，部分系统仍旧运行
+        if (context_.getGameState().isPaused())
+        {
+            place_unit_system_->update(delta_time);
+            ysort_system_->update(registry_); // 调用顺序要在MovementSystem之后
+            selection_system_->update();
+            units_portrait_ui_->update(delta_time);
+            Scene::update(delta_time);
+            return;
+        }
         // 注意系统更新的顺序
         timer_system_->update(delta_time);
         game_rule_system_->update(delta_time);
@@ -205,11 +223,9 @@ namespace game::scene
     void GameScene::clean()
     {
         auto &dispatcher = context_.getDispatcher();
-        auto &input_manager = context_.getInputManager();
         // 断开所有事件连接
         dispatcher.disconnect(this);
         // 断开输入信号连接
-        input_manager.onAction("pause"_hs).disconnect<&GameScene::onClearAllPlayers>(this);
         Scene::clean();
     }
 
@@ -279,6 +295,10 @@ namespace game::scene
 
     bool GameScene::initEventConnections()
     {
+        auto &dispatcher = context_.getDispatcher();
+        dispatcher.sink<game::defs::RestartEvent>().connect<&GameScene::onRestart>(this);
+        dispatcher.sink<game::defs::BackToTitleEvent>().connect<&GameScene::onBackToTitle>(this);
+        dispatcher.sink<game::defs::SaveEvent>().connect<&GameScene::onSave>(this);
         return true;
     }
 
@@ -290,7 +310,7 @@ namespace game::scene
             if (!blueprint_manager_->loadEnemyClassBlueprints("assets/data/enemy_data.json") ||
                 !blueprint_manager_->loadPlayerClassBlueprints("assets/data/player_data.json") ||
                 !blueprint_manager_->loadProjectileBlueprints("assets/data/projectile_data.json") ||
-                !blueprint_manager_->loadEffectBlueprints("assets/data/effect_data.json")||
+                !blueprint_manager_->loadEffectBlueprints("assets/data/effect_data.json") ||
                 !blueprint_manager_->loadSkillBlueprints("assets/data/skill_data.json"))
             {
                 spdlog::error("加载蓝图失败");
@@ -346,8 +366,7 @@ namespace game::scene
 
     bool GameScene::initInputConnections()
     {
-        auto &input_manager = context_.getInputManager();
-        input_manager.onAction("pause"_hs).connect<&GameScene::onClearAllPlayers>(this);
+        // auto &input_manager = context_.getInputManager();
         return true;
     }
 
@@ -392,14 +411,27 @@ namespace game::scene
         return true;
     }
 
-    bool GameScene::onClearAllPlayers()
+    void GameScene::onRestart()
     {
-        auto view = registry_.view<game::component::PlayerComponent>();
-        for (auto entity : view)
-        {
-            context_.getDispatcher().enqueue<game::defs::RemovePlayerUnitEvent>(entity);
-        }
-        return true;
+        spdlog::info("重新开始关卡");
+        requestReplaceScene(std::make_unique<game::scene::GameScene>(
+            context_,
+            blueprint_manager_,
+            session_data_,
+            ui_config_,
+            level_config_));
+    }
+
+    void GameScene::onBackToTitle()
+    {
+    }
+
+    void GameScene::onSave()
+    {
+    }
+
+    void GameScene::onLevelClear()
+    {
     }
 
 } // namespace game::scene

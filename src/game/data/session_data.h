@@ -52,12 +52,14 @@ namespace game::data
         void clearUnits();                                                                      ///< @brief 清空角色列表
         void clear();                                                                           ///< @brief 清空所有数据
 
-        void addPoint(int add_point) { point_ += add_point; }    ///< @brief 增加积分
-        int addOneLevel() { return ++level_number_; }            ///< @brief 增加关卡号(进入下一关)
+        void addPoint(int add_point) { point_ += add_point; } ///< @brief 增加积分
+        int addOneLevel() { return ++level_number_; }         ///< @brief 增加关卡号(进入下一关)
+
         void setLevelClear(bool clear) { level_clear_ = clear; } ///< @brief 设置是否通关
 
         // --- getters ---
         [[nodiscard]] std::unordered_map<entt::id_type, UnitData> &getUnitMap() { return unit_map_; }
+        [[nodiscard]] UnitData &getUnitData(entt::id_type name_id) { return unit_map_[name_id]; }
         [[nodiscard]] int getLevelNumber() const { return level_number_; }
         [[nodiscard]] int getPoint() const { return point_; }
         [[nodiscard]] bool isLevelClear() const { return level_clear_; }

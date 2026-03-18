@@ -52,6 +52,9 @@ namespace game::ui
         void createUnitsPortraitUI();  ///< @brief 创建单位肖像UI
         void arrangeUnitsPortraitUI(); ///< @brief 排列单位肖像UI（肖像增/减时调用）
 
+        void movePortraitPanelRight(float delta_time); ///< @brief 移动肖像面板到右侧
+        void movePortraitPanelLeft(float delta_time);  ///< @brief 移动肖像面板到左侧
+
         void onRemoveUIPortraitEvent(const game::defs::RemoveUIPortraitEvent &event); ///< @brief 移除角色肖像事件回调
     };
 

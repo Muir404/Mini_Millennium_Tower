@@ -91,7 +91,11 @@ namespace game::scene
         entt::entity hovered_unit_{entt::null};  ///< 当前悬停的单位实体
 
     public:
-        GameScene(engine::core::Context &context);
+        GameScene(engine::core::Context &context,
+                  std::shared_ptr<game::factory::BlueprintManager> blueprint_manager = nullptr,
+                  std::shared_ptr<game::data::SessionData> session_data = nullptr,
+                  std::shared_ptr<game::data::UIConfig> ui_config = nullptr,
+                  std::shared_ptr<game::data::LevelConfig> level_config = nullptr);
         ~GameScene();
 
         void init() override;
@@ -112,7 +116,11 @@ namespace game::scene
         [[nodiscard]] bool initEnemySpawner();
         [[nodiscard]] bool initUnitsPortraitUI();
 
-        bool onClearAllPlayers();
+        // 场景相关函数
+        void onRestart();
+        void onBackToTitle();
+        void onSave();
+        void onLevelClear();
     };
 
 } // namespace game::scene
