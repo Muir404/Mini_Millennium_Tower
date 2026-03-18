@@ -260,8 +260,8 @@ namespace engine::core
         spdlog::trace("VSync 设置为: {}", config_->vsync_enabled_ ? "Enabled" : "Disabled");
 
         // 设置逻辑分辨率为窗口大小的一半（针对像素游戏）
-        int logical_width = static_cast<int>(config_->window_width_ * config_->window_logical_scale_);
-        int logical_height = static_cast<int>(config_->window_height_ * config_->window_logical_scale_);
+        int logical_width = static_cast<int>(static_cast<float>(config_->window_width_) * config_->window_logical_scale_);
+        int logical_height = static_cast<int>(static_cast<float>(config_->window_height_) * config_->window_logical_scale_);
         SDL_SetRenderLogicalPresentation(sdl_renderer_, logical_width, logical_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
         spdlog::trace("SDL 初始化成功。");
         return true;
