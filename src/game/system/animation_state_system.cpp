@@ -58,7 +58,7 @@ namespace game::system
         }
 
         // 敌人死亡特效动画结束，添加死亡标签
-        if (registry_.all_of<game::defs::OneShotReadyTag>(event.entity_))
+        if (registry_.all_of<game::defs::OneShotRemoveTag>(event.entity_))
         {
             registry_.emplace_or_replace<game::defs::DeadTag>(event.entity_);
             return;

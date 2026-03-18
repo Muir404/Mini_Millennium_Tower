@@ -160,7 +160,7 @@ namespace game::factory
 
         // 补充其他必要组件
         registry_.emplace<engine::component::RenderComponent>(entity); // 使用默认主图层
-        registry_.emplace<game::defs::OneShotReadyTag>(entity);
+        registry_.emplace<game::defs::OneShotRemoveTag>(entity);
         // 未来可添加其它组件
 
         return entity;
@@ -188,6 +188,27 @@ namespace game::factory
         {
             registry_.emplace<game::defs::ShowRangeTag>(entity);
         }
+        return entity;
+    }
+
+    entt::entity EntityFactory::createEffect(entt::id_type effect_id,
+                                             const glm::vec2 &position,
+                                             const bool is_flipped)
+    {
+        auto entity = registry_.create();
+        const auto &blueprint = blueprint_manager_.getEffectBlueprint(effect_id);
+        // 添加Transform组件
+        addTransformComponent(entity, position);
+
+        // 添加Sprite组件
+        addSpriteComponent(entity, blueprint.sprite_, is_flipped);
+
+        // 添加Animation组件, 只有一个动画，名称为特效id
+        addOneAnimationComponent(entity, blueprint.animation_, blueprint.sprite_, effect_id);
+
+        // 补充其他必要组件
+        registry_.emplace<engine::component::RenderComponent>(entity, engine::component::RenderComponent::MAIN_LAYER + 10);
+        registry_.emplace<game::defs::OneShotRemoveTag>(entity);
         return entity;
     }
 

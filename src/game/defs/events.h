@@ -56,6 +56,16 @@ namespace game::defs
     };
 
     /**
+     * @brief 特效事件
+     */
+    struct EffectEvent
+    {
+        entt::id_type effect_id_{entt::null}; ///< @brief 效果ID
+        glm::vec2 position_{};                ///< @brief 位置
+        bool is_flipped_{false};              ///< @brief 是否面向左侧
+    };
+
+    /**
      * @brief (创建)准备单位事件
      */
     struct PrepUnitEvent

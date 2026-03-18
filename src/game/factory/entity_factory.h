@@ -51,6 +51,10 @@ namespace game::factory
                                     int cost,
                                     const glm::vec2 &position);
 
+        entt::entity createEffect(entt::id_type effect_id,
+                                  const glm::vec2 &position,
+                                  const bool is_flipped = false);
+
     private:
         // --- 组件创建函数 ---
         void addTransformComponent(entt::entity entity,

@@ -130,4 +130,11 @@ namespace game::data
         SoundBlueprint sounds_{};
     };
 
+    struct EffectBlueprint
+    {
+        entt::id_type id_{entt::null}; ///< 效果ID
+        std::string name_{""};
+        SpriteBlueprint sprite_{};
+        AnimationBlueprint animation_{};
+    };
 } // namespace game::data

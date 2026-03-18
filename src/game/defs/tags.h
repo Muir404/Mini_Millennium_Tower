@@ -68,7 +68,7 @@ namespace game::defs
   /**
    * @brief 一次性播放标签，例如死亡
    */
-  struct OneShotReadyTag
+  struct OneShotRemoveTag
   {
   };
 

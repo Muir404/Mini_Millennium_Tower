@@ -5,6 +5,8 @@
 #include <entt/entity/registry.hpp>
 #include <entt/signal/dispatcher.hpp>
 
+#include <spdlog/spdlog.h>
+
 namespace game::system
 {
 
@@ -17,11 +19,17 @@ namespace game::system
         : registry_(registry), dispatcher_(dispatcher), entity_factory_(entity_factory)
     {
         dispatcher_.sink<game::defs::EnemyDeadEffectEvent>().connect<&EffectSystem::onEnemyDeadEffectEvent>(this);
+        dispatcher_.sink<game::defs::EffectEvent>().connect<&EffectSystem::onEffectEvent>(this);
     }
 
     void EffectSystem::onEnemyDeadEffectEvent(const game::defs::EnemyDeadEffectEvent &event)
     {
         entity_factory_.createEnemyDeadEffect(event.class_id_, event.position_, event.is_flipped_);
+    }
+
+    void EffectSystem::onEffectEvent(const game::defs::EffectEvent &event)
+    {
+        entity_factory_.createEffect(event.effect_id_, event.position_, event.is_flipped_);
     }
 
 } // namespace game::system

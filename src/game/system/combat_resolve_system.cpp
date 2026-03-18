@@ -142,6 +142,8 @@ namespace game::system
             registry_.remove<game::defs::InjuredTag>(event.target_);
         }
         // TODO: 添加治疗特效
+        const auto &transform = registry_.get<engine::component::TransformComponent>(event.target_);
+        dispatcher_.enqueue(game::defs::EffectEvent{"heal"_hs, transform.position_, false});
     }
 
     // --- 辅助函数 ---
