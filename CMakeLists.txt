@@ -65,6 +65,52 @@ endif()
 #   可通过 cmake -DBUILD_SHARED_LIBS=ON 手动开启
 option(BUILD_SHARED_LIBS "依赖库默认编译为动态库" OFF)
 
+
+
+
+# ==============================================================================
+# 内存泄漏检测 (AddressSanitizer) 配置
+# ==============================================================================
+option(ENABLE_ASAN "启用 AddressSanitizer 内存检测" OFF)
+
+if(ENABLE_ASAN)
+    message(STATUS "AddressSanitizer (ASan): 正在开启...")
+    
+    # 仅在非 MSVC 编译器下添加（Clang/GCC）
+    if(NOT MSVC)
+        # 编译和链接都需要添加 -fsanitize=address
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
+        
+        # 如果是 Linux 且在 Debug 模式，开启具体的泄漏检测定义
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            add_definitions(-D_ASAN_LEAK_DETECTION)
+        endif()
+    else()
+        # 如果你以后用 MSVC，标志是 /fsanitize=address
+        target_compile_options(${TARGET} PRIVATE /fsanitize=address)
+        target_link_options(${TARGET} PRIVATE /fsanitize=address)
+    endif()
+endif()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ==============================================================================
 # 依赖管理模块 - FetchContent配置
 # ==============================================================================
@@ -419,6 +465,7 @@ set(SOURCES
     src/game/system/render_range_system.cpp
     src/game/system/debug_ui_system.cpp
     src/game/system/selection_system.cpp
+    src/game/system/skill_system.cpp
 
     # game-loader
     src/game/loader/entity_builder_TD.cpp

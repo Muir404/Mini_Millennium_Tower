@@ -55,6 +55,9 @@ namespace game::factory
                                   const glm::vec2 &position,
                                   const bool is_flipped = false);
 
+        entt::entity createSkillDisplay(entt::id_type effect_id,
+                                        const glm::vec2 &position);
+
     private:
         // --- 组件创建函数 ---
         void addTransformComponent(entt::entity entity,
@@ -94,6 +97,9 @@ namespace game::factory
 
         void addProjectileComponent(entt::entity entity,
                                     entt::id_type id);
+
+        void addSkillComponent(entt::entity entity,
+                               entt::id_type skill_id);
 
         // TODO: 未来添加其他组件创建函数
     };

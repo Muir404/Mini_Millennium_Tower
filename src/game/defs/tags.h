@@ -99,4 +99,25 @@ namespace game::defs
   struct ShowRangeTag
   {
   };
+
+  /**
+   * @brief 被动技能标签，用于被动技能
+   */
+  struct PassiveSkillTag
+  {
+  };
+
+  /**
+   * @brief 技能准备就绪标签，用于被动技能
+   */
+  struct SkillReadyTag
+  {
+  };
+
+  /**
+   * @brief 技能激活标签，用于技能激活
+   */
+  struct SkillActiveTag
+  {
+  };
 }

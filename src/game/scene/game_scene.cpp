@@ -35,6 +35,7 @@
 #include "../system/render_range_system.h"
 #include "../system/debug_ui_system.h"
 #include "../system/selection_system.h"
+#include "../system/skill_system.h"
 
 #include "../ui/units_portrait_ui.h"
 
@@ -167,7 +168,7 @@ namespace game::scene
         remove_dead_system_->update(registry_);
 
         // 注意系统更新的顺序
-        timer_system_->update(registry_, delta_time);
+        timer_system_->update(delta_time);
         game_rule_system_->update(delta_time);
         block_system_->update(registry_, dispatcher);
         set_target_system_->update(registry_);
@@ -289,7 +290,8 @@ namespace game::scene
             if (!blueprint_manager_->loadEnemyClassBlueprints("assets/data/enemy_data.json") ||
                 !blueprint_manager_->loadPlayerClassBlueprints("assets/data/player_data.json") ||
                 !blueprint_manager_->loadProjectileBlueprints("assets/data/projectile_data.json") ||
-                !blueprint_manager_->loadEffectBlueprints("assets/data/effect_data.json"))
+                !blueprint_manager_->loadEffectBlueprints("assets/data/effect_data.json")||
+                !blueprint_manager_->loadSkillBlueprints("assets/data/skill_data.json"))
             {
                 spdlog::error("加载蓝图失败");
                 return false;
@@ -317,7 +319,7 @@ namespace game::scene
         set_target_system_ = std::make_unique<game::system::SetTargetSystem>();
         attack_starter_system_ = std::make_unique<game::system::AttackStarterSystem>();
         orientation_system_ = std::make_unique<game::system::OrientationSystem>();
-        timer_system_ = std::make_unique<game::system::TimerSystem>();
+        timer_system_ = std::make_unique<game::system::TimerSystem>(registry_, dispatcher);
         animation_state_system_ = std::make_unique<game::system::AnimationStateSystem>(registry_, dispatcher);
         animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
         combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
@@ -329,6 +331,7 @@ namespace game::scene
         render_range_system_ = std::make_unique<game::system::RenderRangeSystem>();
         debug_ui_system_ = std::make_unique<game::system::DebugUISystem>(registry_, context_);
         selection_system_ = std::make_unique<game::system::SelectionSystem>(registry_, context_);
+        skill_system_ = std::make_unique<game::system::SkillSystem>(registry_, dispatcher, *entity_factory_);
 
         spdlog::info("系统初始化完成");
         return true;

@@ -130,11 +130,41 @@ namespace game::data
         SoundBlueprint sounds_{};
     };
 
+    /**
+     * @brief 效果蓝图, 包含所有必要的子蓝图，用于创建效果实体中的所有组件
+     */
     struct EffectBlueprint
     {
         entt::id_type id_{entt::null}; ///< 效果ID
         std::string name_{""};
         SpriteBlueprint sprite_{};
         AnimationBlueprint animation_{};
+    };
+
+    /**
+     * @brief 增益效果蓝图, 包含所有必要的子蓝图，用于创建增益效果实体中的所有组件
+     */
+    struct BuffBlueprint
+    {
+        float hp_multiplier_{1.0f};
+        float atk_multiplier_{1.0f};
+        float def_multiplier_{1.0f};
+        float range_multiplier_{1.0f};
+        float atk_interval_multiplier_{1.0f};
+        float cost_regen_{0.0f};
+    };
+
+    /**
+     * @brief 技能蓝图, 包含所有必要的子蓝图，用于创建技能实体中的所有组件
+     */
+    struct SkillBlueprint
+    {
+        entt::id_type id_{entt::null}; ///< 技能ID
+        std::string name_{""};
+        std::string description_{""};
+        bool passive_{false};
+        float cooldown_{0.0f};
+        float duration_{0.0f};
+        BuffBlueprint buff_{};
     };
 } // namespace game::data

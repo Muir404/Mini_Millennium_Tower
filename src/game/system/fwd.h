@@ -19,4 +19,5 @@ namespace game::system
     class PlaceUnitSystem;      // 放置单位系统
     class DebugUISystem;        // 调试UI系统
     class SelectionSystem;      // 选择系统
+    class SkillSystem;          // 技能系统
 } // namespace game::system
