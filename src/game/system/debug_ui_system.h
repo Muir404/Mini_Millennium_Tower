@@ -8,6 +8,11 @@ namespace engine::core
     class Context;
 }
 
+namespace game::scene
+{
+    class TitleScene;
+}
+
 namespace game::system
 {
 
@@ -26,11 +31,12 @@ namespace game::system
         bool show_debug_ui_{true};                   ///< @brief 是否显示调试UI
 
     public:
-        DebugUISystem(entt::registry &registry, engine::core::Context &context);
+        DebugUISystem(entt::registry &registry, engine::core::Context &context); /// @brief 构造函数，初始化系统依赖
 
         // 步骤系列三：更新 ImGui 状态
         // ImGui 步骤3: 一轮循环内，ImGui 需要做的操作（逻辑+渲染）
-        void update();
+        void update();                                          /// @brief 更新调试UI状态
+        void updateTitle(game::scene::TitleScene &title_scene); /// @brief 更新标题场景的调试UI
 
     private:
         // 封装开始、结束帧的方法
@@ -45,6 +51,17 @@ namespace game::system
         void renderSettingUI();
         void renderDebugUI();
 
+        // TileScene
+        void renderTitleLogo();
+        void renderTitleButtons(game::scene::TitleScene &title_scene);
+
+        // Shared，所有场景都有的UI
+        void renderUnitInfoUI(bool &show_unit_info);
+        void renderSavePanelUI(bool &show_save_panel);
+        void renderLoadPanelUI(bool &show_load_panel);
+        void renderUnitTable();
+
+        // 事件回调函数
         void onUIPortraitHoverEnterEvent(const game::defs::UIPortraitHoverEnterEvent &event);
         void onUIPortraitHoverExitEvent();
     };

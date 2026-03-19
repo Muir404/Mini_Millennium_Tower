@@ -89,7 +89,7 @@ namespace game::scene
         int level_number_{1};                    ///< 当前关卡编号
         entt::entity selected_unit_{entt::null}; ///< 当前选中的单位实体
         entt::entity hovered_unit_{entt::null};  ///< 当前悬停的单位实体
-
+        bool show_save_panel_{false};            ///< 是否显示保存面板
     public:
         GameScene(engine::core::Context &context,
                   std::shared_ptr<game::factory::BlueprintManager> blueprint_manager = nullptr,

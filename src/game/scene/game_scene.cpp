@@ -1,4 +1,6 @@
 #include "game_scene.h"
+#include "title_scene.h"
+
 #include "../loader/entity_builder_TD.h"
 
 #include "../defs/tags.h"
@@ -392,6 +394,7 @@ namespace game::scene
         registry_.ctx().emplace<std::shared_ptr<game::data::UIConfig>>(ui_config_);
         registry_.ctx().emplace_as<entt::entity &>("selected_unit"_hs, selected_unit_);
         registry_.ctx().emplace_as<entt::entity &>("hovered_unit"_hs, hovered_unit_);
+        registry_.ctx().emplace_as<bool &>("show_save_panel"_hs, show_save_panel_);
 
         spdlog::info("初始化游戏上下文");
         return true;
@@ -424,10 +427,15 @@ namespace game::scene
 
     void GameScene::onBackToTitle()
     {
+        spdlog::info("返回标题场景");
+        requestReplaceScene(std::make_unique<game::scene::TitleScene>(context_));
     }
 
     void GameScene::onSave()
     {
+        spdlog::info("保存游戏");
+        show_save_panel_ = !show_save_panel_;
+        /* 用ImGui快速实现逻辑，未来再完善游戏内UI */
     }
 
     void GameScene::onLevelClear()

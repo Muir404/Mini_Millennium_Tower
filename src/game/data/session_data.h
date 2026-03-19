@@ -37,6 +37,9 @@ namespace game::data
         /// @brief 储存玩家拥有的角色 (角色名id ：角色数据)
         std::unordered_map<entt::id_type, UnitData> unit_map_;
 
+        /// @brief 储存玩家拥有的角色指针 (角色数据指针列表)
+        std::vector<UnitData *> unit_data_list_;
+
     public:
         SessionData() = default;
         ~SessionData() = default;
@@ -44,6 +47,8 @@ namespace game::data
         bool loadDefaultData(std::string_view path = "assets/data/default_session_data.json"); ///< @brief 加载默认数据
         bool loadFromFile(std::string_view path);                                              ///< @brief 加载文件数据(读档)
         bool saveToFile(std::string_view path);                                                ///< @brief 保存文件数据(存档)
+
+        void mapUnitDataList(); ///< @brief 映射角色数据指针列表
 
         void addUnit(std::string_view name, std::string_view class_str, int level, int rarity); ///< @brief 添加角色
         void removeUnit(entt::id_type name_id);                                                 ///< @brief 删除角色
@@ -59,6 +64,7 @@ namespace game::data
 
         // --- getters ---
         [[nodiscard]] std::unordered_map<entt::id_type, UnitData> &getUnitMap() { return unit_map_; }
+        [[nodiscard]] std::vector<UnitData *> &getUnitDataList() { return unit_data_list_; }
         [[nodiscard]] UnitData &getUnitData(entt::id_type name_id) { return unit_map_[name_id]; }
         [[nodiscard]] int getLevelNumber() const { return level_number_; }
         [[nodiscard]] int getPoint() const { return point_; }

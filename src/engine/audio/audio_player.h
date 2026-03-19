@@ -25,7 +25,7 @@ namespace engine::audio
         engine::resource::ResourceManager *resource_manager_; ///< @brief 指向 ResourceManager 的非拥有指针，用于加载和管理音频资源。
         MIX_Mixer *mixer_{nullptr};                           ///< @brief SDL_mixer 混音器指针（非拥有）。
         MIX_Track *music_track_{nullptr};                     ///< @brief 专用于背景音乐播放的轨道（拥有）。
-        entt::id_type current_music_id_;                      ///< @brief 当前正在播放的音乐ID，用于避免重复播放同一音乐。
+        entt::id_type current_music_id_{entt::null};          ///< @brief 当前正在播放的音乐ID，用于避免重复播放同一音乐。
 
     public:
         /**
