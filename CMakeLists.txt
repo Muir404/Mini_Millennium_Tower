@@ -96,7 +96,16 @@ endif()
 
 
 
-
+# 强制使用 lld 链接器 (如果可用)
+if(NOT MSVC)
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=lld -Wl,--version OUTPUT_VARIABLE LLD_OUT ERROR_QUIET)
+    if(LLD_OUT)
+        add_link_options("-fuse-ld=lld")
+        message(STATUS "Linker: 使用 LLD 提升链接速度")
+    else()
+        message(STATUS "Linker: 未找到 LLD，回退至默认链接器")
+    endif()
+endif()
 
 
 
