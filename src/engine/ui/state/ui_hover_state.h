@@ -20,7 +20,7 @@ namespace engine::ui::state
     private:
         void enter() override;
         void update(float delta_time, engine::core::Context &context) override;
-        
+
         bool onMousePressed();
     };
 

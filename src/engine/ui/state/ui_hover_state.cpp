@@ -35,7 +35,7 @@ namespace engine::ui::state
         return true;
     }
 
-    void UIHoverState::update(float delta_time, engine::core::Context &context)
+    void UIHoverState::update(float /*delta_time*/, engine::core::Context &context)
     {
         auto &input_manager = context.getInputManager();
         auto mouse_pos = input_manager.getLogicalMousePosition();

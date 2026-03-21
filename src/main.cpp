@@ -18,6 +18,7 @@ void setupInitialScene(engine::core::Context &context)
 int main(int, char *[])
 {
     spdlog::set_level(spdlog::level::info);
+
     spdlog::info("游戏开始");
 
     engine::core::GameApp app;
