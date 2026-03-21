@@ -169,8 +169,27 @@ namespace game::defs
     {
     };
 
+    /**
+     * @brief 通关事件
+     */
     struct LevelClearEvent
     {
+    };
+
+    /**
+     * @brief 通关延迟事件
+     */
+    struct LevelClearDelayedEvent
+    {
+        float delay_time_{3.0f}; ///< @brief 延迟时间
+    };
+
+    /**
+     * @brief 游戏结束事件
+     */
+    struct GameEndEvent
+    {
+        bool is_win_{false}; ///< @brief 是否胜利
     };
 
 } // namespace game::defs

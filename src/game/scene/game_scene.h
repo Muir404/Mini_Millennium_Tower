@@ -39,8 +39,15 @@ namespace game::spawner
     class EnemySpawner;
 }
 
+namespace game::defs
+{
+    struct GameEndEvent;
+}
+
 namespace game::scene
 {
+    class LevelClearScene;
+    class EndScene;
 
     class GameScene final : public engine::scene::Scene
     {
@@ -121,6 +128,7 @@ namespace game::scene
         void onBackToTitle();
         void onSave();
         void onLevelClear();
+        void onGameEndEvent(const game::defs::GameEndEvent &event);
     };
 
 } // namespace game::scene

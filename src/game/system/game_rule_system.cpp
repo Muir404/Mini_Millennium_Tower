@@ -41,6 +41,17 @@ namespace game::system
             auto &cost_regen = registry_.get<component::CostRegenComponent>(entity);
             game_stats.cost_ += cost_regen.rate_ * delta_time;
         }
+
+        // 更新通关延迟定时器
+        if (is_level_clear_)
+        {
+            level_clear_timer_ -= delta_time;
+            if (level_clear_timer_ <= 0.0f)
+            {
+                dispatcher_.enqueue(game::defs::LevelClearEvent{});
+                is_level_clear_ = false;
+            }
+        }
     }
 
     void GameRuleSystem::onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &)
@@ -53,6 +64,11 @@ namespace game::system
         {
             spdlog::warn("基地被摧毁");
             // TODO: 切换场景逻辑
+            dispatcher_.enqueue(game::defs::GameEndEvent{false});
+        }
+        else if ((game_stats.enemy_arrived_count_ + game_stats.enemy_killed_count_) >= game_stats.enemy_count_)
+        {
+            dispatcher_.enqueue(game::defs::LevelClearEvent{});
         }
     }
 
@@ -90,6 +106,12 @@ namespace game::system
         game_stats.cost_ += event.cost_;
         // 发送移除单位事件
         dispatcher_.enqueue(game::defs::RemovePlayerUnitEvent{event.entity_});
+    }
+
+    void GameRuleSystem::onLevelClearDelayedEvent(const game::defs::LevelClearDelayedEvent &event)
+    {
+        level_clear_timer_ = event.delay_time_;
+        is_level_clear_ = true;
     }
 
 } // namespace game::system

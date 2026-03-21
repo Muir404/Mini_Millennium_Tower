@@ -101,7 +101,8 @@ namespace game::system
                 if ((game_stats.enemy_killed_count_ + game_stats.enemy_arrived_count_) >= game_stats.enemy_count_)
                 {
                     spdlog::warn("所有敌人已死亡");
-                    // change scene to game over scene
+                    // 通关
+                    dispatcher_.enqueue(game::defs::LevelClearDelayedEvent{});
                 }
 
                 // 如果敌人被阻挡，减少阻挡者的阻挡计数

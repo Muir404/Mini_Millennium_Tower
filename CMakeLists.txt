@@ -455,6 +455,8 @@ set(SOURCES
     # game-scene
     src/game/scene/game_scene.cpp
     src/game/scene/title_scene.cpp
+    src/game/scene/level_clear_scene.cpp
+    src/game/scene/end_scene.cpp
 
     # game-system
     src/game/system/remove_dead_system.cpp

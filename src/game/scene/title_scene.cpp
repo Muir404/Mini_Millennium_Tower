@@ -207,7 +207,7 @@ namespace game::scene
             return false;
 
         // 设置背景音乐
-        // context_.getAudioPlayer().playMusic("title_bgm"_hs);
+        context_.getAudioPlayer().playMusic("title_bgm"_hs);
 
         /* 先用ImGui实现UI，未来再使用游戏内UI */
         return true;

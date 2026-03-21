@@ -11,6 +11,8 @@ namespace engine::core
 namespace game::scene
 {
     class TitleScene;
+    class LevelClearScene;
+    class EndScene;
 }
 
 namespace game::system
@@ -35,8 +37,10 @@ namespace game::system
 
         // 步骤系列三：更新 ImGui 状态
         // ImGui 步骤3: 一轮循环内，ImGui 需要做的操作（逻辑+渲染）
-        void update();                                          /// @brief 更新调试UI状态
-        void updateTitle(game::scene::TitleScene &title_scene); /// @brief 更新标题场景的调试UI
+        void update();                                                          /// @brief 更新调试UI状态
+        void updateTitle(game::scene::TitleScene &title_scene);                 /// @brief 更新标题场景的调试UI
+        void updateLevelClear(game::scene::LevelClearScene &level_clear_scene); /// @brief 更新关卡清除场景的调试UI
+        void updateEnd(game::scene::EndScene &end_scene);                       /// @brief 更新游戏结束场景的调试UI
 
     private:
         // 封装开始、结束帧的方法
@@ -54,6 +58,15 @@ namespace game::system
         // TileScene
         void renderTitleLogo();
         void renderTitleButtons(game::scene::TitleScene &title_scene);
+
+        // LevelClearScene
+        void renderLevelClearText();
+        void renderLevelClearTable(game::scene::LevelClearScene &level_clear_scene);
+        void renderLevelClearButtons(game::scene::LevelClearScene &level_clear_scene);
+
+        // EndScene
+        void renderEndText(game::scene::EndScene &end_scene);
+        void renderEndButtons(game::scene::EndScene &end_scene);
 
         // Shared，所有场景都有的UI
         void renderUnitInfoUI(bool &show_unit_info);
