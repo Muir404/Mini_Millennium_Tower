@@ -1,0 +1,71 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 27,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "environment": {
+                "CC": "clang",
+                "CXX": "clang++"
+            }
+        },
+        {
+            "name": "dev",
+            "inherits": "base",
+            "displayName": "Development (Debug + Sanitizers)",
+            "description": "日常开发：Debug模式，开启ASAN、UBSAN和Clang-Tidy",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_LLD_LINKER": "ON",
+                "ENABLE_ASAN": "ON",
+                "ENABLE_UBSAN": "ON",
+                "ENABLE_CLANG_TIDY": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "inherits": "base",
+            "displayName": "Release (Optimized)",
+            "description": "发布版本：Release模式，开启ThinLTO极致优化",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENABLE_LLD_LINKER": "ON",
+                "ENABLE_THINLTO": "ON"
+            }
+        },
+        {
+            "name": "relwithdbg",
+            "inherits": "base",
+            "displayName": "Profile (RelWithDebInfo)",
+            "description": "性能分析：带调试信息的Release，用于Profiler",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ENABLE_LLD_LINKER": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "jobs": 12
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "jobs": 12
+        },
+        {
+            "name": "relwithdbg",
+            "configurePreset": "relwithdbg",
+            "jobs": 12
+        }
+    ]
+}
