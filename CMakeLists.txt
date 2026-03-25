@@ -73,6 +73,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     if(ENABLE_UBSAN)
         message(STATUS "  ✓ UndefinedBehaviorSanitizer (UBSAN) enabled")
         list(APPEND SANITIZER_FLAGS -fsanitize=undefined -fsanitize=float-divide-by-zero -fsanitize=integer)
+
+        # 【新增】指定 UBSan 抑制文件
+        # 只有当文件存在时才添加，避免报错
+        if(EXISTS "${CMAKE_SOURCE_DIR}/sanitizer_ubsan.supp")
+            message(STATUS "  ✓ 应用 UBSan 抑制文件: sanitizer_ubsan.supp")
+            # 注意：UBSan 抑制通常通过环境变量或 -fsanitize-blacklist (旧版) 传递
+            # 这里我们通过环境变量传递，兼容性最好
+        endif()
     endif()
 
     if(SANITIZER_FLAGS)
@@ -99,8 +107,15 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
         if(CLANG_TIDY_EXE)
             message(STATUS "  ✓ clang-tidy found: ${CLANG_TIDY_EXE}")
-            # 配置检查项：启用大部分检查，排除噪音项
-            set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=*,-llvm-header-guard,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-fuchsia-*")
+
+            # 【修改点 1】添加 -header-filter 限制只检查 src 目录下的头文件
+            # 【修改点 2】添加 --use-color 让 Clang-Tidy 也输出彩色
+            set(CMAKE_CXX_CLANG_TIDY
+                "${CLANG_TIDY_EXE}"
+                "-checks=*,-llvm-header-guard,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-fuchsia-*"
+                "-header-filter=${CMAKE_SOURCE_DIR}/src/.*" # 正则：只匹配 src 开头的路径
+                "--use-color" # 强制 clang-tidy 输出彩色
+            )
         else()
             message(WARNING "  ✗ clang-tidy not found")
         endif()

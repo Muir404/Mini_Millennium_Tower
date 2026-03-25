@@ -1,0 +1,12 @@
+# sanitizer_ubsan.supp
+# 功能：屏蔽第三方库的 UBSan 警告
+
+# 屏蔽 external 目录下的所有文件
+src:*/external/*
+
+# 屏蔽 prebuilt 目录下的所有文件
+src:*/prebuilt/*
+
+# 屏蔽系统头文件 (可选，如果你想更激进)
+# src:/usr/include/*
+# src:/usr/local/include/*
