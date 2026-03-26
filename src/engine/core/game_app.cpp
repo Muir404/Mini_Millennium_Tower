@@ -32,6 +32,10 @@ namespace engine::core
         }
     }
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
     void GameApp::run()
     {
         if (!init())
@@ -39,20 +43,36 @@ namespace engine::core
             spdlog::error("GameApp 初始化失败，无法运行游戏。");
             return;
         }
-
+#ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop_arg([](void *arg)
+                                     { static_cast<GameApp *>(arg)->oneIter(); }, this, 0, 1);
+#else
         while (is_running_)
         {
-            time_->update();
-            float delta_time = time_->getDeltaTime();
-
-            handleEvents();
-            update(delta_time);
-            render();
-
-            // 分发事件
-            dispatcher_->update();
+            oneIter();
         }
         close();
+#endif
+    }
+
+    void GameApp::oneIter()
+    {
+        time_->update();
+        float delta_time = time_->getDeltaTime();
+
+        handleEvents();
+        update(delta_time);
+        render();
+
+        // 分发事件
+        dispatcher_->update();
+#ifdef __EMSCRIPTEN__
+        if (!is_running_)
+        {
+            emscripten_cancel_main_loop();
+            close();
+        }
+#endif
     }
 
     void GameApp::registerSceneSetup(std::function<void(engine::core::Context &)> func)

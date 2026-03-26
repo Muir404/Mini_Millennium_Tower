@@ -72,6 +72,7 @@ namespace engine::core
         ~GameApp();
 
         void run();
+        void oneIter();
 
         void registerSceneSetup(std::function<void(engine::core::Context &)> func);
 

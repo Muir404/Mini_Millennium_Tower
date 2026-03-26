@@ -9,7 +9,7 @@
 .cursor/
 
 # build
-build/
+build*/
 build-*/
 cmake-build-*/
 *-darwin
