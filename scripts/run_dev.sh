@@ -12,7 +12,8 @@ LOG_FILE="build_${PRESET_NAME}.log"
 # 强制禁用重定向时的颜色，防止 log.txt 乱码
 export NO_COLOR=1
 export CLICOLOR=0
-
+# 通用去颜色命令（sed，所有Linux自带）
+REMOVE_COLORS='sed -e "s/\x1B\[[0-9;]*[mGK]//g"'
 # -------------------------- 欢迎信息 --------------------------
 echo "=============================================="
 echo "  正在启动 [开发模式] (Dev Mode)"
@@ -24,7 +25,7 @@ echo "=============================================="
 
 # -------------------------- 1. 配置 CMake --------------------------
 echo "[1/3] 正在配置 CMake (--preset ${PRESET_NAME})..."
-if ! cmake --preset "$PRESET_NAME" 2>&1 | tee -a "$LOG_FILE"; then
+if ! cmake --preset "$PRESET_NAME" 2>&1 | eval $REMOVE_COLORS | tee -a "$LOG_FILE"; then
     echo "❌ CMake 配置失败，请查看 ${LOG_FILE}"
     exit 1
 fi
@@ -32,7 +33,7 @@ fi
 # -------------------------- 2. 构建 --------------------------
 echo ""
 echo "[2/3] 正在构建 (--preset ${PRESET_NAME})..."
-if ! cmake --build --preset "$PRESET_NAME" 2>&1 | tee -a "$LOG_FILE"; then
+if ! cmake --build --preset "$PRESET_NAME" 2>&1 | eval $REMOVE_COLORS | tee -a "$LOG_FILE"; then
     echo "❌ 编译失败，请查看 ${LOG_FILE}"
     exit 1
 fi
@@ -42,7 +43,7 @@ echo ""
 echo "[3/3] 正在启动游戏 (使用 Dummy 音频驱动)..."
 echo "=============================================="
 # 注意：这里使用 SDL_AUDIO_DRIVER=dummy
-SDL_AUDIO_DRIVER=dummy ./build/${PRESET_NAME}/TDSDL-Linux 2>&1 | tee -a "$LOG_FILE"
+SDL_AUDIO_DRIVER=dummy ./build/${PRESET_NAME}/TDSDL-Linux 2>&1 | eval $REMOVE_COLORS | tee -a "$LOG_FILE"
 
 # 记录退出码
 EXIT_CODE=${PIPESTATUS[0]}
