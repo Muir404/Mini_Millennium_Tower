@@ -147,9 +147,6 @@ namespace engine::core
     {
         // 游戏逻辑更新
         scene_manager_->update(delta_time);
-
-        // // 分发事件
-        // dispatcher_->update();
     }
 
     void GameApp::render()

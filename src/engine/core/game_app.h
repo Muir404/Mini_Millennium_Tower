@@ -54,18 +54,18 @@ namespace engine::core
         std::function<void(engine::core::Context &)> scene_setup_func_;
 
         // 引擎组件
-        std::unique_ptr<entt::dispatcher> dispatcher_; // 事件分发器
-        std::unique_ptr<engine::core::Time> time_;
-        std::unique_ptr<engine::resource::ResourceManager> resource_manager_;
-        std::unique_ptr<engine::render::Renderer> renderer_;
-        std::unique_ptr<engine::render::Camera> camera_;
-        std::unique_ptr<engine::render::TextRenderer> text_renderer_;
-        std::unique_ptr<engine::core::Config> config_;
-        std::unique_ptr<engine::input::InputManager> input_manager_;
-        std::unique_ptr<engine::core::Context> context_;
-        std::unique_ptr<engine::scene::SceneManager> scene_manager_;
-        std::unique_ptr<engine::audio::AudioPlayer> audio_player_;
-        std::unique_ptr<engine::core::GameState> game_state_;
+        std::unique_ptr<entt::dispatcher> dispatcher_;                        // 事件分发器
+        std::unique_ptr<engine::core::Time> time_;                            // 时间管理器
+        std::unique_ptr<engine::resource::ResourceManager> resource_manager_; // 资源管理器
+        std::unique_ptr<engine::render::Renderer> renderer_;                  // 渲染器
+        std::unique_ptr<engine::render::Camera> camera_;                      // 相机
+        std::unique_ptr<engine::render::TextRenderer> text_renderer_;         // 文本渲染器
+        std::unique_ptr<engine::core::Config> config_;                        // 配置管理器
+        std::unique_ptr<engine::input::InputManager> input_manager_;          // 输入管理器
+        std::unique_ptr<engine::core::Context> context_;                      // 上下文管理器
+        std::unique_ptr<engine::scene::SceneManager> scene_manager_;          // 场景管理器
+        std::unique_ptr<engine::audio::AudioPlayer> audio_player_;            // 音频播放器
+        std::unique_ptr<engine::core::GameState> game_state_;                 // 游戏状态管理器
 
     public:
         GameApp();

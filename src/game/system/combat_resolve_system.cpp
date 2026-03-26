@@ -50,12 +50,6 @@ namespace game::system
         // 如果目标是玩家
         if (registry_.all_of<game::component::PlayerComponent>(event.target_))
         {
-
-            // if (registry_.all_of<game::defs::DeadTag>(event.target_))
-            // {
-            //     return;
-            // }
-
             spdlog::info("玩家 ID: {} 受到 ID: {} 的伤害, 剩余生命值: {}", entt::to_integral(event.target_), entt::to_integral(event.attacker_), target_stats.hp_);
 
             // 死亡情况
