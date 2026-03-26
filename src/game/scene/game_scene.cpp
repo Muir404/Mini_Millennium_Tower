@@ -376,7 +376,12 @@ namespace game::scene
 
     bool GameScene::initInputConnections()
     {
-        // auto &input_manager = context_.getInputManager();
+        auto &dispatcher = context_.getDispatcher();
+        dispatcher.sink<game::defs::RestartEvent>().connect<&GameScene::onRestart>(this);
+        dispatcher.sink<game::defs::BackToTitleEvent>().connect<&GameScene::onBackToTitle>(this);
+        dispatcher.sink<game::defs::SaveEvent>().connect<&GameScene::onSave>(this);
+        dispatcher.sink<game::defs::LevelClearEvent>().connect<&GameScene::onLevelClear>(this);
+        dispatcher.sink<game::defs::GameEndEvent>().connect<&GameScene::onGameEndEvent>(this);
         return true;
     }
 

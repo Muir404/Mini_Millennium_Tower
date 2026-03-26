@@ -25,9 +25,18 @@ namespace game::system
 {
 
     GameRuleSystem::GameRuleSystem(entt::registry &registry, entt::dispatcher &dispatcher)
-        : registry_(registry), dispatcher_(dispatcher) {}
+        : registry_(registry), dispatcher_(dispatcher)
+    {
+        dispatcher_.sink<game::defs::EnemyArriveHomeEvent>().connect<&GameRuleSystem::onEnemyArriveHome>(this);
+        dispatcher_.sink<game::defs::UpgradeUnitEvent>().connect<&GameRuleSystem::onUpgradeUnitEvent>(this);
+        dispatcher_.sink<game::defs::RetreatEvent>().connect<&GameRuleSystem::onRetreatEvent>(this);
+        dispatcher_.sink<game::defs::LevelClearDelayedEvent>().connect<&GameRuleSystem::onLevelClearDelayedEvent>(this);
+    }
 
-    GameRuleSystem::~GameRuleSystem() {}
+    GameRuleSystem::~GameRuleSystem()
+    {
+        dispatcher_.disconnect(this);
+    }
 
     void GameRuleSystem::update(float delta_time)
     {
