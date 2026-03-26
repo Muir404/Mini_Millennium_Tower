@@ -210,27 +210,7 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
                 set(SDLIMAGE_DAV1D OFF CACHE BOOL "" FORCE)
                 set(SDLIMAGE_AOM OFF CACHE BOOL "" FORCE)
             endif()
-
-            # ============================================
-            # 【新增】SDL3_ttf 特殊处理 (Emscripten 适配)
-            # ============================================
-            if("${DEP_NAME}" STREQUAL "SDL3_ttf")
-                message(STATUS "     → 为 SDL3_ttf 启用内置 FreeType/HarfBuzz (Emscripten 适配)")
-                # 1. 强制使用 SDL3_ttf 源码包内置的库 (vendored)
-                set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
-
-                # 2. 配置 FreeType (使用内置，不找系统库)
-                set(SDLTTF_FREETYPE ON CACHE BOOL "" FORCE)
-                set(SDLTTF_FREETYPE_SHARED OFF CACHE BOOL "" FORCE)
-                set(SDLTTF_FREETYPE_VENDORED ON CACHE BOOL "" FORCE)
-
-                # 3. 配置 HarfBuzz (使用内置，不找系统库)
-                set(SDLTTF_HARFBUZZ ON CACHE BOOL "" FORCE)
-                set(SDLTTF_HARFBUZZ_SHARED OFF CACHE BOOL "" FORCE)
-                set(SDLTTF_HARFBUZZ_VENDORED ON CACHE BOOL "" FORCE)
-            endif()
         endif()
-
 
         # ------------------------------
         # 【融合】通用源码获取逻辑（更稳健）
@@ -556,21 +536,23 @@ endif()
     endif()
 endif()
 
-# ============================================
-# Emscripten 特定配置
-# ============================================
-if(EMSCRIPTEN)
-    set_target_properties(${TARGET} PROPERTIES SUFFIX ".html")
+# # ============================================
+# # Emscripten 特定配置
+# # ============================================
+# if(EMSCRIPTEN)
+#     # 设置输出文件扩展名为 .html (会生成 .html, .js, .wasm)
+#     set_target_properties(${TARGET} PROPERTIES SUFFIX ".html")
 
-    target_link_options(${TARGET} PRIVATE
-        "-sUSE_ZLIB=1"
-        "-sALLOW_MEMORY_GROWTH=1"
-        "-sEXIT_RUNTIME=1"
-        "-sASSERTIONS=1"
-        "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
-    )
-endif()
-
+#     # 链接选项
+#     target_link_options(${TARGET} PRIVATE
+#         "-sUSE_ZLIB=1" # 启用 zlib 支持 (freetype 需要)
+#         "-sALLOW_MEMORY_GROWTH=1" # 允许内存增长
+#         "-sASSERTIONS=1" # 启用断言(调试用)
+#         "-sEXIT_RUNTIME=1" # 允许退出运行时(调用close)
+#         "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets" # 打包assets目录到虚拟文件系统, "@/assets"表示挂载点
+#         "--shell-file" "${CMAKE_SOURCE_DIR}/cmake/shell_minimal.html" # 使用自定义最小化 HTML 模板
+#     )
+# endif()
 
 # ======================================================
 # 配置完成提示
