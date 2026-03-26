@@ -1,0 +1,72 @@
+{
+    "level": 1,
+    "level_clear": true,
+    "point": 500,
+    "unit": {
+        "惊鸿": {
+            "class": "warrior",
+            "level": 2,
+            "rarity": 1
+        },
+        "挽星": {
+            "class": "archer",
+            "level": 5,
+            "rarity": 2
+        },
+        "撼天": {
+            "class": "lancer",
+            "level": 5,
+            "rarity": 2
+        },
+        "断岳": {
+            "class": "warrior",
+            "level": 5,
+            "rarity": 2
+        },
+        "焚夜": {
+            "class": "witch",
+            "level": 5,
+            "rarity": 2
+        },
+        "玄霜": {
+            "class": "witch",
+            "level": 1,
+            "rarity": 1
+        },
+        "瑶光": {
+            "class": "witch",
+            "level": 2,
+            "rarity": 1
+        },
+        "破阵": {
+            "class": "lancer",
+            "level": 1,
+            "rarity": 1
+        },
+        "穿云": {
+            "class": "archer",
+            "level": 3,
+            "rarity": 2
+        },
+        "苍澜": {
+            "class": "warrior",
+            "level": 1,
+            "rarity": 1
+        },
+        "落羽": {
+            "class": "archer",
+            "level": 2,
+            "rarity": 1
+        },
+        "裂空": {
+            "class": "lancer",
+            "level": 2,
+            "rarity": 1
+        },
+        "逐风": {
+            "class": "archer",
+            "level": 1,
+            "rarity": 1
+        }
+    }
+}

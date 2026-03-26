@@ -3,6 +3,7 @@
 #include "../component/class_name_component.h"
 #include "../component/blocker_component.h"
 #include "../component/skill_component.h"
+#include "../component/player_component.h"
 
 #include "../defs/events.h"
 #include "../defs/tags.h"
@@ -302,6 +303,33 @@ namespace game::system
         {
             ImGui::Text("阻挡数量: %d/%d", blocker->current_count_, blocker->max_count_);
         }
+
+        // 升级，消耗COST与出击COST相同
+        const auto &player = registry_.get<game::component::PlayerComponent>(entity);
+        auto available_cost = registry_.ctx().get<game::data::GameStats &>().cost_;
+        bool button_available = available_cost >= player.cost_;
+        // COST资源充足时升级按钮才可用
+        ImGui::BeginDisabled(!button_available);
+        // 设置快捷键 U 升级
+        ImGui::SetNextItemShortcut(ImGuiKey_U, ImGuiInputFlags_RouteAlways | ImGuiInputFlags_Tooltip);
+        if (ImGui::Button("升级"))
+        {
+            context_.getDispatcher().enqueue<game::defs::UpgradeUnitEvent>(entity, player.cost_);
+        }
+        ImGui::SameLine();
+        ImGui::Text("快捷键 U: COST消费: %d", player.cost_);
+        ImGui::EndDisabled();
+
+        // 撤退，返回 50% 的COST
+        auto return_cost = static_cast<int>(player.cost_ * 0.5f);
+        // 设置快捷键 R 撤退
+        ImGui::SetNextItemShortcut(ImGuiKey_R, ImGuiInputFlags_RouteAlways | ImGuiInputFlags_Tooltip);
+        if (ImGui::Button("撤退"))
+        {
+            context_.getDispatcher().enqueue<game::defs::RetreatEvent>(entity, return_cost);
+        }
+        ImGui::SameLine();
+        ImGui::Text("快捷键 R: COST返还: %d", return_cost);
 
         // TODO: 技能相关按钮与信息
         // 技能显示与交互

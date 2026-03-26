@@ -58,6 +58,7 @@ namespace engine::core
          * @param resource_manager 资源管理器
          * @param audio_player 音频播放器
          * @param game_state 游戏状态
+         * @param time 游戏时间
          * @note 所有参数都必须有效，否则行为未定义。
          */
         Context(

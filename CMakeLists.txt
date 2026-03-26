@@ -406,6 +406,7 @@ set(SOURCES
     src/game/data/session_data.cpp
     src/game/data/ui_config.cpp
     src/game/data/level_config.cpp
+    src/game/data/lua_combat_calculator.cpp
 
     # 游戏 - UI：游戏内特定 UI（单位头像面板等）
     src/game/ui/units_portrait_ui.cpp

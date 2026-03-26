@@ -23,8 +23,8 @@ using namespace entt::literals;
 namespace game::system
 {
 
-    CombatResolveSystem::CombatResolveSystem(entt::registry &registry, entt::dispatcher &dispatcher)
-        : registry_(registry), dispatcher_(dispatcher)
+    CombatResolveSystem::CombatResolveSystem(entt::registry &registry, entt::dispatcher &dispatcher, game::data::LuaCombatCalculator &combat_calc)
+        : registry_(registry), dispatcher_(dispatcher), combat_calc_(combat_calc)
     {
         dispatcher_.sink<game::defs::AttackEvent>().connect<&CombatResolveSystem::onAttackEvent>(this);
         dispatcher_.sink<game::defs::HealEvent>().connect<&CombatResolveSystem::onHealEvent>(this);
@@ -42,20 +42,20 @@ namespace game::system
             return;
         }
 
+        // // 根据伤害公式，让目标扣血
+        // auto &target_stats = registry_.get<game::component::StatsComponent>(event.target_);
+        // float damage = calculateEffectiveDamage(event.damage_, target_stats.def_);
+        // target_stats.hp_ -= damage;
+
         // 根据伤害公式，让目标扣血
         auto &target_stats = registry_.get<game::component::StatsComponent>(event.target_);
-        float damage = calculateEffectiveDamage(event.damage_, target_stats.def_);
+        // 核心修改：把硬编码计算换成Lua计算器调用
+        float damage = combat_calc_.calculateEffectiveDamage(event.damage_, target_stats.def_);
         target_stats.hp_ -= damage;
 
         // 如果目标是玩家
         if (registry_.all_of<game::component::PlayerComponent>(event.target_))
         {
-
-            // if (registry_.all_of<game::defs::DeadTag>(event.target_))
-            // {
-            //     return;
-            // }
-
             spdlog::info("玩家 ID: {} 受到 ID: {} 的伤害, 剩余生命值: {}", entt::to_integral(event.target_), entt::to_integral(event.attacker_), target_stats.hp_);
 
             // 死亡情况
@@ -147,14 +147,19 @@ namespace game::system
         dispatcher_.enqueue(game::defs::EffectEvent{"heal"_hs, transform.position_, false});
     }
 
-    // --- 辅助函数 ---
-    float CombatResolveSystem::calculateEffectiveDamage(float attacker_atk, float target_def)
+    void CombatResolveSystem::update(float)
     {
-        // 最终伤害 = 攻击力 - 防御力
-        float damage = attacker_atk - target_def;
-        // 最小伤害为攻击力的10%
-        damage = std::max(damage, 0.1f * attacker_atk);
-        return damage;
+        combat_calc_.checkHotReload();
     }
+
+    // // --- 辅助函数 ---
+    // float CombatResolveSystem::calculateEffectiveDamage(float attacker_atk, float target_def)
+    // {
+    //     // 最终伤害 = 攻击力 - 防御力
+    //     float damage = attacker_atk - target_def;
+    //     // 最小伤害为攻击力的10%
+    //     damage = std::max(damage, 0.1f * attacker_atk);
+    //     return damage;
+    // }
 
 } // namespace game::system
