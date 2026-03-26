@@ -19,7 +19,8 @@
 #include "../data/game_stats.h"
 #include "../data/level_config.h"
 #include "../data/level_data.h"
-
+#include "../data/lua_combat_calculator.h" // =============================================
+#include "../system/combat_resolve_system.h" // ==============================================
 #include "../system/fwd.h"
 #include "../system/remove_dead_system.h"
 #include "../system/followpath_system.h"
@@ -40,6 +41,7 @@
 #include "../system/debug_ui_system.h"
 #include "../system/selection_system.h"
 #include "../system/skill_system.h"
+
 
 #include "../ui/units_portrait_ui.h"
 
@@ -179,6 +181,13 @@ namespace game::scene
 
         // 每一帧最先清理死亡实体(要在dispatcher处理完事件后再清理，因此放在下一帧开头)
         remove_dead_system_->update(registry_);
+
+        // ==============================================
+        // 核心修改3：每帧调用战斗系统的update（触发热更检查）
+        // 注意：放在最前面，无论游戏是否暂停都要检查热更
+        // ==============================================
+        combat_resolve_system_->update(delta_time);
+        // ========================================
 
         // 处理暂停状态，部分系统仍旧运行
         if (context_.getGameState().isPaused())
@@ -352,7 +361,23 @@ namespace game::scene
         timer_system_ = std::make_unique<game::system::TimerSystem>(registry_, dispatcher);
         animation_state_system_ = std::make_unique<game::system::AnimationStateSystem>(registry_, dispatcher);
         animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
-        combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
+        // combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
+
+        // ==============================================
+        // 核心修改1：先创建 Lua 战斗计算器
+        // ==============================================
+        combat_calculator_ = std::make_unique<game::data::LuaCombatCalculator>(context_);
+
+        // ==============================================
+        // 核心修改2：创建战斗系统时，注入计算器
+        // ==============================================
+        combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(
+            registry_,
+            dispatcher,
+            *combat_calculator_ // 传入计算器引用
+        );
+        // ======================
+
         projectile_system_ = std::make_unique<game::system::ProjectileSystem>(registry_, dispatcher, *entity_factory_);
         effect_system_ = std::make_unique<game::system::EffectSystem>(registry_, dispatcher, *entity_factory_);
         health_bar_system_ = std::make_unique<game::system::HealthBarSystem>();

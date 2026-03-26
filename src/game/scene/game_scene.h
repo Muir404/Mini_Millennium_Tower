@@ -29,6 +29,7 @@ namespace game::factory
 
 namespace game::data
 {
+    class LuaCombatCalculator;
     class SessionData;
     class UIConfig;
     class LevelConfig;
@@ -77,6 +78,8 @@ namespace game::scene
         std::unique_ptr<game::system::DebugUISystem> debug_ui_system_;               ///< 调试UI系统
         std::unique_ptr<game::system::SelectionSystem> selection_system_;            ///< 选择单位系统
         std::unique_ptr<game::system::SkillSystem> skill_system_;                    ///< 技能系统
+
+        std::unique_ptr<game::data::LuaCombatCalculator> combat_calculator_; ///< 战斗计算器============================================
 
         std::unique_ptr<game::spawner::EnemySpawner> enemy_spawner_;   ///< 敌人生成系统
         std::unique_ptr<game::ui::UnitsPortraitUI> units_portrait_ui_; // 封装的单位肖像UI，负责管理单位肖像UI的创建、更新和排列
