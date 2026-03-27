@@ -22,7 +22,7 @@ set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/prebuilt)
 set(TARGET ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME})
 
 # ======================================================
-# LLVM 生态优先配置（保留你的优势）
+# LLVM 生态优先配置
 # ======================================================
 if(NOT CMAKE_C_COMPILER)
     set(CMAKE_C_COMPILER "clang" CACHE STRING "C compiler" FORCE)
@@ -126,12 +126,11 @@ set(FETCHCONTENT_QUIET OFF)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
 # ======================================================
-# 核心依赖管理宏：融合了 MonsterWar 的稳健性
+# 核心依赖管理宏
 # ======================================================
 macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH LINK_TYPE)
     message(STATUS "正在处理依赖: ${DEP_NAME}")
 
-    # 确定链接类型并打印友好信息
     if("${LINK_TYPE}" STREQUAL "STATIC")
         set(_LIB_IS_SHARED OFF)
         set(_LINK_TYPE_STR "静态")
@@ -147,30 +146,17 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
         endif()
     endif()
 
-    # 第一步：尝试查找本地库，并打印详细路径
     find_package(${PACKAGE_NAME} QUIET)
     if(${PACKAGE_NAME}_FOUND OR ${DEP_NAME}_FOUND)
         message(STATUS "  ✓ 找到本地安装的 ${PACKAGE_NAME}")
-        # 【融合】打印详细的包路径信息，方便调试
         if(DEFINED ${PACKAGE_NAME}_DIR)
             message(STATUS "     路径: ${${PACKAGE_NAME}_DIR}")
         elseif(DEFINED ${DEP_NAME}_DIR)
             message(STATUS "     路径: ${${DEP_NAME}_DIR}")
-        elseif(DEFINED ${PACKAGE_NAME}_ROOT)
-            message(STATUS "     根目录: ${${PACKAGE_NAME}_ROOT}")
-        elseif(DEFINED ${DEP_NAME}_ROOT)
-            message(STATUS "     根目录: ${${DEP_NAME}_ROOT}")
-        elseif(DEFINED ${PACKAGE_NAME}_INCLUDE_DIRS)
-            message(STATUS "     头文件: ${${PACKAGE_NAME}_INCLUDE_DIRS}")
-        elseif(DEFINED ${DEP_NAME}_INCLUDE_DIRS)
-            message(STATUS "     头文件: ${${DEP_NAME}_INCLUDE_DIRS}")
         endif()
     else()
         message(STATUS "  ✗ 未找到本地安装，准备从源码构建 [${_LINK_TYPE_STR}]")
 
-        # ------------------------------
-        # 保留你的 Lua 特殊自动构建逻辑
-        # ------------------------------
         if("${DEP_NAME}" STREQUAL "lua")
             set(LOCAL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/${LOCAL_PATH})
             if(EXISTS ${LOCAL_SOURCE_DIR})
@@ -179,7 +165,9 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
                 list(REMOVE_ITEM LUA_SOURCES "${LOCAL_SOURCE_DIR}/lua.c" "${LOCAL_SOURCE_DIR}/luac.c")
                 add_library(lua STATIC ${LUA_SOURCES})
                 target_include_directories(lua PUBLIC ${LOCAL_SOURCE_DIR})
-                if(UNIX AND NOT APPLE)
+                if(EMSCRIPTEN)
+                    target_compile_definitions(lua PRIVATE LUA_USE_POSIX)
+                elseif(UNIX AND NOT APPLE)
                     target_compile_definitions(lua PRIVATE LUA_USE_LINUX)
                     target_link_libraries(lua PRIVATE dl readline)
                 elseif(APPLE)
@@ -189,20 +177,15 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
                 endif()
             endif()
 
-            # ------------------------------
-            # 【融合】SDL 系列库增强配置
-            # ------------------------------
         elseif("${DEP_NAME}" MATCHES "^SDL" OR "${PACKAGE_NAME}" MATCHES "^SDL")
             set(SDL_SHARED ${_LIB_IS_SHARED} CACHE BOOL "" FORCE)
             set(SDL_STATIC NOT ${_LIB_IS_SHARED} CACHE BOOL "" FORCE)
-            # 【融合】禁用 SDL 测试，避免构建失败
             set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
             set(SDL_TESTS OFF CACHE BOOL "" FORCE)
             set(SDL_INSTALL_TESTS OFF CACHE BOOL "" FORCE)
 
-            # 【融合】SDL_image 特殊处理：禁用 AVIF 格式（避免 NASM/Meson 依赖）
             if("${DEP_NAME}" STREQUAL "SDL3_image")
-                message(STATUS "     → 为 SDL3_image 禁用 AVIF 格式 (避免复杂工具链依赖)")
+                message(STATUS "     → 为 SDL3_image 禁用 AVIF 格式")
                 set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
                 set(SDLIMAGE_AVIF_SHARED OFF CACHE BOOL "" FORCE)
                 set(SDLIMAGE_AVIF_SAVE OFF CACHE BOOL "" FORCE)
@@ -212,26 +195,20 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
             endif()
         endif()
 
-        # ------------------------------
-        # 【融合】通用源码获取逻辑（更稳健）
-        # ------------------------------
         if(NOT TARGET ${DEP_NAME} AND NOT TARGET ${PACKAGE_NAME})
             set(LOCAL_SOURCE_DIR ${CMAKE_SOURCE_DIR}/${LOCAL_PATH})
             if(EXISTS ${LOCAL_SOURCE_DIR})
                 message(STATUS "  → 使用本地源码: ${LOCAL_SOURCE_DIR}")
 
-                # 【融合】临时保存全局 BUILD_SHARED_LIBS，只影响当前依赖
                 set(_SAVED_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
                 set(BUILD_SHARED_LIBS ${_LIB_IS_SHARED} CACHE BOOL "" FORCE)
 
                 add_subdirectory(${LOCAL_SOURCE_DIR} ${CMAKE_BINARY_DIR}/_deps/${DEP_NAME}-build)
 
-                # 【融合】恢复全局设置
                 set(BUILD_SHARED_LIBS ${_SAVED_BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
             else()
                 message(STATUS "  → 本地源码不存在，在线获取: ${GIT_REPO}")
 
-                # 【融合】智能判断是否浅克隆（根据 GIT_TAG 类型）
                 string(LENGTH "${GIT_TAG}" TAG_LENGTH)
                 string(REGEX MATCH "^[0-9a-f]+$" IS_HEX "${GIT_TAG}")
                 if(TAG_LENGTH EQUAL 40 AND IS_HEX)
@@ -242,7 +219,6 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
                     set(USE_SHALLOW TRUE)
                 endif()
 
-                # 【融合】临时保存全局设置
                 set(_SAVED_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
                 set(BUILD_SHARED_LIBS ${_LIB_IS_SHARED} CACHE BOOL "" FORCE)
 
@@ -250,16 +226,14 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
                     GIT_REPOSITORY ${GIT_REPO}
                     GIT_TAG ${GIT_TAG}
                     GIT_SHALLOW ${USE_SHALLOW}
-                    GIT_PROGRESS TRUE # 【融合】显示下载进度
+                    GIT_PROGRESS TRUE
                 )
                 FetchContent_MakeAvailable(${DEP_NAME})
 
-                # 【融合】恢复全局设置
                 set(BUILD_SHARED_LIBS ${_SAVED_BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
             endif()
         endif()
 
-        # 【融合】更稳健的命名空间别名创建
         if(TARGET ${DEP_NAME} AND NOT TARGET ${PACKAGE_NAME}::${PACKAGE_NAME})
             message(STATUS "     创建别名: ${PACKAGE_NAME}::${PACKAGE_NAME} -> ${DEP_NAME}")
             add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ALIAS ${DEP_NAME})
@@ -271,25 +245,27 @@ macro(find_or_fetch_dependency DEP_NAME PACKAGE_NAME GIT_REPO GIT_TAG LOCAL_PATH
 endmacro()
 
 # ======================================================
-# 项目依赖库声明（保留你的依赖列表）
+# 项目依赖库声明 (已更新路径为 库名-版本号 格式)
 # ======================================================
-find_or_fetch_dependency(SDL3 SDL3 "https://github.com/libsdl-org/SDL.git" "release-3.4.0" "external/SDL" AUTO)
-find_or_fetch_dependency(SDL3_image SDL3_image "https://github.com/libsdl-org/SDL_image.git" "release-3.2.6" "external/SDL_image" AUTO)
-find_or_fetch_dependency(SDL3_mixer SDL3_mixer "https://github.com/libsdl-org/SDL_mixer.git" "release-3.2.0" "external/SDL_mixer" AUTO)
-find_or_fetch_dependency(SDL3_ttf SDL3_ttf "https://github.com/libsdl-org/SDL_ttf.git" "release-3.2.2" "external/SDL_ttf" AUTO)
+find_or_fetch_dependency(SDL3 SDL3 "https://github.com/libsdl-org/SDL.git" "release-3.4.0" "external/SDL-release-3.4.0" AUTO)
+find_or_fetch_dependency(SDL3_image SDL3_image "https://github.com/libsdl-org/SDL_image.git" "release-3.2.6" "external/SDL_image-release-3.2.6" AUTO)
+find_or_fetch_dependency(SDL3_mixer SDL3_mixer "https://github.com/libsdl-org/SDL_mixer.git" "release-3.2.0" "external/SDL_mixer-release-3.2.0" AUTO)
+find_or_fetch_dependency(SDL3_ttf SDL3_ttf "https://github.com/libsdl-org/SDL_ttf.git" "release-3.2.2" "external/SDL_ttf-release-3.2.2" AUTO)
 
-find_or_fetch_dependency(glm glm "https://github.com/g-truc/glm.git" "1.0.3" "external/glm" STATIC)
-find_or_fetch_dependency(json nlohmann_json "https://github.com/nlohmann/json.git" "v3.12.0" "external/json" STATIC)
-find_or_fetch_dependency(spdlog spdlog "https://github.com/gabime/spdlog.git" "v1.17.0" "external/spdlog" STATIC)
-find_or_fetch_dependency(EnTT EnTT "https://github.com/skypjack/entt.git" "v3.16.0" "external/entt" STATIC)
+find_or_fetch_dependency(glm glm "https://github.com/g-truc/glm.git" "1.0.3" "external/glm-1.0.3" STATIC)
+find_or_fetch_dependency(json nlohmann_json "https://github.com/nlohmann/json.git" "v3.12.0" "external/json-v3.12.0" STATIC)
+find_or_fetch_dependency(spdlog spdlog "https://github.com/gabime/spdlog.git" "v1.17.0" "external/spdlog-v1.17.0" STATIC)
+find_or_fetch_dependency(EnTT EnTT "https://github.com/skypjack/entt.git" "v3.16.0" "external/entt-v3.16.0" STATIC)
 
-find_or_fetch_dependency(lua lua "https://github.com/lua/lua.git" "v5.4.6" "external/lua" STATIC)
-find_or_fetch_dependency(sol2 sol2 "https://github.com/ThePhD/sol2.git" "v3.3.0" "external/sol2" STATIC)
+find_or_fetch_dependency(lua lua "https://github.com/lua/lua.git" "v5.4.6" "external/lua-v5.4.6" STATIC)
+find_or_fetch_dependency(sol2 sol2 "https://github.com/ThePhD/sol2.git" "v3.3.0" "external/sol2-v3.5.0" STATIC)
+
+
 
 # ======================================================
-# ImGui 配置（保留你的配置）
+# ImGui 配置 (已更新目录为 imgui-v1.92.5-docking)
 # ======================================================
-set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui)
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui-v1.92.5-docking)
 set(IMGUI_SOURCES
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
@@ -302,7 +278,7 @@ set(IMGUI_SOURCES
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends)
 
 # ======================================================
-# 项目源文件列表（保留你的源文件）
+# 项目源文件列表
 # ======================================================
 set(SOURCES
     src/main.cpp
@@ -399,26 +375,24 @@ target_link_libraries(${TARGET}
 )
 
 # ======================================================
-# 【融合】更全面的编译器警告与选项配置
+# 编译器警告与选项配置
 # ======================================================
 if(MSVC)
     target_compile_options(${TARGET} PRIVATE /W4 /utf-8)
     target_link_options(${TARGET} PRIVATE "/SUBSYSTEM:WINDOWS")
 elseif(WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
-    # 【融合】MinGW/Clang on Windows 也设置 UTF-8 编码，避免中文乱码
     target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic -finput-charset=utf-8 -fexec-charset=utf-8)
 else()
     target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 # ======================================================
-# 【融合】资源文件自动复制（通过大小对比避免重复复制）
+# 资源文件自动复制
 # ======================================================
 file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/copy_assets_$<CONFIG>.cmake CONTENT "
 set(SOURCE_DIR \"${CMAKE_CURRENT_LIST_DIR}/assets\")
 set(TARGET_DIR \"$<TARGET_FILE_DIR:${TARGET}>/assets\")
 
-# 【融合】计算源文件夹大小
 file(GLOB_RECURSE SOURCE_FILES \"\${SOURCE_DIR}/*\")
 set(SOURCE_SIZE 0)
 foreach(FILE IN LISTS SOURCE_FILES)
@@ -426,7 +400,6 @@ foreach(FILE IN LISTS SOURCE_FILES)
     math(EXPR SOURCE_SIZE \"\${SOURCE_SIZE} + \${FILE_SIZE}\")
 endforeach()
 
-# 【融合】计算目标文件夹大小
 set(TARGET_SIZE 0)
 if(EXISTS \"\${TARGET_DIR}\")
     file(GLOB_RECURSE TARGET_FILES \"\${TARGET_DIR}/*\")
@@ -436,7 +409,6 @@ if(EXISTS \"\${TARGET_DIR}\")
     endforeach()
 endif()
 
-# 【融合】只在大小不同时复制，提高构建效率
 if(NOT SOURCE_SIZE EQUAL TARGET_SIZE)
     file(COPY \"\${SOURCE_DIR}/\" DESTINATION \"\${TARGET_DIR}\")
     message(STATUS \"更新资源文件夹 (大小: \${SOURCE_SIZE} 字节)\")
@@ -451,7 +423,7 @@ add_custom_command(
 )
 
 # ======================================================
-# Windows 平台：DLL 自动复制（保留你的逻辑）
+# Windows 平台：DLL 自动复制
 # ======================================================
 if(WIN32)
     message(STATUS "配置Windows DLL自动检测和复制...")
@@ -536,23 +508,22 @@ endif()
     endif()
 endif()
 
-# # ============================================
-# # Emscripten 特定配置
-# # ============================================
-# if(EMSCRIPTEN)
-#     # 设置输出文件扩展名为 .html (会生成 .html, .js, .wasm)
-#     set_target_properties(${TARGET} PROPERTIES SUFFIX ".html")
+# ============================================
+# Emscripten 特定配置 (强制隔离版)
+# ============================================
+if(EMSCRIPTEN)
+    set_target_properties(${TARGET} PROPERTIES SUFFIX ".html")
 
-#     # 链接选项
-#     target_link_options(${TARGET} PRIVATE
-#         "-sUSE_ZLIB=1" # 启用 zlib 支持 (freetype 需要)
-#         "-sALLOW_MEMORY_GROWTH=1" # 允许内存增长
-#         "-sASSERTIONS=1" # 启用断言(调试用)
-#         "-sEXIT_RUNTIME=1" # 允许退出运行时(调用close)
-#         "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets" # 打包assets目录到虚拟文件系统, "@/assets"表示挂载点
-#         "--shell-file" "${CMAKE_SOURCE_DIR}/cmake/shell_minimal.html" # 使用自定义最小化 HTML 模板
-#     )
-# endif()
+    # 链接选项
+    target_link_options(${TARGET} PRIVATE
+        "-sUSE_ZLIB=1"
+        "-sASSERTIONS=1"
+        "-SEXIT_RUNTIME=1"
+        "-sALLOW_MEMORY_GROWTH=1"
+        "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
+        "--shell-file" "${CMAKE_SOURCE_DIR}/cmake/shell_minimal.html"
+    )
+endif()
 
 # ======================================================
 # 配置完成提示

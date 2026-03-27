@@ -1,3 +1,4 @@
+[桌面端]
 [调试模式]
 编译命令：cmake --preset dev
 构建命令：cmake --build --preset dev
@@ -23,3 +24,10 @@
 | **`dev`**        | `-O0 -g`   | **ASAN + UBSAN** | ❌           | **日常开发**。能立即发现内存越界、空指针等致命错误。 |
 | **`release`**    | `-O3`      | ❌                | **ThinLTO** | **最终发布**。性能最强。                             |
 | **`relwithdbg`** | `-O2 -g`   | ❌                | ❌           | **性能调优**。配合 Tracy 或 Perf 使用。              |
+
+[Web端]
+激活环境：source ./external/emsdk/emsdk_env.sh
+编译命令：emcmake cmake -B build_web
+构建命令：emake --build build_web -j$(nproc)
+创建服务器：python3 -m http.server 8000
+访问游戏：http://localhost:8000/build_web/TDSDL-Emscripten.html
