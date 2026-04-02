@@ -19,3 +19,5 @@
 - C++：负责游戏的逻辑、物理、渲染等核心功能。
 - Lua：负责游戏的脚本、事件处理等。
 
+## Badge
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Muir404/Mini_Millennium_Tower)
