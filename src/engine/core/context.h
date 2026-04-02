@@ -23,6 +23,11 @@ namespace engine::audio
     class AudioPlayer;
 }
 
+namespace engine::script
+{
+    class LuaManager;
+}
+
 namespace engine::core
 {
     class GameState;
@@ -46,6 +51,7 @@ namespace engine::core
         engine::audio::AudioPlayer &audio_player_;            ///< 音频播放器
         engine::core::GameState &game_state_;                 ///< 游戏状态
         engine::core::Time &time_;                            ///< 游戏时间
+        engine::script::LuaManager &lua_manager_;             ///< Lua脚本管理器
 
     public:
         /**
@@ -59,6 +65,7 @@ namespace engine::core
          * @param audio_player 音频播放器
          * @param game_state 游戏状态
          * @param time 游戏时间
+         * @param lua_manager Lua脚本管理器
          * @note 所有参数都必须有效，否则行为未定义。
          */
         Context(
@@ -70,7 +77,8 @@ namespace engine::core
             engine::resource::ResourceManager &resource_manager,
             engine::audio::AudioPlayer &audio_player_,
             engine::core::GameState &game_state_,
-            engine::core::Time &time_);
+            engine::core::Time &time_,
+            engine::script::LuaManager &lua_manager_);
 
         // 禁止拷贝和移动，Context 对象通常是唯一的或按需创建/传递
         Context(const Context &) = delete;
@@ -114,6 +122,10 @@ namespace engine::core
         engine::core::Time &getTime() const
         {
             return time_; // 获取游戏时间
+        }
+        engine::script::LuaManager &getLuaManager() const
+        {
+            return lua_manager_; // 获取Lua脚本管理器
         }
     };
 

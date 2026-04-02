@@ -34,6 +34,11 @@ namespace engine::audio
     class AudioPlayer;
 }
 
+namespace engine::script
+{
+    class LuaManager;
+}
+
 namespace engine::core
 { // 命名空间的最佳实践：与文件路径一致
     class Time;
@@ -66,6 +71,7 @@ namespace engine::core
         std::unique_ptr<engine::scene::SceneManager> scene_manager_;          // 场景管理器
         std::unique_ptr<engine::audio::AudioPlayer> audio_player_;            // 音频播放器
         std::unique_ptr<engine::core::GameState> game_state_;                 // 游戏状态管理器
+        std::unique_ptr<engine::script::LuaManager> lua_manager_;              // Lua脚本管理管理器
 
     public:
         GameApp();
@@ -101,6 +107,7 @@ namespace engine::core
         [[nodiscard]] bool initTextRenderer();
         [[nodiscard]] bool initCamera();
         [[nodiscard]] bool initInputManager();
+        [[nodiscard]] bool initLuaManager();
         [[nodiscard]] bool initContext();
         [[nodiscard]] bool initSceneManager();
         [[nodiscard]] bool initImGui();

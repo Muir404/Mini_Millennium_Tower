@@ -2,7 +2,7 @@
 #include <entt/entity/fwd.hpp>
 #include <entt/signal/fwd.hpp>
 #include "../defs/events.h"
-#include "../data/lua_combat_calculator.h"
+#include "../binding/lua_binder.h"
 namespace game::system
 {
 
@@ -13,25 +13,18 @@ namespace game::system
      */
     class CombatResolveSystem
     {
-        entt::registry &registry_;
-        entt::dispatcher &dispatcher_;
-        game::data::LuaCombatCalculator &combat_calc_;
+        entt::registry &registry_;             ///< 实体注册表引用
+        entt::dispatcher &dispatcher_;         ///< 事件分发器引用
+        game::binding::LuaBinder &lua_binder_; ///< Lua绑定器引用
 
     public:
-        CombatResolveSystem(entt::registry &registry, entt::dispatcher &dispatcher, game::data::LuaCombatCalculator &combat_calc);
+        CombatResolveSystem(entt::registry &registry, entt::dispatcher &dispatcher, game::binding::LuaBinder &lua_binder);
         ~CombatResolveSystem();
-        void update(float); // ==============================================
 
     private:
         // 事件回调函数
         void onAttackEvent(const game::defs::AttackEvent &event);
         void onHealEvent(const game::defs::HealEvent &event);
-
-        /**
-         * @brief 计算最终伤害（公式可修改）
-         * 当前计算公式：攻击力 - 防御力，最小伤害为攻击力的10%
-         */
-        // float calculateEffectiveDamage(float attacker_atk, float target_def);
     };
 
 } // namespace game::system

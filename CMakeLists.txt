@@ -86,7 +86,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             message(STATUS "  ✓ clang-tidy found: ${CLANG_TIDY_EXE}")
             set(CMAKE_CXX_CLANG_TIDY
                 "${CLANG_TIDY_EXE}"
-                "-checks=*,-llvm-header-guard,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-fuchsia-*"
+                # "-checks=*,-llvm-header-guard,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-fuchsia-*"
+                "-checks=*,-llvmlibc-*,-llvm-header-guard,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-fuchsia-*"
                 "-header-filter=${CMAKE_SOURCE_DIR}/src/.*"
                 "--use-color"
             )
@@ -282,29 +283,40 @@ include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends)
 # ======================================================
 set(SOURCES
     src/main.cpp
+
     src/engine/audio/audio_player.cpp
+
     src/engine/core/game_app.cpp
     src/engine/core/time.cpp
     src/engine/core/config.cpp
     src/engine/core/context.cpp
     src/engine/core/game_state.cpp
+
     src/engine/resource/resource_manager.cpp
     src/engine/resource/texture_manager.cpp
     src/engine/resource/audio_manager.cpp
     src/engine/resource/font_manager.cpp
+
     src/engine/render/renderer.cpp
     src/engine/render/camera.cpp
     src/engine/render/text_renderer.cpp
+
     src/engine/input/input_manager.cpp
+
+    src/engine/script/lua_manager.cpp
+
     src/engine/scene/scene.cpp
     src/engine/scene/scene_manager.cpp
+
     src/engine/loader/level_loader.cpp
     src/engine/loader/basic_entity_builder.cpp
+
     src/engine/system/animation_system.cpp
     src/engine/system/render_system.cpp
     src/engine/system/movement_system.cpp
     src/engine/system/ysort_system.cpp
     src/engine/system/audio_system.cpp
+
     src/engine/ui/ui_manager.cpp
     src/engine/ui/ui_element.cpp
     src/engine/ui/ui_interactive.cpp
@@ -315,10 +327,14 @@ set(SOURCES
     src/engine/ui/state/ui_normal_state.cpp
     src/engine/ui/state/ui_pressed_state.cpp
     src/engine/ui/state/ui_hover_state.cpp
+
     src/game/scene/game_scene.cpp
     src/game/scene/title_scene.cpp
     src/game/scene/level_clear_scene.cpp
     src/game/scene/end_scene.cpp
+
+    src/game/binding/lua_binder.cpp
+    
     src/game/system/remove_dead_system.cpp
     src/game/system/followpath_system.cpp
     src/game/system/block_system.cpp
@@ -338,14 +354,18 @@ set(SOURCES
     src/game/system/debug_ui_system.cpp
     src/game/system/selection_system.cpp
     src/game/system/skill_system.cpp
+
     src/game/loader/entity_builder_TD.cpp
+
     src/game/factory/entity_factory.cpp
     src/game/factory/blueprint_manager.cpp
+
     src/game/data/session_data.cpp
     src/game/data/ui_config.cpp
     src/game/data/level_config.cpp
-    src/game/data/lua_combat_calculator.cpp
+
     src/game/ui/units_portrait_ui.cpp
+
     src/game/spawner/enemy_spawner.cpp
 )
 

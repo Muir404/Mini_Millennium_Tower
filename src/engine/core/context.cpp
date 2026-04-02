@@ -22,15 +22,17 @@ namespace engine::core
         engine::resource::ResourceManager &resource_manager,
         engine::audio::AudioPlayer &audio_player,
         engine::core::GameState &game_state,
-        engine::core::Time &time) : dispatcher_(dispatcher),
-                                    input_manager_(input_manager),
-                                    renderer_(renderer),
-                                    camera_(camera),
-                                    texture_renderer_(texture_renderer),
-                                    resource_manager_(resource_manager),
-                                    audio_player_(audio_player),
-                                    game_state_(game_state),
-                                    time_(time)
+        engine::core::Time &time,
+        engine::script::LuaManager &lua_manager) : dispatcher_(dispatcher),
+                                                   input_manager_(input_manager),
+                                                   renderer_(renderer),
+                                                   camera_(camera),
+                                                   texture_renderer_(texture_renderer),
+                                                   resource_manager_(resource_manager),
+                                                   audio_player_(audio_player),
+                                                   game_state_(game_state),
+                                                   time_(time),
+                                                   lua_manager_(lua_manager)
     {
         spdlog::trace("[Context] 上下文已创建并初始化。");
     }

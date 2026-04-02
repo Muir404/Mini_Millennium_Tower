@@ -11,6 +11,7 @@
 #include "../input/input_manager.h"
 #include "../scene/scene_manager.h"
 #include "../utils/events.h"
+#include "../script/lua_manager.h"
 #include <SDL3/SDL.h>
 #include <spdlog/spdlog.h>
 #include <entt/signal/dispatcher.hpp>
@@ -133,6 +134,10 @@ namespace engine::core
         {
             return false;
         }
+        if (!initLuaManager())
+        {
+            return false;
+        }
         if (!initContext())
         {
             return false;
@@ -167,6 +172,7 @@ namespace engine::core
     {
         // 游戏逻辑更新
         scene_manager_->update(delta_time);
+        lua_manager_->update(delta_time);
     }
 
     void GameApp::render()
@@ -393,6 +399,21 @@ namespace engine::core
         return true;
     }
 
+    bool GameApp::initLuaManager()
+    {
+        try
+        {
+            lua_manager_ = std::make_unique<engine::script::LuaManager>();
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::error("初始化Lua管理器失败: {}", e.what());
+            return false;
+        }
+        spdlog::trace("Lua管理器初始化成功。");
+        return true;
+    }
+
     bool GameApp::initGameState()
     {
         try
@@ -419,7 +440,8 @@ namespace engine::core
                                                                *resource_manager_,
                                                                *audio_player_,
                                                                *game_state_,
-                                                               *time_);
+                                                               *time_,
+                                                               *lua_manager_);
         }
         catch (const std::exception &e)
         {

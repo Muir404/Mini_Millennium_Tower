@@ -1,4 +1,5 @@
 #include "combat_resolve_system.h"
+
 #include "../component/stats_component.h"
 #include "../component/player_component.h"
 #include "../component/enemy_component.h"
@@ -23,8 +24,10 @@ using namespace entt::literals;
 namespace game::system
 {
 
-    CombatResolveSystem::CombatResolveSystem(entt::registry &registry, entt::dispatcher &dispatcher, game::data::LuaCombatCalculator &combat_calc)
-        : registry_(registry), dispatcher_(dispatcher), combat_calc_(combat_calc)
+    CombatResolveSystem::CombatResolveSystem(entt::registry &registry,
+                                             entt::dispatcher &dispatcher,
+                                             game::binding::LuaBinder &lua_binder) : registry_(registry),
+                                                                                                dispatcher_(dispatcher), lua_binder_(lua_binder)
     {
         dispatcher_.sink<game::defs::AttackEvent>().connect<&CombatResolveSystem::onAttackEvent>(this);
         dispatcher_.sink<game::defs::HealEvent>().connect<&CombatResolveSystem::onHealEvent>(this);
@@ -41,16 +44,10 @@ namespace game::system
         {
             return;
         }
-
-        // // 根据伤害公式，让目标扣血
-        // auto &target_stats = registry_.get<game::component::StatsComponent>(event.target_);
-        // float damage = calculateEffectiveDamage(event.damage_, target_stats.def_);
-        // target_stats.hp_ -= damage;
-
         // 根据伤害公式，让目标扣血
         auto &target_stats = registry_.get<game::component::StatsComponent>(event.target_);
-        // 核心修改：把硬编码计算换成Lua计算器调用
-        float damage = combat_calc_.calculateEffectiveDamage(event.damage_, target_stats.def_);
+        // 核心：把硬编码计算换成Lua计算器调用
+        float damage = lua_binder_.calculateEffectiveDamage(event.damage_, target_stats.def_);
         target_stats.hp_ -= damage;
 
         // 如果目标是玩家
@@ -90,12 +87,12 @@ namespace game::system
                 }
                 spdlog::info("敌人 ID: {} 死亡", entt::to_integral(event.target_));
 
-                // TODO: 添加死亡特效
+                // 添加死亡特效
                 const auto [class_name, transform, sprite] = registry_.get<game::component::ClassNameComponent,
                                                                            engine::component::TransformComponent,
                                                                            engine::component::SpriteComponent>(event.target_);
                 dispatcher_.enqueue(game::defs::EnemyDeadEffectEvent{class_name.class_id_, transform.position_, sprite.sprite_.is_flipped_});
-                // TODO: 更新统计信息
+                // 更新统计信息
                 auto &game_stats = registry_.ctx().get<game::data::GameStats>();
                 game_stats.enemy_killed_count_++;
                 if ((game_stats.enemy_killed_count_ + game_stats.enemy_arrived_count_) >= game_stats.enemy_count_)
@@ -128,9 +125,13 @@ namespace game::system
     void CombatResolveSystem::onHealEvent(const game::defs::HealEvent &event)
     {
         if (!registry_.valid(event.target_))
+        {
             return;
+        }
         if (!registry_.all_of<game::component::PlayerComponent>(event.target_))
+        {
             return;
+        }
         // 根据治疗量，让目标回血
         auto &target_stats = registry_.get<game::component::StatsComponent>(event.target_);
         target_stats.hp_ += event.amount_;
@@ -142,24 +143,8 @@ namespace game::system
             target_stats.hp_ = target_stats.max_hp_;
             registry_.remove<game::defs::InjuredTag>(event.target_);
         }
-        // TODO: 添加治疗特效
+        // 添加治疗特效
         const auto &transform = registry_.get<engine::component::TransformComponent>(event.target_);
         dispatcher_.enqueue(game::defs::EffectEvent{"heal"_hs, transform.position_, false});
     }
-
-    void CombatResolveSystem::update(float)
-    {
-        combat_calc_.checkHotReload();
-    }
-
-    // // --- 辅助函数 ---
-    // float CombatResolveSystem::calculateEffectiveDamage(float attacker_atk, float target_def)
-    // {
-    //     // 最终伤害 = 攻击力 - 防御力
-    //     float damage = attacker_atk - target_def;
-    //     // 最小伤害为攻击力的10%
-    //     damage = std::max(damage, 0.1f * attacker_atk);
-    //     return damage;
-    // }
-
 } // namespace game::system
