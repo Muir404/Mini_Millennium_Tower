@@ -1,7 +1,7 @@
 local CombatConfig = {
     CRIT_RATE = 0.6,       -- 60% 暴击率
     CRIT_MULTIPLIER = 1.5, -- 1.5倍暴击伤害
-    MIN_DAMAGE = 10        -- 最低保底伤害
+    MIN_DAMAGE = 20        -- 最低保底伤害
 }
 
 function calculateEffectiveDamage(attacker_atk, target_def)
