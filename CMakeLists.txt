@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.27.0 FATAL_ERROR)
 # ======================================================
 # 项目基础配置
 # ======================================================
-project(TDSDL
+project(Mini_Millennium_TowerDefense
     VERSION 1.0.0
     DESCRIPTION "A TOWER DEFENSE GAME BASED ON SDL3"
     LANGUAGES C CXX
@@ -334,7 +334,7 @@ set(SOURCES
     src/game/scene/end_scene.cpp
 
     src/game/binding/lua_binder.cpp
-    
+
     src/game/system/remove_dead_system.cpp
     src/game/system/followpath_system.cpp
     src/game/system/block_system.cpp
@@ -529,18 +529,27 @@ endif()
 endif()
 
 # ============================================
-# Emscripten 特定配置 (强制隔离版)
+# Emscripten 特定配置
 # ============================================
 if(EMSCRIPTEN)
     set_target_properties(${TARGET} PROPERTIES SUFFIX ".html")
-
     # 链接选项
     target_link_options(${TARGET} PRIVATE
         "-sUSE_ZLIB=1"
         "-sASSERTIONS=1"
-        "-SEXIT_RUNTIME=1"
+        "-sEXIT_RUNTIME=1"
         "-sALLOW_MEMORY_GROWTH=1"
-        "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
+        "-fexceptions"
+        "-sNO_DISABLE_EXCEPTION_CATCHING"
+
+        # 允许在 F12 控制台使用 Module.FS
+        "-sEXPORTED_RUNTIME_METHODS=['FS']"
+        "-sFORCE_FILESYSTEM=1"
+
+        # 路径映射：将本地的 scripts 放到虚拟环境的 assets/scripts 下
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/src/game/scripts@assets/scripts"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets@assets"
+
         "--shell-file" "${CMAKE_SOURCE_DIR}/cmake/shell_minimal.html"
     )
 endif()

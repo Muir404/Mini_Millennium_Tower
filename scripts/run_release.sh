@@ -39,7 +39,7 @@ fi
 echo ""
 echo "[3/3] 正在启动游戏..."
 echo "=============================================="
-./build/${PRESET_NAME}/TDSDL-Linux 2>&1 | tee -a "$LOG_FILE"
+./build/${PRESET_NAME}/Mini_Millennium_TowerDefense-Linux 2>&1 | tee -a "$LOG_FILE"
 
 EXIT_CODE=${PIPESTATUS[0]}
 

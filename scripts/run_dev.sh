@@ -43,7 +43,7 @@ echo ""
 echo "[3/3] 正在启动游戏 (使用 Dummy 音频驱动)..."
 echo "=============================================="
 # 注意：这里使用 SDL_AUDIO_DRIVER=dummy
-SDL_AUDIO_DRIVER=dummy ./build/${PRESET_NAME}/TDSDL-Linux 2>&1 | eval $REMOVE_COLORS | tee -a "$LOG_FILE"
+SDL_AUDIO_DRIVER=dummy ./build/${PRESET_NAME}/Mini_Millennium_TowerDefense-Linux 2>&1 | eval $REMOVE_COLORS | tee -a "$LOG_FILE"
 
 # 记录退出码
 EXIT_CODE=${PIPESTATUS[0]}

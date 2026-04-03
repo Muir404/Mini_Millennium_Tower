@@ -8,9 +8,14 @@ namespace game::binding
         // 1. 向 LuaManager 注册这个模块的绑定
         auto &lua_mgr = context_.getLuaManager();
         lua_mgr.addBinding("Combat", &LuaBinder::registerBindings);
-
+#ifndef __EMSCRIPTEN__
         // 2. 告诉 LuaManager 加载脚本
         lua_mgr.loadScript("combat_script", "src/game/scripts/combat/combat.lua");
+#endif
+
+#ifdef __EMSCRIPTEN__
+        lua_mgr.loadScript("combat_script", "assets/scripts/combat/combat.lua");
+#endif
     }
 
     // 这里是真正的 C++ 函数暴露给 Lua 的地方
