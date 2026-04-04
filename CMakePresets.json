@@ -51,6 +51,7 @@
             "description": "性能分析：带调试信息的Release，用于Profiler",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_CXX_FLAGS": "-fno-omit-frame-pointer",
                 "ENABLE_LLD_LINKER": "ON"
             }
         }

@@ -84,7 +84,9 @@ namespace game::system
     void GameRuleSystem::onUpgradeUnitEvent(const game::defs::UpgradeUnitEvent &event)
     {
         if (event.entity_ == entt::null || !registry_.valid(event.entity_))
+        {
             return;
+        }
         // 扣除COST
         auto &game_stats = registry_.ctx().get<game::data::GameStats &>();
         game_stats.cost_ -= event.cost_;
@@ -103,7 +105,7 @@ namespace game::system
         const auto &transform = registry_.get<engine::component::TransformComponent>(event.entity_);
         dispatcher_.enqueue(game::defs::EffectEvent{"level_up"_hs, transform.position_, false});
         // 播放音效
-        dispatcher_.enqueue(engine::utils::PlaySoundEvent{event.entity_, "level_up"_hs});
+        dispatcher_.enqueue(engine::utils::PlaySoundEvent{event.entity_, "unit_upgrade"_hs});
     }
 
     void GameRuleSystem::onRetreatEvent(const game::defs::RetreatEvent &event)
